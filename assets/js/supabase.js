@@ -196,38 +196,7 @@
       const applicationNo = generateApplicationNo();
       const studentName   = d['اسم_الطالب_الثلاثي'] || 'طالب';
 
-      // ── رفع الملفات لـ Google Drive ──────────────────────────────────────
-      let passportUrl    = '';
-      let passportFileId = '';
-      let videoUrl       = '';
-      let videoFileId    = '';
-      let appFolderId    = '';
-      let appFolderPath  = '';
-
-      try {
-        const uploadResult = await uploadFilesToDrive(
-          studentName,
-          applicationNo,
-          d['صورة_الجواز'] || null,
-          d['فيديو_تعريفي'] || null
-        );
-
-        if (uploadResult.passportFile) {
-          passportUrl    = uploadResult.passportFile.url    || '';
-          passportFileId = uploadResult.passportFile.fileId || '';
-        }
-        if (uploadResult.videoFile) {
-          videoUrl    = uploadResult.videoFile.url    || '';
-          videoFileId = uploadResult.videoFile.fileId || '';
-        }
-        appFolderId   = uploadResult.appFolderId   || '';
-        appFolderPath = uploadResult.appFolderPath || '';
-      } catch (uploadErr) {
-        // لا توقف التسجيل إذا فشل الرفع – سجّل الخطأ فقط
-        console.error('خطأ في رفع الملفات:', uploadErr);
-      }
-
-      // ── حفظ الطلب في Supabase ────────────────────────────────────────────
+      // ── 1. احفظ الطلب في Supabase فورًا (بدون انتظار الملفات) ─────────────
       const { data: inserted, error } = await sb.from('applications').insert({
         application_no:      applicationNo,
         student_name:        studentName,
@@ -247,19 +216,48 @@
         category:            d['الفئة']                     || '',
         source:              d['كيف_عرفت_عن_البرنامج']      || '',
         application_status:  'تسجيل أولي',
-        // روابط Drive
-        passport_image_path: passportUrl,
-        passport_file_id:    passportFileId,
-        intro_video_path:    videoUrl,
-        intro_video_file_id: videoFileId,
-        drive_folder_id:     appFolderId,
-        drive_folder_path:   appFolderPath
+        // الملفات ستُرفع في الخلفية لاحقًا
+        passport_image_path: '',
+        passport_file_id:    '',
+        intro_video_path:    '',
+        intro_video_file_id: '',
+        drive_folder_id:     '',
+        drive_folder_path:   ''
       }).select('id').single();
 
       if (error) throw error;
 
       await logAction(inserted.id, 'النظام', 'تم إرسال الطلب', null, 'تسجيل أولي', 'طلب جديد');
 
+      // ── 2. ارفع الملفات في الخلفية (لا تنتظر النتيجة) ────────────────────
+      const hasPassport = d['صورة_الجواز']?.base64;
+      const hasVideo    = d['فيديو_تعريفي']?.base64;
+
+      if ((hasPassport || hasVideo) && DRIVE_UPLOAD_URL && !DRIVE_UPLOAD_URL.startsWith('ضع')) {
+        // fire-and-forget – لا نعرض خطأ للمستخدم إذا فشل الرفع
+        uploadFilesToDrive(studentName, applicationNo, d['صورة_الجواز'] || null, d['فيديو_تعريفي'] || null)
+          .then(async (uploadResult) => {
+            const update = {};
+            if (uploadResult.passportFile) {
+              update.passport_image_path = uploadResult.passportFile.url    || '';
+              update.passport_file_id    = uploadResult.passportFile.fileId || '';
+            }
+            if (uploadResult.videoFile) {
+              update.intro_video_path    = uploadResult.videoFile.url    || '';
+              update.intro_video_file_id = uploadResult.videoFile.fileId || '';
+            }
+            if (uploadResult.appFolderId) {
+              update.drive_folder_id   = uploadResult.appFolderId   || '';
+              update.drive_folder_path = uploadResult.appFolderPath || '';
+            }
+            if (Object.keys(update).length) {
+              await sb.from('applications').update(update).eq('id', inserted.id);
+            }
+          })
+          .catch(err => console.warn('رفع الملفات (خلفية):', err));
+      }
+
+      // ── 3. أرجع النتيجة فورًا ─────────────────────────────────────────────
       return { ok: true, applicationNo, data: { applicationNo } };
     },
 
