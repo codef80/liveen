@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة الفئات | Live English</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+
+  <style>
+    .admin-cats-page{
+      padding-top:110px;
+      padding-bottom:60px;
+      min-height:100vh;
+    }
+    .head-box{
+      background:linear-gradient(145deg, rgba(255,255,255,.98), rgba(255,248,223,.96));
+      border:1px solid rgba(251,199,13,.22);
+      border-radius:32px;
+      box-shadow:0 22px 48px rgba(88,89,91,.10);
+      padding:24px;
+      margin-bottom:22px;
+    }
+    .head-title{
+      font-size:1.9rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:8px;
+    }
+    .head-text{
+      color:#707176;
+      margin:0;
+      line-height:1.9;
+    }
+    .panel-box{
+      background:#fff;
+      border:1px solid #efe7cf;
+      border-radius:28px;
+      box-shadow:0 16px 36px rgba(88,89,91,.08);
+      padding:22px;
+      margin-bottom:22px;
+    }
+    .panel-title{
+      font-size:1.2rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:16px;
+    }
+    .categories-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+    .cat-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,249,229,.90));
+      border:1px solid #efe7cf;
+      border-radius:24px;
+      padding:20px;
+      box-shadow:0 12px 28px rgba(88,89,91,.08);
+      height:100%;
+    }
+    .cat-cover{
+      width:100%;
+      aspect-ratio:16/10;
+      object-fit:cover;
+      border-radius:20px;
+      background:#f8f2df;
+      display:block;
+      margin-bottom:16px;
+      cursor:pointer;
+    }
+    .cat-title{
+      font-size:1.2rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:8px;
+    }
+    .cat-desc{
+      color:#6f7075;
+      line-height:1.9;
+      margin-bottom:14px;
+      min-height:54px;
+    }
+    .cat-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:16px;
+    }
+    .cat-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:.9rem;
+    }
+    .pill-on{ background:rgba(25,135,84,.12); color:#198754; }
+    .pill-off{ background:rgba(220,53,69,.10); color:#dc3545; }
+    .pill-order{ background:rgba(251,199,13,.14); color:#8a6900; }
+
+    .cat-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .preview-img{
+      width:100%;
+      border-radius:18px;
+      background:#f8f2df;
+      display:block;
+    }
+
+    @media (max-width:767.98px){
+      .categories-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-badge"><i class="fa-solid fa-language"></i></span>
+        <span>Live English</span>
+      </a>
+
+      <div class="ms-auto d-flex gap-2">
+        <a href="admin.html" class="btn btn-le-outline">
+          <i class="fa-solid fa-table-columns"></i>
+          لوحة المشرف
+        </a>
+        <button id="logoutBtn" class="btn btn-le-dark">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          خروج
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="admin-cats-page">
+    <div class="container">
+      <div class="head-box">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div>
+            <div class="head-title">إدارة الفئات</div>
+            <p class="head-text">إدارة فئتي أشبال وقادة من حيث النصوص والصور والترتيب والتفعيل.</p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button id="refreshBtn" class="btn btn-le-outline">
+              <i class="fa-solid fa-rotate"></i>
+              تحديث
+            </button>
+            <button id="addCategoryBtn" class="btn btn-le">
+              <i class="fa-solid fa-plus"></i>
+              إضافة فئة
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">الفئات الحالية</div>
+        <div class="categories-grid" id="categoriesGrid">
+          <div class="empty-box">جاري تحميل الفئات...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius:28px;overflow:hidden;">
+        <div class="modal-header" style="background:#fff7da;border-bottom:1px solid #eadca9;">
+          <h5 class="modal-title fw-bold" id="previewTitle">معاينة الصورة</h5>
+          <button type="button" class="btn-close m-0 ms-auto shadow-none" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body bg-white">
+          <img id="previewImage" class="preview-img" src="" alt="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    const API_URL = window.APP_CONFIG.API_URL;
+    const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+
+    let currentUser = null;
+    let currentItems = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      guardAuth();
+      bindEvents();
+      await loadCategories();
+    });
+
+    function guardAuth() {
+      const raw = localStorage.getItem('liveEnglishStaffUser');
+      if (!raw) {
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      try {
+        currentUser = JSON.parse(raw);
+      } catch {
+        localStorage.removeItem('liveEnglishStaffUser');
+        window.location.href = 'staff-login.html';
+      }
+    }
+
+    function bindEvents() {
+      document.getElementById('refreshBtn').addEventListener('click', loadCategories);
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('addCategoryBtn').addEventListener('click', () => openCategoryForm());
+    }
+
+    async function loadCategories() {
+      const grid = document.getElementById('categoriesGrid');
+      grid.innerHTML = '<div class="empty-box">جاري تحميل الفئات...</div>';
+
+      try {
+        const res = await fetch(`${API_URL}?action=getPackages&includeHidden=true`);
+        const json = await res.json();
+        currentItems = json?.data || [];
+
+        if (!currentItems.length) {
+          grid.innerHTML = '<div class="empty-box">لا توجد فئات محفوظة حاليًا.</div>';
+          return;
+        }
+
+        grid.innerHTML = currentItems.map(item => `
+          <div class="cat-card">
+            <img
+              class="cat-cover"
+              src="${escapeAttr(normalizeDriveImageUrl(item.imageUrl || '')) || placeholderImg(item.title)}"
+              alt="${escapeAttr(item.title || '')}"
+              onclick="openPreview('${escapeJs(item.imageUrl || '')}','${escapeJs(item.title || '')}')"
+            >
+
+            <div class="cat-title">${escapeHtml(item.title || '')}</div>
+            <div class="cat-desc">${escapeHtml(item.description || '')}</div>
+
+            <div class="cat-meta">
+              <span class="cat-pill pill-order"><i class="fa-solid fa-sort"></i> الترتيب: ${toNum(item.order)}</span>
+              <span class="cat-pill ${item.enabled ? 'pill-on' : 'pill-off'}">
+                <i class="fa-solid ${item.enabled ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+                ${item.enabled ? 'مفعلة' : 'مخفية'}
+              </span>
+              <span class="cat-pill ${item.registerEnabled ? 'pill-on' : 'pill-off'}">
+                <i class="fa-solid ${item.registerEnabled ? 'fa-bolt' : 'fa-ban'}"></i>
+                ${item.registerEnabled ? 'التسجيل مفعل' : 'التسجيل متوقف'}
+              </span>
+            </div>
+
+            <div class="cat-actions">
+              <button class="btn btn-le-outline" onclick="openCategoryForm('${escapeJs(item.id)}')">
+                <i class="fa-solid fa-pen"></i>
+                تعديل
+              </button>
+              <button class="btn btn-le-dark" onclick="toggleEnabled('${escapeJs(item.id)}')">
+                <i class="fa-solid fa-power-off"></i>
+                تبديل التفعيل
+              </button>
+              <button class="btn btn-outline-danger" onclick="deleteCategory('${escapeJs(item.id)}')">
+                <i class="fa-solid fa-trash"></i>
+                حذف
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+        grid.innerHTML = '<div class="empty-box">تعذر تحميل الفئات.</div>';
+      }
+    }
+
+    async function openCategoryForm(id = '') {
+      const item = currentItems.find(x => String(x.id) === String(id)) || null;
+
+      const result = await Swal.fire({
+        title: item ? 'تعديل الفئة' : 'إضافة فئة',
+        width: 720,
+        html: `
+          <div class="text-end">
+            <label class="form-label">اسم الفئة</label>
+            <input id="swalTitle" class="form-control mb-3" value="${escapeAttr(item?.title || '')}" placeholder="مثل: أشبال">
+
+            <label class="form-label">الوصف</label>
+            <textarea id="swalDesc" class="form-control mb-3" rows="4" placeholder="وصف مختصر">${escapeHtml(item?.description || '')}</textarea>
+
+            <label class="form-label">الترتيب</label>
+            <input id="swalOrder" type="number" class="form-control mb-3" value="${toNum(item?.order || 1)}">
+
+            <label class="form-label">رابط الصورة</label>
+            <input id="swalImage" class="form-control mb-3" value="${escapeAttr(item?.imageUrl || '')}" placeholder="رابط صورة مباشر أو رابط Google Drive">
+
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="swalEnabled" ${item ? (item.enabled ? 'checked' : '') : 'checked'}>
+              <label class="form-check-label" for="swalEnabled">الفئة مفعلة</label>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="swalRegister" ${item ? (item.registerEnabled ? 'checked' : '') : 'checked'}>
+              <label class="form-check-label" for="swalRegister">التسجيل مفعل</label>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'حفظ',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#fbc70d',
+        didOpen: () => {
+          const el = document.getElementById('swalTitle');
+          if (el) setTimeout(() => el.focus(), 50);
+        },
+        preConfirm: () => {
+          const title = document.getElementById('swalTitle').value.trim();
+          if (!title) {
+            Swal.showValidationMessage('اسم الفئة مطلوب');
+            return false;
+          }
+
+          return {
+            id,
+            title,
+            description: document.getElementById('swalDesc').value.trim(),
+            order: document.getElementById('swalOrder').value,
+            imageUrl: document.getElementById('swalImage').value.trim(),
+            enabled: document.getElementById('swalEnabled').checked,
+            registerEnabled: document.getElementById('swalRegister').checked
+          };
+        }
+      });
+
+      if (!result.isConfirmed || !result.value) return;
+      const formValues = result.value;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'savePackage',
+            actor: currentUser?.name || 'مستخدم النظام',
+            data: {
+              'معرف_الباقة': formValues.id || '',
+              'عنوان_الباقة': formValues.title,
+              'الوصف': formValues.description,
+              'السعر': 0,
+              'ترتيب_الظهور': Number(formValues.order || 0),
+              'مفعل': formValues.enabled,
+              'زر_التسجيل_مفعل': formValues.registerEnabled,
+              'معرف_ملف_الصورة': extractGoogleDriveFileId(formValues.imageUrl) || '',
+              'رابط_الصورة': formValues.imageUrl
+            }
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل الحفظ');
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'تم الحفظ',
+          confirmButtonColor: '#fbc70d'
+        });
+
+        await loadCategories();
+      } catch (e) {
+        console.error(e);
+        Swal.fire({
+          icon: 'error',
+          title: 'تعذر الحفظ',
+          text: e.message || 'حدث خطأ',
+          confirmButtonColor: '#58595b'
+        });
+      }
+    }
+
+    async function toggleEnabled(id) {
+      const item = currentItems.find(x => String(x.id) === String(id));
+      if (!item) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'savePackage',
+            actor: currentUser?.name || 'مستخدم النظام',
+            data: {
+              'معرف_الباقة': item.id,
+              'عنوان_الباقة': item.title,
+              'الوصف': item.description,
+              'السعر': 0,
+              'ترتيب_الظهور': Number(item.order || 0),
+              'مفعل': !item.enabled,
+              'زر_التسجيل_مفعل': item.registerEnabled,
+              'معرف_ملف_الصورة': item.imageFileId || extractGoogleDriveFileId(item.imageUrl || '') || '',
+              'رابط_الصورة': item.imageUrl || ''
+            }
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+
+        await loadCategories();
+      } catch (e) {
+        console.error(e);
+        Swal.fire({
+          icon: 'error',
+          title: 'تعذر التنفيذ',
+          text: e.message || 'حدث خطأ',
+          confirmButtonColor: '#58595b'
+        });
+      }
+    }
+
+    async function deleteCategory(id) {
+      const confirm = await Swal.fire({
+        icon: 'warning',
+        title: 'حذف الفئة',
+        text: 'سيتم حذف هذه الفئة نهائيًا',
+        showCancelButton: true,
+        confirmButtonText: 'حذف',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#dc3545'
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'deletePackage',
+            actor: currentUser?.name || 'مستخدم النظام',
+            packageId: id
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل الحذف');
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'تم الحذف',
+          confirmButtonColor: '#fbc70d'
+        });
+
+        await loadCategories();
+      } catch (e) {
+        console.error(e);
+        Swal.fire({
+          icon: 'error',
+          title: 'تعذر الحذف',
+          text: e.message || 'حدث خطأ',
+          confirmButtonColor: '#58595b'
+        });
+      }
+    }
+
+    function normalizeDriveImageUrl(url) {
+      url = String(url || '').trim();
+      if (!url) return '';
+
+      const fileId = extractGoogleDriveFileId(url);
+      if (fileId) {
+        return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1600`;
+      }
+
+      return url;
+    }
+
+    function extractGoogleDriveFileId(url) {
+      url = String(url || '').trim();
+      if (!url) return '';
+
+      const patterns = [
+        /[?&]id=([^&]+)/,
+        /\/file\/d\/([^/]+)/,
+        /\/thumbnail\?id=([^&]+)/,
+        /\/uc\?(?:export=[^&]+&)?id=([^&]+)/
+      ];
+
+      for (const p of patterns) {
+        const m = url.match(p);
+        if (m && m[1]) return m[1];
+      }
+
+      return '';
+    }
+
+    function openPreview(src, title) {
+      document.getElementById('previewImage').src = normalizeDriveImageUrl(src || '') || placeholderImg(title || 'Live English');
+      document.getElementById('previewTitle').textContent = title || 'معاينة الصورة';
+      previewModal.show();
+    }
+
+    function placeholderImg(text) {
+      return `https://placehold.co/900x620/f8f1db/58595b?text=${encodeURIComponent(text || 'Live English')}`;
+    }
+
+    function logout() {
+      localStorage.removeItem('liveEnglishStaffUser');
+      window.location.href = 'staff-login.html';
+    }
+
+    function toNum(v) {
+      const n = Number(v || 0);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function escapeJs(value) {
+      return String(value ?? '').replace(/'/g, "\\'");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>دخول العاملين | Live English</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+
+  <style>
+    .login-page{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      padding:110px 0 50px;
+      background:
+        radial-gradient(circle at top right, rgba(251,199,13,.16), transparent 20%),
+        radial-gradient(circle at bottom left, rgba(250,235,180,.40), transparent 18%),
+        #fffdf7;
+    }
+
+    .login-card-wrap{
+      background:linear-gradient(145deg, rgba(255,255,255,.98), rgba(255,248,223,.96));
+      border:1px solid rgba(251,199,13,.22);
+      border-radius:34px;
+      box-shadow:0 28px 70px rgba(88,89,91,.14);
+      overflow:hidden;
+    }
+
+    .login-side{
+      background:linear-gradient(145deg, #58595b, #4d4e51);
+      color:#fff;
+      padding:42px 34px;
+      height:100%;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .login-side::before{
+      content:"";
+      position:absolute;
+      width:240px;
+      height:240px;
+      border-radius:50%;
+      left:-80px;
+      bottom:-80px;
+      background:rgba(251,199,13,.12);
+    }
+
+    .login-side::after{
+      content:"";
+      position:absolute;
+      width:180px;
+      height:180px;
+      border-radius:50%;
+      right:-40px;
+      top:-40px;
+      background:rgba(251,199,13,.10);
+    }
+
+    .login-brand{
+      position:relative;
+      z-index:1;
+    }
+
+    .login-brand-badge{
+      width:70px;
+      height:70px;
+      border-radius:22px;
+      background:linear-gradient(135deg, #fbc70d, #ffd95f);
+      color:#58595b;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.8rem;
+      margin-bottom:20px;
+      box-shadow:0 16px 36px rgba(0,0,0,.18);
+    }
+
+    .login-side-title{
+      font-size:2rem;
+      font-weight:900;
+      margin-bottom:12px;
+    }
+
+    .login-side-text{
+      color:rgba(255,255,255,.84);
+      line-height:2;
+      margin-bottom:28px;
+    }
+
+    .login-side-list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      position:relative;
+      z-index:1;
+    }
+
+    .login-side-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.08);
+      padding:14px 16px;
+      border-radius:18px;
+      color:#fff;
+      font-weight:700;
+    }
+
+    .login-form-side{
+      padding:42px 34px;
+      background:#fff;
+      height:100%;
+    }
+
+    .login-title{
+      font-size:2rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:10px;
+    }
+
+    .login-text{
+      color:#727378;
+      line-height:1.95;
+      margin-bottom:24px;
+    }
+
+    .login-note{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,249,229,.90));
+      border:1px solid #efe7cf;
+      border-radius:20px;
+      padding:16px;
+      color:#727378;
+      line-height:1.9;
+      margin-top:18px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-badge"><i class="fa-solid fa-language"></i></span>
+        <span>Live English</span>
+      </a>
+
+      <div class="ms-auto d-flex gap-2">
+        <a href="index.html" class="btn btn-le-outline">
+          <i class="fa-solid fa-house"></i>
+          الرئيسية
+        </a>
+        <a href="register.html" class="btn btn-le">
+          <i class="fa-solid fa-pen-to-square"></i>
+          التسجيل
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="login-page">
+    <div class="container">
+      <div class="login-card-wrap">
+        <div class="row g-0">
+          <div class="col-lg-5">
+            <div class="login-side">
+              <div class="login-brand">
+                <div class="login-brand-badge">
+                  <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div class="login-side-title">دخول العاملين</div>
+                <div class="login-side-text">
+                  بوابة دخول مخصصة للعاملين للوصول إلى لوحة التحكم وإدارة الطلبات والمتابعة الداخلية.
+                </div>
+
+                <div class="login-side-list">
+                  <div class="login-side-item">
+                    <i class="fa-solid fa-user-tie"></i>
+                    المدير
+                  </div>
+                  <div class="login-side-item">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    المشرف
+                  </div>
+                  <div class="login-side-item">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    المعلم
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="login-form-side">
+              <h1 class="login-title">تسجيل الدخول</h1>
+              <p class="login-text">أدخل اسم المستخدم وكلمة المرور للمتابعة.</p>
+
+              <form id="staffLoginForm" novalidate>
+                <div class="mb-3">
+                  <label class="form-label">اسم المستخدم</label>
+                  <input type="text" id="username" class="form-control" placeholder="اسم المستخدم" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">كلمة المرور</label>
+                  <div class="position-relative">
+                    <input type="password" id="password" class="form-control" placeholder="كلمة المرور" required>
+                    <button type="button" id="togglePasswordBtn"
+                      style="position:absolute;left:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#777;">
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                  <button type="submit" id="loginBtn" class="btn btn-le btn-lg">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    دخول
+                  </button>
+                </div>
+              </form>
+
+              <div class="login-note">
+                بعد تسجيل الدخول بنجاح يمكنك تحويل المستخدم إلى الصفحة الإدارية المناسبة حسب دوره.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    const API_URL = window.APP_CONFIG.API_URL;
+    const form = document.getElementById('staffLoginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const passwordInput = document.getElementById('password');
+
+    togglePasswordBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      togglePasswordBtn.innerHTML = isPassword
+        ? '<i class="fa-solid fa-eye-slash"></i>'
+        : '<i class="fa-solid fa-eye"></i>';
+    });
+
+    form.addEventListener('submit', async function(e){
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        Swal.fire({
+          icon:'warning',
+          title:'تنبيه',
+          text:'أدخل اسم المستخدم وكلمة المرور',
+          confirmButtonColor:'#fbc70d',
+          confirmButtonText:'حسنًا'
+        });
+        return;
+      }
+
+      try {
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'loginStaff',
+            username,
+            password
+          })
+        });
+
+        const json = await res.json();
+
+        if (!json.ok) {
+          Swal.fire({
+            icon:'error',
+            title:'تعذر تسجيل الدخول',
+            text: json.message || 'بيانات الدخول غير صحيحة',
+            confirmButtonColor:'#58595b',
+            confirmButtonText:'إغلاق'
+          });
+          return;
+        }
+
+        const user = json.user || {};
+        localStorage.setItem('liveEnglishStaffUser', JSON.stringify(user));
+
+        await Swal.fire({
+          icon:'success',
+          title:'تم تسجيل الدخول بنجاح',
+          text:`مرحبًا ${user.name || ''}`,
+          confirmButtonColor:'#fbc70d',
+          confirmButtonText:'متابعة'
+        });
+
+        // غيّر الوجهة لاحقًا إلى الصفحة الإدارية الفعلية
+        if (String(user.role || '') === 'معلم') {
+          window.location.href = 'teacher.html';
+        } else { 
+          window.location.href = 'admin.html';
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          icon:'error',
+          title:'حدث خطأ',
+          text:'تعذر الاتصال بالنظام حاليًا',
+          confirmButtonColor:'#58595b',
+          confirmButtonText:'إغلاق'
+        });
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> دخول';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة السنوات | Live English</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+
+  <style>
+    .admin-years-page{
+      padding-top:110px;
+      padding-bottom:60px;
+      min-height:100vh;
+    }
+
+    .head-box{
+      background:linear-gradient(145deg, rgba(255,255,255,.98), rgba(255,248,223,.96));
+      border:1px solid rgba(251,199,13,.22);
+      border-radius:32px;
+      box-shadow:0 22px 48px rgba(88,89,91,.10);
+      padding:24px;
+      margin-bottom:22px;
+    }
+
+    .head-title{
+      font-size:1.9rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:8px;
+    }
+
+    .head-text{
+      color:#707176;
+      margin:0;
+      line-height:1.9;
+    }
+
+    .panel-box{
+      background:#fff;
+      border:1px solid #efe7cf;
+      border-radius:28px;
+      box-shadow:0 16px 36px rgba(88,89,91,.08);
+      padding:22px;
+      margin-bottom:22px;
+    }
+
+    .panel-title{
+      font-size:1.2rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:16px;
+    }
+
+    .years-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .year-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,249,229,.90));
+      border:1px solid #efe7cf;
+      border-radius:24px;
+      padding:20px;
+      box-shadow:0 12px 28px rgba(88,89,91,.08);
+      height:100%;
+    }
+
+    .year-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:start;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .year-title{
+      font-size:1.2rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:6px;
+    }
+
+    .year-desc{
+      color:#6f7075;
+      line-height:1.9;
+      margin-bottom:14px;
+      min-height:54px;
+    }
+
+    .year-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:.9rem;
+    }
+
+    .pill-on{ background:rgba(25,135,84,.12); color:#198754; }
+    .pill-off{ background:rgba(220,53,69,.10); color:#dc3545; }
+    .pill-order{ background:rgba(251,199,13,.14); color:#8a6900; }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .summary-box{
+      background:#fff;
+      border:1px solid #efe7cf;
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .summary-label{
+      color:#7b7c80;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .summary-value{
+      color:#58595b;
+      font-weight:900;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .media-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .media-item{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,249,229,.90));
+      border:1px solid #efe7cf;
+      border-radius:18px;
+      padding:14px 16px;
+    }
+
+    .media-item-title{
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:4px;
+    }
+
+    .media-item-meta{
+      color:#8a8b90;
+      font-size:.92rem;
+      margin-bottom:8px;
+    }
+
+    .preview-img{
+      width:100%;
+      border-radius:18px;
+      display:block;
+      background:#f8f2df;
+    }
+
+    @media (max-width:767.98px){
+      .years-grid,
+      .summary-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-badge"><i class="fa-solid fa-language"></i></span>
+        <span>Live English</span>
+      </a>
+
+      <div class="ms-auto d-flex gap-2">
+        <a href="admin.html" class="btn btn-le-outline">
+          <i class="fa-solid fa-table-columns"></i>
+          لوحة المشرف
+        </a>
+        <button id="logoutBtn" class="btn btn-le-dark">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          خروج
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="admin-years-page">
+    <div class="container">
+      <div class="head-box">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div>
+            <div class="head-title">إدارة السنوات</div>
+            <p class="head-text">إدارة السنوات، الصور، روابط الوسائط، وروابط يوتيوب المرتبطة بكل سنة.</p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button id="refreshBtn" class="btn btn-le-outline">
+              <i class="fa-solid fa-rotate"></i>
+              تحديث
+            </button>
+            <button id="addYearBtn" class="btn btn-le">
+              <i class="fa-solid fa-plus"></i>
+              إضافة سنة
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">السنوات الحالية</div>
+        <div class="years-grid" id="yearsGrid">
+          <div class="empty-box">جاري تحميل السنوات...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal fade" id="mediaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content border-0" style="border-radius:28px;overflow:hidden;">
+        <div class="modal-header" style="background:#fff7da;border-bottom:1px solid #eadca9;">
+          <h5 class="modal-title fw-bold" id="mediaModalTitle">وسائط السنة</h5>
+          <button type="button" class="btn-close m-0 ms-auto shadow-none" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body bg-white">
+          <div id="mediaModalBody">جاري التحميل...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius:28px;overflow:hidden;">
+        <div class="modal-header" style="background:#fff7da;border-bottom:1px solid #eadca9;">
+          <h5 class="modal-title fw-bold" id="previewTitle">معاينة الصورة</h5>
+          <button type="button" class="btn-close m-0 ms-auto shadow-none" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body bg-white">
+          <img id="previewImage" class="preview-img" src="" alt="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    const API_URL = window.APP_CONFIG.API_URL;
+    const mediaModal = new bootstrap.Modal(document.getElementById('mediaModal'));
+    const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+
+    let currentUser = null;
+    let currentYears = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      guardAuth();
+      bindEvents();
+      await loadYears();
+    });
+
+    function guardAuth() {
+      const raw = localStorage.getItem('liveEnglishStaffUser');
+      if (!raw) {
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      try {
+        currentUser = JSON.parse(raw);
+      } catch {
+        localStorage.removeItem('liveEnglishStaffUser');
+        window.location.href = 'staff-login.html';
+      }
+    }
+
+    function bindEvents() {
+      document.getElementById('refreshBtn').addEventListener('click', loadYears);
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('addYearBtn').addEventListener('click', () => openYearForm());
+    }
+
+    async function loadYears() {
+      const grid = document.getElementById('yearsGrid');
+      grid.innerHTML = '<div class="empty-box">جاري تحميل السنوات...</div>';
+
+      try {
+        const res = await fetch(`${API_URL}?action=getYears&includeHidden=true`);
+        const json = await res.json();
+        currentYears = json?.data || [];
+
+        if (!currentYears.length) {
+          grid.innerHTML = '<div class="empty-box">لا توجد سنوات محفوظة حاليًا.</div>';
+          return;
+        }
+
+        grid.innerHTML = currentYears.map(item => {
+          const imagesCount = (item.media || []).filter(m => normalizeMediaType(m.type) === 'image').length;
+          const linksCount = (item.media || []).filter(m => normalizeMediaType(m.type) !== 'image').length;
+          const videosCount = Array.isArray(item.youtubeLinks) ? item.youtubeLinks.filter(Boolean).length : 0;
+
+          return `
+            <div class="year-card">
+              <div class="year-top">
+                <div>
+                  <div class="year-title">${escapeHtml(item.title || ('Live English ' + item.year))}</div>
+                  <div class="text-muted fw-bold">${escapeHtml(item.year || '')}</div>
+                </div>
+              </div>
+
+              <div class="year-desc">${escapeHtml(item.description || '')}</div>
+
+              <div class="year-meta">
+                <span class="pill pill-order"><i class="fa-solid fa-sort"></i> الترتيب: ${toNum(item.order)}</span>
+                <span class="pill ${item.enabled ? 'pill-on' : 'pill-off'}">
+                  <i class="fa-solid ${item.enabled ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+                  ${item.enabled ? 'مفعلة' : 'مخفية'}
+                </span>
+              </div>
+
+              <div class="summary-grid">
+                <div class="summary-box">
+                  <div class="summary-label">عدد المشاركين</div>
+                  <div class="summary-value">${escapeHtml(item.participants || '—')}</div>
+                </div>
+                <div class="summary-box">
+                  <div class="summary-label">الصور</div>
+                  <div class="summary-value">${imagesCount}</div>
+                </div>
+                <div class="summary-box">
+                  <div class="summary-label">فيديوهات يوتيوب</div>
+                  <div class="summary-value">${videosCount}</div>
+                </div>
+                <div class="summary-box">
+                  <div class="summary-label">وسائط إضافية</div>
+                  <div class="summary-value">${linksCount}</div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-le-outline" onclick="openYearForm('${escapeJs(item.id)}')">
+                  <i class="fa-solid fa-pen"></i>
+                  تعديل
+                </button>
+                <button class="btn btn-le-dark" onclick="toggleYearEnabled('${escapeJs(item.id)}')">
+                  <i class="fa-solid fa-power-off"></i>
+                  تبديل التفعيل
+                </button>
+                <button class="btn btn-le" onclick="openMediaManager('${escapeJs(item.id)}')">
+                  <i class="fa-solid fa-images"></i>
+                  الوسائط
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+        grid.innerHTML = '<div class="empty-box">تعذر تحميل السنوات.</div>';
+      }
+    }
+
+    async function openYearForm(id = '') {
+      const item = currentYears.find(x => String(x.id) === String(id)) || null;
+
+      const { value: formValues } = await Swal.fire({
+        title: item ? 'تعديل سنة' : 'إضافة سنة',
+        width: 760,
+        html: `
+          <div class="text-end">
+            <label class="form-label">السنة</label>
+            <input id="swalYear" class="form-control mb-3" value="${escapeAttr(item?.year || '')}" placeholder="مثل: 2026">
+
+            <label class="form-label">العنوان</label>
+            <input id="swalTitle" class="form-control mb-3" value="${escapeAttr(item?.title || '')}" placeholder="عنوان السنة">
+
+            <label class="form-label">الوصف</label>
+            <textarea id="swalDesc" class="form-control mb-3" rows="4" placeholder="وصف مختصر">${escapeHtml(item?.description || '')}</textarea>
+
+            <label class="form-label">عدد المشاركين</label>
+            <input id="swalParticipants" class="form-control mb-3" value="${escapeAttr(item?.participants || '')}" placeholder="مثال: 120">
+
+            <label class="form-label">أبرز الأنشطة</label>
+            <input id="swalActivities" class="form-control mb-3" value="${escapeAttr(item?.activities || '')}" placeholder="مثال: ورش - مسابقات - رحلات">
+
+            <label class="form-label">الترتيب</label>
+            <input id="swalOrder" type="number" class="form-control mb-3" value="${toNum(item?.order || 1)}">
+
+            <label class="form-label">روابط يوتيوب (كل رابط في سطر)</label>
+            <textarea id="swalYoutube" class="form-control mb-3" rows="4" placeholder="https://youtube.com/...">${escapeHtml((item?.youtubeLinks || []).join('\n'))}</textarea>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="swalEnabled" ${item ? (item.enabled ? 'checked' : '') : 'checked'}>
+              <label class="form-check-label" for="swalEnabled">السنة مفعلة</label>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'حفظ',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#fbc70d',
+        preConfirm: () => {
+          const year = document.getElementById('swalYear').value.trim();
+          const title = document.getElementById('swalTitle').value.trim();
+
+          if (!year || !title) {
+            Swal.showValidationMessage('السنة والعنوان مطلوبان');
+            return false;
+          }
+
+          return {
+            id,
+            year,
+            title,
+            description: document.getElementById('swalDesc').value.trim(),
+            participants: document.getElementById('swalParticipants').value.trim(),
+            activities: document.getElementById('swalActivities').value.trim(),
+            order: document.getElementById('swalOrder').value,
+            youtube: document.getElementById('swalYoutube').value.trim(),
+            enabled: document.getElementById('swalEnabled').checked
+          };
+        }
+      });
+
+      if (!formValues) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveYear',
+            actor: currentUser?.name || 'مستخدم النظام',
+            data: {
+              'معرف_السنة': formValues.id || '',
+              'السنة': formValues.year,
+              'عنوان_السنة': formValues.title,
+              'الوصف': formValues.description,
+              'عدد_المشاركين': formValues.participants,
+              'أبرز_الأنشطة': formValues.activities,
+              'ترتيب_الظهور': Number(formValues.order || 0),
+              'مفعل': formValues.enabled,
+              'معرف_مجلد_الصور': '',
+              'رابط_مجلد_الصور': '',
+              'روابط_يوتيوب': formValues.youtube
+                ? formValues.youtube.split('\n').map(v => v.trim()).filter(Boolean)
+                : []
+            }
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل الحفظ');
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'تم الحفظ',
+          confirmButtonColor: '#fbc70d'
+        });
+
+        await loadYears();
+      } catch (e) {
+        console.error(e);
+        Swal.fire({
+          icon: 'error',
+          title: 'تعذر الحفظ',
+          text: e.message || 'حدث خطأ',
+          confirmButtonColor: '#58595b'
+        });
+      }
+    }
+
+    async function toggleYearEnabled(id) {
+      const item = currentYears.find(x => String(x.id) === String(id));
+      if (!item) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveYear',
+            actor: currentUser?.name || 'مستخدم النظام',
+            data: {
+              'معرف_السنة': item.id,
+              'السنة': item.year,
+              'عنوان_السنة': item.title,
+              'الوصف': item.description,
+              'عدد_المشاركين': item.participants,
+              'أبرز_الأنشطة': item.activities,
+              'ترتيب_الظهور': Number(item.order || 0),
+              'مفعل': !item.enabled,
+              'معرف_مجلد_الصور': item.driveFolderId || '',
+              'رابط_مجلد_الصور': item.driveFolderUrl || '',
+              'روابط_يوتيوب': item.youtubeLinks || []
+            }
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+
+        await loadYears();
+      } catch (e) {
+        console.error(e);
+        Swal.fire({
+          icon: 'error',
+          title: 'تعذر التنفيذ',
+          text: e.message || 'حدث خطأ',
+          confirmButtonColor: '#58595b'
+        });
+      }
+    }
+
+    function openMediaManager(id) {
+      const item = currentYears.find(x => String(x.id) === String(id));
+      if (!item) return;
+
+      const media = item.media || [];
+
+      document.getElementById('mediaModalTitle').textContent = `وسائط السنة — ${item.year}`;
+      document.getElementById('mediaModalBody').innerHTML = `
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <button class="btn btn-le" onclick="addMedia('${escapeJs(item.id)}','صورة')">
+            <i class="fa-solid fa-image"></i>
+            إضافة صورة
+          </button>
+          <button class="btn btn-le-dark" onclick="addMedia('${escapeJs(item.id)}','رابط')">
+            <i class="fa-solid fa-link"></i>
+            إضافة رابط/وسيط
+          </button>
+        </div>
+
+        ${
+          media.length
+            ? `<div class="media-list">
+                ${media.map(m => `
+                  <div class="media-item">
+                    <div class="media-item-title">${escapeHtml(m.title || 'وسيط')}</div>
+                    <div class="media-item-meta">
+                      النوع: ${escapeHtml(m.type || '—')} — الترتيب: ${toNum(m.order)} — ${m.enabled ? 'مفعل' : 'مخفي'}
+                    </div>
+                    <div class="mb-3 text-muted">${escapeHtml(m.description || '')}</div>
+                    <div class="d-flex flex-wrap gap-2">
+                      ${normalizeMediaType(m.type) === 'image'
+                        ? `<button class="btn btn-le-outline" onclick="openPreview('${escapeJs(m.url || '')}','${escapeJs(m.title || '')}')">
+                            <i class="fa-solid fa-eye"></i>
+                            معاينة
+                          </button>`
+                        : ''
+                      }
+                      <a href="${escapeAttr(normalizeMediaType(m.type) === 'image' ? normalizeDriveImageUrl(m.url || '') : (m.url || '#'))}" target="_blank" class="btn btn-le-outline">
+                        <i class="fa-solid fa-up-right-from-square"></i>
+                        فتح
+                      </a>
+                      <button class="btn btn-le-dark" onclick="editMedia('${escapeJs(item.id)}','${escapeJs(m.id)}')">
+                        <i class="fa-solid fa-pen"></i>
+                        تعديل
+                      </button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>`
+            : `<div class="empty-box">لا توجد وسائط محفوظة لهذه السنة.</div>`
+        }
+      `;
+
+      mediaModal.show();
+    }
+
+    async function addMedia(yearId, mediaType) {
+  const yearItem = currentYears.find(x => String(x.id) === String(yearId));
+  if (!yearItem) return;
+
+  const result = await openMediaFormDialog({
+    title: mediaType === 'صورة' ? 'إضافة صورة' : 'إضافة رابط/وسيط',
+    mediaType,
+    initialData: {
+      title: '',
+      description: '',
+      url: '',
+      order: 1,
+      enabled: true
+    }
+  });
+
+  if (!result.isConfirmed || !result.value) {
+    openMediaManager(yearId);
+    return;
+  }
+
+  const formValues = result.value;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'saveYearMedia',
+        actor: currentUser?.name || 'مستخدم النظام',
+        data: {
+          'معرف_السنة': yearItem.id,
+          'السنة': yearItem.year,
+          'نوع_الوسيط': mediaType,
+          'العنوان': formValues.title,
+          'الوصف': formValues.description,
+          'معرف_الملف': extractGoogleDriveFileId(formValues.url) || '',
+          'الرابط': formValues.url,
+          'ترتيب_الظهور': Number(formValues.order || 0),
+          'مفعل': formValues.enabled
+        }
+      })
+    });
+
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.message || 'فشل الحفظ');
+
+    await loadYears();
+    const refreshed = currentYears.find(x => String(x.id) === String(yearId));
+    if (refreshed) openMediaManager(refreshed.id);
+  } catch (e) {
+    console.error(e);
+    Swal.fire({
+      icon: 'error',
+      title: 'تعذر الحفظ',
+      text: e.message || 'حدث خطأ',
+      confirmButtonColor: '#58595b'
+    }).then(() => openMediaManager(yearId));
+  }
+}
+
+    async function editMedia(yearId, mediaId) {
+  const yearItem = currentYears.find(x => String(x.id) === String(yearId));
+  const media = (yearItem?.media || []).find(m => String(m.id) === String(mediaId));
+  if (!yearItem || !media) return;
+
+  const result = await openMediaFormDialog({
+    title: 'تعديل وسيط',
+    mediaType: media.type,
+    initialData: {
+      title: media.title || '',
+      description: media.description || '',
+      url: media.url || '',
+      order: media.order || 1,
+      enabled: media.enabled !== false
+    }
+  });
+
+  if (!result.isConfirmed || !result.value) {
+    openMediaManager(yearId);
+    return;
+  }
+
+  const formValues = result.value;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'saveYearMedia',
+        actor: currentUser?.name || 'مستخدم النظام',
+        data: {
+          'معرف_الوسيط': media.id,
+          'معرف_السنة': yearItem.id,
+          'السنة': yearItem.year,
+          'نوع_الوسيط': media.type,
+          'العنوان': formValues.title,
+          'الوصف': formValues.description,
+          'معرف_الملف': extractGoogleDriveFileId(formValues.url) || media.fileId || '',
+          'الرابط': formValues.url,
+          'ترتيب_الظهور': Number(formValues.order || 0),
+          'مفعل': formValues.enabled
+        }
+      })
+    });
+
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.message || 'فشل الحفظ');
+
+    await loadYears();
+    const refreshed = currentYears.find(x => String(x.id) === String(yearId));
+    if (refreshed) openMediaManager(refreshed.id);
+  } catch (e) {
+    console.error(e);
+    Swal.fire({
+      icon: 'error',
+      title: 'تعذر الحفظ',
+      text: e.message || 'حدث خطأ',
+      confirmButtonColor: '#58595b'
+    }).then(() => openMediaManager(yearId));
+  }
+}
+
+    function openPreview(src, title) {
+  document.getElementById('previewImage').src = normalizeDriveImageUrl(src || '');
+  document.getElementById('previewTitle').textContent = title || 'معاينة الصورة';
+  previewModal.show();
+}
+
+    function normalizeMediaType(type) {
+      const t = String(type || '').trim().toLowerCase();
+      if (t === 'صورة' || t === 'image' || t === 'img') return 'image';
+      return 'link';
+    }
+
+    function normalizeDriveImageUrl(url) {
+  url = String(url || '').trim();
+  if (!url) return '';
+
+  const fileId = extractGoogleDriveFileId(url);
+  if (fileId) {
+    return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1600`;
+  }
+
+  return url;
+}
+
+function extractGoogleDriveFileId(url) {
+  url = String(url || '').trim();
+  if (!url) return '';
+
+  const patterns = [
+    /[?&]id=([^&]+)/,
+    /\/file\/d\/([^/]+)/,
+    /\/thumbnail\?id=([^&]+)/,
+    /\/uc\?(?:export=[^&]+&)?id=([^&]+)/
+  ];
+
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m && m[1]) return m[1];
+  }
+
+  return '';
+}
+
+async function openMediaFormDialog({ title, mediaType, initialData }) {
+  initialData = initialData || {};
+
+  const mediaModalEl = document.getElementById('mediaModal');
+  const mediaModalInstance = bootstrap.Modal.getInstance(mediaModalEl);
+  if (mediaModalInstance) mediaModalInstance.hide();
+
+  const result = await Swal.fire({
+    title,
+    width: 700,
+    html: `
+      <div class="text-end">
+        <label class="form-label">العنوان</label>
+        <input id="swalMediaTitle" class="form-control mb-3" value="${escapeAttr(initialData.title || '')}" placeholder="عنوان الوسيط">
+
+        <label class="form-label">الوصف</label>
+        <textarea id="swalMediaDesc" class="form-control mb-3" rows="3" placeholder="وصف مختصر">${escapeHtml(initialData.description || '')}</textarea>
+
+        <label class="form-label">الرابط</label>
+        <input id="swalMediaUrl" class="form-control mb-3" value="${escapeAttr(initialData.url || '')}" placeholder="${mediaType === 'صورة' ? 'رابط صورة أو رابط Google Drive' : 'رابط الوسيط'}">
+
+        <label class="form-label">الترتيب</label>
+        <input id="swalMediaOrder" type="number" class="form-control mb-3" value="${toNum(initialData.order || 1)}">
+
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="swalMediaEnabled" ${initialData.enabled === false ? '' : 'checked'}>
+          <label class="form-check-label" for="swalMediaEnabled">الوسيط مفعل</label>
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'حفظ',
+    cancelButtonText: 'إلغاء',
+    confirmButtonColor: '#fbc70d',
+    didOpen: () => {
+      const el = document.getElementById('swalMediaTitle');
+      if (el) {
+        el.removeAttribute('readonly');
+        el.removeAttribute('disabled');
+        setTimeout(() => el.focus(), 50);
+      }
+    },
+    preConfirm: () => {
+      const titleVal = document.getElementById('swalMediaTitle').value.trim();
+      const urlVal = document.getElementById('swalMediaUrl').value.trim();
+
+      if (!titleVal || !urlVal) {
+        Swal.showValidationMessage('العنوان والرابط مطلوبان');
+        return false;
+      }
+
+      return {
+        title: titleVal,
+        description: document.getElementById('swalMediaDesc').value.trim(),
+        url: urlVal,
+        order: document.getElementById('swalMediaOrder').value,
+        enabled: document.getElementById('swalMediaEnabled').checked
+      };
+    }
+  });
+
+  return result;
+}
+
+    function logout() {
+      localStorage.removeItem('liveEnglishStaffUser');
+      window.location.href = 'staff-login.html';
+    }
+
+    function toNum(v) {
+      const n = Number(v || 0);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function escapeJs(value) {
+      return String(value ?? '').replace(/'/g, "\\'");
+    }
+  </script>
+</body>
+</html>

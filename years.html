@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>عبر السنوات | Live English</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+
+  <style>
+    .years-page{
+      padding-top:120px;
+      padding-bottom:60px;
+      min-height:100vh;
+    }
+
+    .years-head{
+      background:linear-gradient(145deg, rgba(255,255,255,.98), rgba(255,248,223,.95));
+      border:1px solid rgba(251,199,13,.22);
+      border-radius:34px;
+      box-shadow:0 24px 60px rgba(88,89,91,.12);
+      padding:28px;
+      margin-bottom:26px;
+    }
+
+    .years-title{
+      font-size:2rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:8px;
+    }
+
+    .years-text{
+      color:#6f7075;
+      line-height:1.95;
+      margin:0;
+    }
+
+    .years-tabs{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:24px;
+    }
+
+    .year-tab{
+      border:0;
+      background:#fff;
+      border:1px solid #efe7cf;
+      color:#58595b;
+      border-radius:999px;
+      padding:12px 18px;
+      font-weight:900;
+      transition:.25s ease;
+      box-shadow:0 8px 20px rgba(88,89,91,.06);
+    }
+
+    .year-tab:hover{
+      transform:translateY(-2px);
+    }
+
+    .year-tab.active{
+      background:linear-gradient(135deg,#fbc70d,#ffe06f);
+      border-color:transparent;
+      color:#58595b;
+      box-shadow:0 14px 28px rgba(251,199,13,.24);
+    }
+
+    .year-main-card{
+      background:#fff;
+      border:1px solid #efe7cf;
+      border-radius:30px;
+      box-shadow:0 18px 40px rgba(88,89,91,.08);
+      padding:24px;
+      margin-bottom:22px;
+    }
+
+    .year-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(251,199,13,.14);
+      color:#8a6900;
+      font-weight:800;
+      font-size:.92rem;
+      margin-bottom:14px;
+    }
+
+    .year-main-title{
+      font-size:1.8rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:10px;
+    }
+
+    .year-main-desc{
+      color:#6f7075;
+      line-height:2;
+      margin-bottom:22px;
+    }
+
+    .year-stats-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .year-stat-box{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,249,229,.90));
+      border:1px solid #efe7cf;
+      border-radius:20px;
+      padding:16px;
+    }
+
+    .year-stat-label{
+      color:#7b7c80;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .year-stat-value{
+      color:#58595b;
+      font-weight:900;
+      line-height:1.8;
+    }
+
+    .media-card{
+      background:#fff;
+      border:1px solid #efe7cf;
+      border-radius:28px;
+      box-shadow:0 16px 36px rgba(88,89,91,.08);
+      padding:22px;
+      height:100%;
+    }
+
+    .media-title{
+      font-size:1.18rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:16px;
+    }
+
+    .gallery-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .gallery-item{
+      border-radius:18px;
+      overflow:hidden;
+      background:#f8f2df;
+      border:1px solid #efe7cf;
+      aspect-ratio:1/1;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(88,89,91,.06);
+      transition:.25s ease;
+      position:relative;
+    }
+
+    .gallery-item:hover{
+      transform:translateY(-4px);
+      box-shadow:0 16px 28px rgba(88,89,91,.12);
+    }
+
+    .gallery-item img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .gallery-caption{
+      position:absolute;
+      inset-inline:0;
+      bottom:0;
+      padding:10px 12px;
+      background:linear-gradient(180deg, transparent, rgba(0,0,0,.55));
+      color:#fff;
+      font-size:.92rem;
+      font-weight:700;
+    }
+
+    .video-list{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .video-box{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,249,229,.90));
+      border:1px solid #efe7cf;
+      border-radius:20px;
+      padding:14px;
+    }
+
+    .video-frame{
+      position:relative;
+      width:100%;
+      padding-top:56.25%;
+      border-radius:16px;
+      overflow:hidden;
+      background:#f6f0dd;
+    }
+
+    .video-frame iframe{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border:0;
+    }
+
+    .video-label{
+      margin-top:10px;
+      color:#58595b;
+      font-weight:800;
+    }
+
+    .links-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .link-item{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,249,229,.90));
+      border:1px solid #efe7cf;
+      border-radius:18px;
+      padding:14px 16px;
+    }
+
+    .link-item-title{
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:6px;
+    }
+
+    .link-item-desc{
+      color:#6f7075;
+      line-height:1.9;
+      margin-bottom:10px;
+    }
+
+    .empty-years{
+      background:#fff;
+      border:1px dashed rgba(88,89,91,.18);
+      border-radius:24px;
+      padding:30px;
+      text-align:center;
+      color:#7a7b7f;
+    }
+
+    .preview-img{
+      width:100%;
+      border-radius:18px;
+      display:block;
+      background:#f8f2df;
+    }
+
+    @media (max-width:991.98px){
+      .gallery-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width:767.98px){
+      .year-stats-grid,
+      .gallery-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-badge"><i class="fa-solid fa-language"></i></span>
+        <span>Live English</span>
+      </a>
+
+      <div class="ms-auto d-flex gap-2">
+        <a href="index.html" class="btn btn-le-outline">
+          <i class="fa-solid fa-house"></i>
+          الرئيسية
+        </a>
+        <a href="register.html" class="btn btn-le">
+          <i class="fa-solid fa-pen-to-square"></i>
+          التسجيل
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="years-page">
+    <div class="container">
+      <div class="years-head">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div>
+            <div class="years-title">Live English عبر السنوات</div>
+            <p class="years-text">استعرض السنوات السابقة، الصور، الفيديوهات، وعدد المشاركين وأبرز الأنشطة.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="yearsTabs" class="years-tabs">
+        <div class="empty-years w-100">جاري تحميل السنوات...</div>
+      </div>
+
+      <div id="yearContent">
+        <div class="empty-years">اختر سنة للعرض.</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius:28px;overflow:hidden;">
+        <div class="modal-header" style="background:#fff7da;border-bottom:1px solid #eadca9;">
+          <h5 class="modal-title fw-bold" id="imagePreviewTitle">معاينة الصورة</h5>
+          <button type="button" class="btn-close m-0 ms-auto shadow-none" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body bg-white">
+          <img id="imagePreviewEl" class="preview-img" src="" alt="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    const API_URL = window.APP_CONFIG.API_URL;
+    const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+
+    let yearsData = [];
+    let currentYearId = null;
+
+    document.addEventListener('DOMContentLoaded', loadYearsPage);
+
+    async function loadYearsPage() {
+      try {
+        const res = await fetch(`${API_URL}?action=getYears`);
+        const json = await res.json();
+        yearsData = json?.data || [];
+
+        renderTabs();
+
+        if (yearsData.length) {
+          selectYear(yearsData[0].id);
+        } else {
+          document.getElementById('yearContent').innerHTML = '<div class="empty-years">لا توجد سنوات مفعلة حاليًا.</div>';
+        }
+      } catch (e) {
+        console.error(e);
+        document.getElementById('yearsTabs').innerHTML = '<div class="empty-years w-100">تعذر تحميل السنوات.</div>';
+        document.getElementById('yearContent').innerHTML = '<div class="empty-years">تعذر تحميل البيانات.</div>';
+      }
+    }
+
+    function renderTabs() {
+      const tabs = document.getElementById('yearsTabs');
+
+      if (!yearsData.length) {
+        tabs.innerHTML = '<div class="empty-years w-100">لا توجد سنوات متاحة.</div>';
+        return;
+      }
+
+      tabs.innerHTML = yearsData.map(item => `
+        <button class="year-tab ${String(currentYearId) === String(item.id) ? 'active' : ''}" onclick="selectYear('${escapeJs(item.id)}')">
+          <i class="fa-solid fa-calendar-days"></i>
+          ${escapeHtml(item.year || '')}
+        </button>
+      `).join('');
+    }
+
+    function selectYear(id) {
+      currentYearId = id;
+      renderTabs();
+
+      const item = yearsData.find(y => String(y.id) === String(id));
+      if (!item) return;
+
+      const mediaItems = Array.isArray(item.media) ? item.media : [];
+      const imageItems = mediaItems.filter(m => normalizeMediaType(m.type) === 'image' && m.url);
+      const linkItems = mediaItems.filter(m => normalizeMediaType(m.type) !== 'image' && m.url);
+      const videos = normalizeYoutubeLinks(item.youtubeLinks || []);
+
+      document.getElementById('yearContent').innerHTML = `
+        <div class="year-main-card">
+          <div class="year-badge">
+            <i class="fa-solid fa-calendar-days"></i>
+            ${escapeHtml(item.year || '')}
+          </div>
+          <div class="year-main-title">${escapeHtml(item.title || ('Live English ' + item.year))}</div>
+          <div class="year-main-desc">${escapeHtml(item.description || '—')}</div>
+
+          <div class="year-stats-grid">
+            <div class="year-stat-box">
+              <div class="year-stat-label">عدد المشاركين</div>
+              <div class="year-stat-value">${escapeHtml(item.participants || '—')}</div>
+            </div>
+            <div class="year-stat-box">
+              <div class="year-stat-label">أبرز الأنشطة</div>
+              <div class="year-stat-value">${escapeHtml(item.activities || '—')}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="media-card">
+              <div class="media-title">الصور</div>
+              ${
+                imageItems.length
+                  ? `<div class="gallery-grid">
+                      ${imageItems.map(img => `
+                        <div class="gallery-item" onclick="openPreview('${escapeJs(img.url || '')}','${escapeJs(img.title || '')}')">
+                          <img src="${escapeAttr(normalizeDriveImageUrl(img.url || ''))}" alt="${escapeAttr(img.title || '')}">
+                          <div class="gallery-caption">${escapeHtml(img.title || 'صورة')}</div>
+                        </div>
+                      `).join('')}
+                    </div>`
+                  : `<div class="empty-years">لا توجد صور لهذه السنة.</div>`
+              }
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="media-card mb-4">
+              <div class="media-title">فيديوهات يوتيوب</div>
+              ${
+                videos.length
+                  ? `<div class="video-list">
+                      ${videos.map((videoId, index) => `
+                        <div class="video-box">
+                          <div class="video-frame">
+                            <iframe src="https://www.youtube.com/embed/${escapeAttr(videoId)}" allowfullscreen loading="lazy"></iframe>
+                          </div>
+                          <div class="video-label">فيديو ${index + 1}</div>
+                        </div>
+                      `).join('')}
+                    </div>`
+                  : `<div class="empty-years">لا توجد فيديوهات لهذه السنة.</div>`
+              }
+            </div>
+
+            <div class="media-card">
+              <div class="media-title">روابط ووسائط إضافية</div>
+              ${
+                linkItems.length
+                  ? `<div class="links-list">
+                      ${linkItems.map(link => `
+                        <div class="link-item">
+                          <div class="link-item-title">${escapeHtml(link.title || 'رابط')}</div>
+                          <div class="link-item-desc">${escapeHtml(link.description || '—')}</div>
+                          <a href="${escapeAttr(link.url || '#')}" target="_blank" class="btn btn-le-outline w-100">
+                            <i class="fa-solid fa-up-right-from-square"></i>
+                            فتح
+                          </a>
+                        </div>
+                      `).join('')}
+                    </div>`
+                  : `<div class="empty-years">لا توجد وسائط إضافية.</div>`
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function normalizeMediaType(type) {
+      const t = String(type || '').trim().toLowerCase();
+
+      if (t === 'صورة' || t === 'image' || t === 'img') return 'image';
+      return 'link';
+    }
+
+    function normalizeYoutubeLinks(list) {
+      return (Array.isArray(list) ? list : [])
+        .map(v => extractYoutubeId(String(v || '').trim()))
+        .filter(Boolean);
+    }
+
+    function extractYoutubeId(url) {
+      if (!url) return '';
+      if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+
+      const patterns = [
+        /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+        /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+        /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+        /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/
+      ];
+
+      for (const p of patterns) {
+        const m = url.match(p);
+        if (m && m[1]) return m[1];
+      }
+
+      return '';
+    }
+
+    function openPreview(src, title) {
+  document.getElementById('imagePreviewEl').src = normalizeDriveImageUrl(src || '');
+  document.getElementById('imagePreviewTitle').textContent = title || 'معاينة الصورة';
+  previewModal.show();
+}
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function escapeJs(value) {
+      return String(value ?? '').replace(/'/g, "\\'");
+    }
+
+
+    function normalizeDriveImageUrl(url) {
+  url = String(url || '').trim();
+  if (!url) return '';
+
+  const fileId = extractGoogleDriveFileId(url);
+  if (fileId) {
+    return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1600`;
+  }
+
+  return url;
+}
+
+function extractGoogleDriveFileId(url) {
+  url = String(url || '').trim();
+  if (!url) return '';
+
+  const patterns = [
+    /[?&]id=([^&]+)/,
+    /\/file\/d\/([^/]+)/,
+    /\/thumbnail\?id=([^&]+)/,
+    /\/uc\?(?:export=[^&]+&)?id=([^&]+)/
+  ];
+
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m && m[1]) return m[1];
+  }
+
+  return '';
+}
+
+    
+  </script>
+</body>
+</html>

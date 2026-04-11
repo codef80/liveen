@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة المعلم | Live English</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+
+  <style>
+    .teacher-page{padding-top:110px;padding-bottom:60px;min-height:100vh}
+    .head-box{
+      background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(255,248,223,.96));
+      border:1px solid rgba(251,199,13,.22);
+      border-radius:32px;box-shadow:0 22px 48px rgba(88,89,91,.10);
+      padding:24px;margin-bottom:22px
+    }
+    .head-title{font-size:1.9rem;font-weight:900;color:#58595b;margin-bottom:8px}
+    .head-text{color:#707176;margin:0;line-height:1.9}
+
+    .stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:22px}
+    .stat-card{
+      background:#fff;border:1px solid #efe7cf;border-radius:24px;
+      box-shadow:0 12px 28px rgba(88,89,91,.08);padding:20px;height:100%;
+      position:relative;overflow:hidden
+    }
+    .stat-card::after{
+      content:"";position:absolute;width:110px;height:110px;border-radius:50%;
+      left:-28px;bottom:-28px;background:rgba(251,199,13,.12)
+    }
+    .stat-label{color:#77787d;font-weight:700;margin-bottom:10px;position:relative;z-index:1}
+    .stat-value{color:#58595b;font-size:2rem;font-weight:900;line-height:1.1;position:relative;z-index:1}
+
+    .panel-box{
+      background:#fff;border:1px solid #efe7cf;border-radius:28px;
+      box-shadow:0 16px 36px rgba(88,89,91,.08);padding:22px;margin-bottom:22px
+    }
+    .panel-title{font-size:1.2rem;font-weight:900;color:#58595b;margin-bottom:16px}
+
+    .filters-grid{
+      display:grid;grid-template-columns:2fr 1fr auto;gap:14px;align-items:end;margin-bottom:18px
+    }
+
+    .table-shell{overflow:auto;border-radius:22px;border:1px solid #f0ead7}
+    .table-teacher{margin:0;min-width:980px;vertical-align:middle}
+    .table-teacher thead th{
+      background:#fff7da;color:#58595b;font-weight:900;border-bottom:1px solid #eadca9;white-space:nowrap
+    }
+    .table-teacher td{color:#5d5e62;white-space:nowrap}
+
+    .status-badge{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+      font-weight:800;font-size:.9rem
+    }
+    .status-pending{background:rgba(251,199,13,.16);color:#8a6900}
+    .status-success{background:rgba(25,135,84,.12);color:#198754}
+    .status-progress{background:rgba(88,89,91,.10);color:#58595b}
+
+    .actions-row{display:flex;gap:8px;flex-wrap:wrap}
+    .mini-btn{
+      border:0;border-radius:12px;padding:8px 12px;font-weight:800;transition:.25s ease;
+      display:inline-flex;align-items:center;gap:8px
+    }
+    .mini-btn:hover{transform:translateY(-2px)}
+    .mini-btn-view{background:#fff4c7;color:#6f5600}
+    .mini-btn-report{background:#eef3ff;color:#3153a5}
+
+    @media (max-width:991.98px){
+      .stats-grid{grid-template-columns:1fr}
+      .filters-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-badge"><i class="fa-solid fa-language"></i></span>
+        <span>Live English</span>
+      </a>
+
+      <div class="ms-auto d-flex gap-2">
+        <button id="logoutBtn" class="btn btn-le-dark">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          خروج
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="teacher-page">
+    <div class="container">
+      <div class="head-box">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div>
+            <div class="head-title">لوحة </div>
+            <p class="head-text" id="welcomeText">جاري تحميل بيانات ...</p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-le" id="refreshBtn">
+              <i class="fa-solid fa-rotate"></i>
+              تحديث
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">إجمالي الطلاب المسكنين</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">مكتمل السداد</div>
+          <div class="stat-value" id="statPaid">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">بانتظار/جزئي</div>
+          <div class="stat-value" id="statPending">0</div>
+        </div>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">طلابي</div>
+
+        <div class="filters-grid">
+          <div>
+            <label class="form-label">بحث</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="اسم الطالب أو رقم الطلب">
+          </div>
+          <div>
+            <label class="form-label">الفئة</label>
+            <select id="categoryFilter" class="form-select">
+              <option value="">الكل</option>
+              <option value="أشبال">أشبال</option>
+              <option value="قادة">قادة</option>
+            </select>
+          </div>
+          <div class="d-grid">
+            <button class="btn btn-le" id="applyFilterBtn">
+              <i class="fa-solid fa-filter"></i>
+              تطبيق
+            </button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <table class="table table-teacher">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>الاسم</th>
+                <th>الفئة</th>
+                <th>حالة الطلب</th>
+                <th>السداد</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="teacherTableBody">
+              <tr>
+                <td colspan="6" class="text-center py-4">جاري تحميل البيانات...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    const API_URL = window.APP_CONFIG.API_URL;
+    let currentUser = null;
+    let currentRows = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      guardAuth();
+      bindEvents();
+      await loadTeacherStudents();
+    });
+
+    function guardAuth() {
+      const raw = localStorage.getItem('liveEnglishStaffUser');
+      if (!raw) {
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      try {
+        currentUser = JSON.parse(raw);
+      } catch {
+        localStorage.removeItem('liveEnglishStaffUser');
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      if (String(currentUser.role || '') !== 'معلم') {
+        window.location.href = 'admin.html';
+        return;
+      }
+
+      document.getElementById('welcomeText').textContent = `مرحبًا ${currentUser.name || ''}`;
+    }
+
+    function bindEvents() {
+      document.getElementById('refreshBtn').addEventListener('click', loadTeacherStudents);
+      document.getElementById('applyFilterBtn').addEventListener('click', loadTeacherStudents);
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('searchInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') loadTeacherStudents();
+      });
+    }
+
+    async function loadTeacherStudents() {
+      const tbody = document.getElementById('teacherTableBody');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">جاري تحميل البيانات...</td></tr>';
+
+      try {
+        const res = await fetch(`${API_URL}?action=getTeacherAssignedStudents&teacherId=${encodeURIComponent(currentUser.id || '')}`);
+        const json = await res.json();
+        let rows = json?.data || [];
+
+        const search = document.getElementById('searchInput').value.trim().toLowerCase();
+        const category = document.getElementById('categoryFilter').value;
+
+        if (search) {
+          rows = rows.filter(r => {
+            const hay = [r.applicationNo, r.name].join(' ').toLowerCase();
+            return hay.includes(search);
+          });
+        }
+
+        if (category) {
+          rows = rows.filter(r => String(r.category || '') === category);
+        }
+
+        currentRows = rows;
+        renderStats(rows);
+
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">لا يوجد طلاب مسكنون لك حاليًا.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td>${escapeHtml(r.applicationNo || '')}</td>
+            <td class="fw-bold">${escapeHtml(r.name || '')}</td>
+            <td>${escapeHtml(r.category || '')}</td>
+            <td>${renderStatus(r.applicationStatus)}</td>
+            <td>${renderPaymentStatus(r.paymentStatus)}</td>
+            <td>
+              <div class="actions-row">
+                <button class="mini-btn mini-btn-view" onclick="viewStudent('${escapeJs(r.applicationNo)}')">
+                  <i class="fa-solid fa-eye"></i>
+                  عرض
+                </button>
+                <button class="mini-btn mini-btn-report" onclick="addTeacherReport('${escapeJs(r.applicationNo)}','${escapeJs(r.studentId || '')}','${escapeJs(r.name || '')}')">
+                  <i class="fa-solid fa-file-circle-plus"></i>
+                  تقرير
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">تعذر تحميل بيانات الطلاب.</td></tr>';
+      }
+    }
+
+    function renderStats(rows) {
+      const total = rows.length;
+      const paid = rows.filter(r => String(r.paymentStatus || '').includes('مكتمل')).length;
+      const pending = rows.filter(r => ['بانتظار السداد', 'سداد جزئي', 'مؤجل'].includes(String(r.paymentStatus || ''))).length;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statPaid').textContent = paid;
+      document.getElementById('statPending').textContent = pending;
+    }
+
+    async function viewStudent(applicationNo) {
+      try {
+        const res = await fetch(`${API_URL}?action=getStudentProfile&applicationNo=${encodeURIComponent(applicationNo)}`);
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'تعذر تحميل البيانات');
+
+        const app = json.data?.application || {};
+        const reports = json.data?.reports || [];
+
+        await Swal.fire({
+          title: app['اسم_الطالب_الثلاثي'] || 'الطالب',
+          width: 820,
+          html: `
+            <div class="text-end" style="display:flex;flex-direction:column;gap:12px">
+              <div style="border:1px solid #efe7cf;border-radius:18px;padding:14px 16px;background:#fffaf0">
+                <div><strong>رقم الطلب:</strong> ${escapeHtml(app['رقم_الطلب'] || '')}</div>
+                <div><strong>الفئة:</strong> ${escapeHtml(app['الفئة'] || '')}</div>
+                <div><strong>حالة الطلب:</strong> ${escapeHtml(app['حالة_الطلب'] || '')}</div>
+                <div><strong>حالة السداد:</strong> ${escapeHtml(app['حالة_السداد'] || '')}</div>
+              </div>
+              <div style="font-weight:900;color:#58595b">التقارير السابقة</div>
+              ${
+                reports.length
+                  ? reports.map(r => `
+                      <div style="border:1px solid #efe7cf;border-radius:18px;padding:14px 16px;background:#fff">
+                        <div style="font-weight:900;color:#58595b;margin-bottom:6px">${escapeHtml(r['المعلم'] || '')}</div>
+                        <div style="color:#8a8b90;font-size:.92rem;margin-bottom:6px">${escapeHtml(r['تاريخ_الإنشاء'] || '')}</div>
+                        <div style="color:#6f7075;line-height:1.9">${escapeHtml(r['ملاحظات'] || r['التوصيات'] || '—')}</div>
+                      </div>
+                    `).join('')
+                  : '<div class="empty-box">لا توجد تقارير.</div>'
+              }
+            </div>
+          `,
+          confirmButtonColor: '#fbc70d',
+          confirmButtonText: 'إغلاق'
+        });
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر العرض', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function addTeacherReport(applicationNo, studentId, studentName) {
+      const { value: formValues } = await Swal.fire({
+        title: 'إضافة تقرير',
+        width: 760,
+        html: `
+          <div class="text-end">
+            <label class="form-label">الحالة التعليمية</label>
+            <input id="swalEduStatus" class="form-control mb-3" placeholder="مثال: جيد جدًا">
+
+            <label class="form-label">مستوى اللغة</label>
+            <input id="swalLangLevel" class="form-control mb-3" placeholder="مثال: متوسط">
+
+            <label class="form-label">الحضور</label>
+            <input id="swalAttendance" class="form-control mb-3" placeholder="مثال: منتظم">
+
+            <label class="form-label">السلوك</label>
+            <input id="swalBehavior" class="form-control mb-3" placeholder="مثال: ممتاز">
+
+            <label class="form-label">المهارات</label>
+            <textarea id="swalSkills" class="form-control mb-3" rows="3"></textarea>
+
+            <label class="form-label">التوصيات</label>
+            <textarea id="swalRecommendations" class="form-control mb-3" rows="3"></textarea>
+
+            <label class="form-label">ملاحظات</label>
+            <textarea id="swalNotes" class="form-control" rows="3"></textarea>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'حفظ',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#fbc70d',
+        preConfirm: () => ({
+          eduStatus: document.getElementById('swalEduStatus').value.trim(),
+          langLevel: document.getElementById('swalLangLevel').value.trim(),
+          attendance: document.getElementById('swalAttendance').value.trim(),
+          behavior: document.getElementById('swalBehavior').value.trim(),
+          skills: document.getElementById('swalSkills').value.trim(),
+          recommendations: document.getElementById('swalRecommendations').value.trim(),
+          notes: document.getElementById('swalNotes').value.trim()
+        })
+      });
+
+      if (!formValues) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveTeacherReport',
+            actor: currentUser?.name || '',
+            data: {
+              'معرف_الطالب': studentId,
+              'رقم_الطلب': applicationNo,
+              'اسم_الطالب': studentName,
+              'المعلم': currentUser?.name || '',
+              'الحالة_التعليمية': formValues.eduStatus,
+              'مستوى_اللغة': formValues.langLevel,
+              'الحضور': formValues.attendance,
+              'السلوك': formValues.behavior,
+              'المهارات': formValues.skills,
+              'التوصيات': formValues.recommendations,
+              'ملاحظات': formValues.notes
+            }
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل الحفظ');
+
+        await Swal.fire({
+          icon:'success',
+          title:'تم حفظ التقرير',
+          confirmButtonColor:'#fbc70d'
+        });
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر الحفظ', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    function renderStatus(status) {
+      const s = String(status || '');
+      let cls = 'status-progress';
+      if (s.includes('مكتمل') || s.includes('نشط')) cls = 'status-success';
+      else if (s.includes('بانتظار') || s.includes('جزئي') || s.includes('مؤجل')) cls = 'status-pending';
+      return `<span class="status-badge ${cls}">${escapeHtml(s || '—')}</span>`;
+    }
+
+    function renderPaymentStatus(status) {
+      const s = String(status || '');
+      let cls = 'status-progress';
+      if (s.includes('مكتمل')) cls = 'status-success';
+      else if (s.includes('بانتظار') || s.includes('جزئي') || s.includes('مؤجل')) cls = 'status-pending';
+      return `<span class="status-badge ${cls}">${escapeHtml(s || '—')}</span>`;
+    }
+
+    function logout() {
+      localStorage.removeItem('liveEnglishStaffUser');
+      window.location.href = 'staff-login.html';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeJs(value) {
+      return String(value ?? '').replace(/'/g, "\\'");
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+  </script>
+</body>
+</html>

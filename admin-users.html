@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة المستخدمين | Live English</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+
+  <style>
+    .users-page{
+      padding-top:110px;
+      padding-bottom:60px;
+      min-height:100vh;
+    }
+
+    .head-box{
+      background:linear-gradient(145deg, rgba(255,255,255,.98), rgba(255,248,223,.96));
+      border:1px solid rgba(251,199,13,.22);
+      border-radius:32px;
+      box-shadow:0 22px 48px rgba(88,89,91,.10);
+      padding:24px;
+      margin-bottom:22px;
+    }
+
+    .head-title{
+      font-size:1.9rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:8px;
+    }
+
+    .head-text{
+      color:#707176;
+      margin:0;
+      line-height:1.9;
+    }
+
+    .panel-box{
+      background:#fff;
+      border:1px solid #efe7cf;
+      border-radius:28px;
+      box-shadow:0 16px 36px rgba(88,89,91,.08);
+      padding:22px;
+      margin-bottom:22px;
+    }
+
+    .panel-title{
+      font-size:1.2rem;
+      font-weight:900;
+      color:#58595b;
+      margin-bottom:16px;
+    }
+
+    .table-shell{
+      overflow:auto;
+      border-radius:22px;
+      border:1px solid #f0ead7;
+    }
+
+    .table-users{
+      margin:0;
+      min-width:980px;
+      vertical-align:middle;
+    }
+
+    .table-users thead th{
+      background:#fff7da;
+      color:#58595b;
+      font-weight:900;
+      border-bottom:1px solid #eadca9;
+      white-space:nowrap;
+    }
+
+    .table-users td{
+      color:#5d5e62;
+      white-space:nowrap;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:.9rem;
+    }
+
+    .pill-on{ background:rgba(25,135,84,.12); color:#198754; }
+    .pill-off{ background:rgba(220,53,69,.10); color:#dc3545; }
+    .pill-role{ background:rgba(251,199,13,.14); color:#8a6900; }
+
+    .actions-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .mini-btn{
+      border:0;
+      border-radius:12px;
+      padding:8px 12px;
+      font-weight:800;
+      transition:.25s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .mini-btn:hover{ transform:translateY(-2px); }
+    .mini-btn-edit{ background:#fff4c7; color:#6f5600; }
+    .mini-btn-toggle{ background:#eef3ff; color:#3153a5; }
+
+    .filters-grid{
+      display:grid;
+      grid-template-columns:2fr 1fr 1fr auto;
+      gap:14px;
+      align-items:end;
+      margin-bottom:18px;
+    }
+
+    @media (max-width:991.98px){
+      .filters-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width:767.98px){
+      .filters-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-badge"><i class="fa-solid fa-language"></i></span>
+        <span>Live English</span>
+      </a>
+
+      <div class="ms-auto d-flex gap-2">
+        <a href="admin.html" class="btn btn-le-outline">
+          <i class="fa-solid fa-table-columns"></i>
+          لوحة العاملين
+        </a>
+        <button id="logoutBtn" class="btn btn-le-dark">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          خروج
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="users-page">
+    <div class="container">
+      <div class="head-box">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div>
+            <div class="head-title">إدارة المستخدمين</div>
+            <p class="head-text">إضافة المستخدمين وتعديلهم وتفعيلهم أو تعطيلهم حسب الدور.</p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button id="refreshBtn" class="btn btn-le-outline">
+              <i class="fa-solid fa-rotate"></i>
+              تحديث
+            </button>
+            <button id="addUserBtn" class="btn btn-le">
+              <i class="fa-solid fa-plus"></i>
+              إضافة مستخدم
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">المستخدمون</div>
+
+        <div class="filters-grid">
+          <div>
+            <label class="form-label">بحث</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="الاسم أو اسم المستخدم">
+          </div>
+          <div>
+            <label class="form-label">الدور</label>
+            <select id="roleFilter" class="form-select">
+              <option value="">الكل</option>
+              <option value="مدير">مدير</option>
+              <option value="مشرف">مشرف</option>
+              <option value="معلم">معلم</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">الحالة</label>
+            <select id="statusFilter" class="form-select">
+              <option value="">الكل</option>
+              <option value="نشط">نشط</option>
+              <option value="غير نشط">غير نشط</option>
+            </select>
+          </div>
+          <div class="d-grid">
+            <button id="applyFilterBtn" class="btn btn-le">
+              <i class="fa-solid fa-filter"></i>
+              تطبيق
+            </button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <table class="table table-users">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>اسم المستخدم</th>
+                <th>الدور</th>
+                <th>الحالة</th>
+                <th>الجوال</th>
+                <th>آخر دخول</th>
+                <th>تاريخ الإنشاء</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="8" class="text-center py-4">جاري تحميل البيانات...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    const API_URL = window.APP_CONFIG.API_URL;
+    let currentUser = null;
+    let currentUsers = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      guardAuth();
+      bindEvents();
+      await loadUsers();
+    });
+
+    function guardAuth() {
+      const raw = localStorage.getItem('liveEnglishStaffUser');
+      if (!raw) {
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      try {
+        currentUser = JSON.parse(raw);
+      } catch {
+        localStorage.removeItem('liveEnglishStaffUser');
+        window.location.href = 'staff-login.html';
+      }
+    }
+
+    function bindEvents() {
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('refreshBtn').addEventListener('click', loadUsers);
+      document.getElementById('applyFilterBtn').addEventListener('click', loadUsers);
+      document.getElementById('addUserBtn').addEventListener('click', () => openUserForm());
+
+      document.getElementById('searchInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') loadUsers();
+      });
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">جاري تحميل البيانات...</td></tr>';
+
+      const params = new URLSearchParams({
+        action: 'getUsers',
+        search: document.getElementById('searchInput').value.trim(),
+        role: document.getElementById('roleFilter').value,
+        status: document.getElementById('statusFilter').value
+      });
+
+      try {
+        const res = await fetch(`${API_URL}?${params.toString()}`);
+        const json = await res.json();
+        currentUsers = json?.data || [];
+
+        if (!currentUsers.length) {
+          tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">لا توجد نتائج.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = currentUsers.map(item => `
+          <tr>
+            <td class="fw-bold">${escapeHtml(item.name || '')}</td>
+            <td>${escapeHtml(item.username || '')}</td>
+            <td><span class="status-pill pill-role">${escapeHtml(item.role || '')}</span></td>
+            <td><span class="status-pill ${item.status === 'نشط' ? 'pill-on' : 'pill-off'}">${escapeHtml(item.status || '')}</span></td>
+            <td>${escapeHtml(item.phone || '—')}</td>
+            <td>${escapeHtml(item.lastLogin || '—')}</td>
+            <td>${escapeHtml(item.createdAt || '—')}</td>
+            <td>
+              <div class="actions-row">
+                <button class="mini-btn mini-btn-edit" onclick="openUserForm('${escapeJs(item.id)}')">
+                  <i class="fa-solid fa-pen"></i>
+                  تعديل
+                </button>
+                <button class="mini-btn mini-btn-toggle" onclick="toggleUserStatus('${escapeJs(item.id)}')">
+                  <i class="fa-solid fa-power-off"></i>
+                  تبديل الحالة
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">تعذر تحميل المستخدمين.</td></tr>';
+      }
+    }
+
+    async function openUserForm(id = '') {
+      const item = currentUsers.find(x => String(x.id) === String(id)) || null;
+
+      const { value: formValues } = await Swal.fire({
+        title: item ? 'تعديل مستخدم' : 'إضافة مستخدم',
+        width: 720,
+        html: `
+          <div class="text-end">
+            <label class="form-label">الاسم</label>
+            <input id="swalName" class="form-control mb-3" value="${escapeAttr(item?.name || '')}" placeholder="الاسم الكامل">
+
+            <label class="form-label">اسم المستخدم</label>
+            <input id="swalUsername" class="form-control mb-3" value="${escapeAttr(item?.username || '')}" placeholder="اسم المستخدم">
+
+            <label class="form-label">كلمة المرور ${item ? '(اتركها فارغة للإبقاء عليها)' : ''}</label>
+            <input id="swalPassword" type="text" class="form-control mb-3" value="" placeholder="كلمة المرور">
+
+            <label class="form-label">الدور</label>
+            <select id="swalRole" class="form-select mb-3">
+              <option value="مدير" ${item?.role === 'مدير' ? 'selected' : ''}>مدير</option>
+              <option value="مشرف" ${item?.role === 'مشرف' ? 'selected' : ''}>مشرف</option>
+              <option value="معلم" ${item?.role === 'معلم' ? 'selected' : ''}>معلم</option>
+            </select>
+
+            <label class="form-label">الجوال</label>
+            <input id="swalPhone" class="form-control mb-3" value="${escapeAttr(item?.phone || '')}" placeholder="رقم الجوال">
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="swalActive" ${item ? (item.status === 'نشط' ? 'checked' : '') : 'checked'}>
+              <label class="form-check-label" for="swalActive">المستخدم نشط</label>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'حفظ',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#fbc70d',
+        preConfirm: () => {
+          const name = document.getElementById('swalName').value.trim();
+          const username = document.getElementById('swalUsername').value.trim();
+          const password = document.getElementById('swalPassword').value.trim();
+
+          if (!name || !username) {
+            Swal.showValidationMessage('الاسم واسم المستخدم مطلوبان');
+            return false;
+          }
+
+          if (!item && !password) {
+            Swal.showValidationMessage('كلمة المرور مطلوبة عند إضافة مستخدم جديد');
+            return false;
+          }
+
+          return {
+            id,
+            name,
+            username,
+            password,
+            role: document.getElementById('swalRole').value,
+            phone: document.getElementById('swalPhone').value.trim(),
+            status: document.getElementById('swalActive').checked ? 'نشط' : 'غير نشط'
+          };
+        }
+      });
+
+      if (!formValues) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveUser',
+            actor: currentUser?.name || 'مستخدم النظام',
+            data: {
+              'معرف_المستخدم': formValues.id || '',
+              'الاسم': formValues.name,
+              'اسم_المستخدم': formValues.username,
+              'كلمة_المرور': formValues.password,
+              'الدور': formValues.role,
+              'الحالة': formValues.status,
+              'الجوال': formValues.phone
+            }
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل الحفظ');
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'تم الحفظ',
+          confirmButtonColor: '#fbc70d'
+        });
+
+        await loadUsers();
+      } catch (e) {
+        console.error(e);
+        Swal.fire({
+          icon: 'error',
+          title: 'تعذر الحفظ',
+          text: e.message || 'حدث خطأ',
+          confirmButtonColor: '#58595b'
+        });
+      }
+    }
+
+    async function toggleUserStatus(id) {
+      const item = currentUsers.find(x => String(x.id) === String(id));
+      if (!item) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveUser',
+            actor: currentUser?.name || 'مستخدم النظام',
+            data: {
+              'معرف_المستخدم': item.id,
+              'الاسم': item.name,
+              'اسم_المستخدم': item.username,
+              'كلمة_المرور': '',
+              'الدور': item.role,
+              'الحالة': item.status === 'نشط' ? 'غير نشط' : 'نشط',
+              'الجوال': item.phone || ''
+            }
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+
+        await loadUsers();
+      } catch (e) {
+        console.error(e);
+        Swal.fire({
+          icon: 'error',
+          title: 'تعذر التنفيذ',
+          text: e.message || 'حدث خطأ',
+          confirmButtonColor: '#58595b'
+        });
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('liveEnglishStaffUser');
+      window.location.href = 'staff-login.html';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function escapeJs(value) {
+      return String(value ?? '').replace(/'/g, "\\'");
+    }
+  </script>
+</body>
+</html>

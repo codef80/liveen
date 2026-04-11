@@ -1,0 +1,1254 @@
+
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة المشرف | Live English</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+
+  <style>
+    .brand-logo-img{width:32px;height:32px;object-fit:contain;display:block;border-radius:10px}
+    .top-icon-btn{width:40px;height:40px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;border-radius:12px!important}
+    .btn-label-mobile-hide{display:inline}
+    .admin-page{padding-top:108px;padding-bottom:56px;min-height:100vh}
+    .admin-head{
+      background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(255,248,223,.96));
+      border:1px solid rgba(251,199,13,.22);
+      border-radius:28px;box-shadow:0 22px 48px rgba(88,89,91,.10);
+      padding:20px;margin-bottom:18px
+    }
+    .admin-head-title{font-size:1.6rem;font-weight:900;color:#58595b;margin-bottom:6px}
+    .admin-head-text{color:#707176;margin:0;line-height:1.85}
+
+    .head-actions .btn{padding:.55rem .9rem;font-size:.92rem;border-radius:12px}
+
+    .quick-admin-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .quick-admin-card{
+      background:#fff;border:1px solid #efe7cf;border-radius:20px;
+      box-shadow:0 10px 24px rgba(88,89,91,.07);padding:14px;transition:.22s ease;height:100%;text-decoration:none
+    }
+    .quick-admin-card:hover{transform:translateY(-4px);box-shadow:0 18px 32px rgba(88,89,91,.12)}
+    .quick-admin-icon{
+      width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,rgba(251,199,13,.18),rgba(251,199,13,.34));
+      color:#58595b;font-size:1.1rem;margin-bottom:10px
+    }
+    .quick-admin-title{font-size:.98rem;font-weight:900;color:#58595b;margin-bottom:6px}
+    .quick-admin-text{color:#6f7075;line-height:1.65;margin-bottom:10px;font-size:.86rem}
+
+    .stats-row .col-md-6,.stats-row .col-xl-3{display:flex}
+    .stat-card{
+      background:#fff;border:1px solid #efe7cf;border-radius:20px;
+      box-shadow:0 10px 24px rgba(88,89,91,.07);padding:16px;height:100%;width:100%;
+      position:relative;overflow:hidden
+    }
+    .stat-card::after{
+      content:"";position:absolute;width:92px;height:92px;border-radius:50%;
+      left:-24px;bottom:-24px;background:rgba(251,199,13,.12)
+    }
+    .stat-label{color:#77787d;font-weight:700;margin-bottom:8px;position:relative;z-index:1;font-size:.92rem}
+    .stat-value{color:#58595b;font-size:1.75rem;font-weight:900;line-height:1.1;position:relative;z-index:1}
+
+    .stage-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+    .stage-card{
+      background:#fff;border:1px solid #efe7cf;border-radius:22px;
+      box-shadow:0 12px 28px rgba(88,89,91,.08);padding:16px;cursor:pointer;transition:.22s ease;height:100%
+    }
+    .stage-card:hover{transform:translateY(-4px)}
+    .stage-card.active{border-color:rgba(251,199,13,.55);box-shadow:0 16px 32px rgba(251,199,13,.15);background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,249,229,.94))}
+    .stage-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(251,199,13,.18),rgba(251,199,13,.34));color:#58595b;font-size:1.1rem;margin-bottom:10px}
+    .stage-title{font-size:1rem;font-weight:900;color:#58595b;margin-bottom:5px}
+    .stage-text{color:#6f7075;line-height:1.7;margin-bottom:8px;font-size:.88rem}
+    .stage-count{font-weight:900;color:#8a6900;font-size:.88rem}
+
+    .admin-panel{background:#fff;border:1px solid #efe7cf;border-radius:26px;box-shadow:0 16px 36px rgba(88,89,91,.08);padding:18px;margin-bottom:22px}
+    .panel-title{font-size:1.15rem;font-weight:900;color:#58595b;margin-bottom:0}
+
+    .filters-grid{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;align-items:end;margin:18px 0}
+    .filters-grid .btn{padding:.65rem .95rem}
+
+    .table-shell{overflow:auto;border-radius:20px;border:1px solid #f0ead7}
+    .table-admin{margin:0;min-width:1280px;vertical-align:middle}
+    .table-admin thead th{background:#fff7da;color:#58595b;font-weight:900;border-bottom:1px solid #eadca9;white-space:nowrap;font-size:.94rem}
+    .table-admin td{color:#5d5e62;white-space:nowrap;font-size:.93rem}
+
+    .mobile-cards{display:none}
+    .app-card{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,249,229,.92));border:1px solid #efe7cf;border-radius:16px;padding:10px;box-shadow:0 10px 20px rgba(88,89,91,.06)}
+    .app-card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:8px}
+    .app-card-name{font-weight:900;color:#58595b;line-height:1.5;font-size:.88rem}
+    .app-card-sub{color:#7a7b7f;font-size:.74rem}
+    .app-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+    .app-chip{background:#fff;border:1px solid #efe7cf;border-radius:10px;padding:6px 8px}
+    .app-chip-label{font-size:.66rem;color:#8a8b90;font-weight:700;margin-bottom:2px}
+    .app-chip-value{font-size:.76rem;color:#58595b;font-weight:900;line-height:1.35}
+
+    .status-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;font-weight:800;font-size:.84rem}
+    .status-pending{background:rgba(251,199,13,.16);color:#8a6900}
+    .status-progress{background:rgba(88,89,91,.10);color:#58595b}
+    .status-success{background:rgba(25,135,84,.12);color:#198754}
+    .status-danger{background:rgba(220,53,69,.10);color:#dc3545}
+
+    .actions-row,.card-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .action-pill{border:0;border-radius:12px;padding:7px 11px;font-weight:800;font-size:.82rem;display:inline-flex;align-items:center;gap:6px;transition:.2s ease}
+    .action-pill:hover{transform:translateY(-2px)}
+    .action-pill i{font-size:.9rem}
+    .icon-btn{
+      width:36px;height:36px;border:0;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;
+      transition:.2s ease;font-size:.95rem
+    }
+    .icon-btn:hover{transform:translateY(-2px)}
+    .icon-view{background:#fff4c7;color:#6f5600}
+    .icon-accept{background:#e8f7ee;color:#198754}
+    .icon-reject{background:#fdebec;color:#dc3545}
+    .icon-pay{background:#eef3ff;color:#3153a5}
+    .icon-wa{background:#e7f9ef;color:#128c7e}
+    .icon-edit{background:#f7f0ff;color:#6c3fa1}
+    .icon-print{background:#f2f3f5;color:#58595b}
+
+    .loading-block{padding:28px 10px;text-align:center}
+    .loading-spinner{width:2rem;height:2rem;color:#fbc70d}
+    .loading-text{margin-top:10px;font-weight:800;color:#6f7075}
+
+    .profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .profile-item{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,249,229,.90));border:1px solid #efe7cf;border-radius:16px;padding:13px 14px}
+    .profile-item.full{grid-column:1/-1}
+    .profile-key{color:#7b7c80;font-weight:700;margin-bottom:6px;font-size:.88rem}
+    .profile-value{color:#58595b;font-weight:900;line-height:1.8}
+    .modal-box-list{display:flex;flex-direction:column;gap:10px}
+    .timeline-box{background:#fff;border:1px solid #efe7cf;border-radius:16px;padding:13px 14px}
+    .timeline-box-title{font-weight:900;color:#58595b;margin-bottom:5px}
+    .timeline-box-meta{color:#8a8b90;font-size:.88rem;margin-bottom:6px}
+    .timeline-box-text{color:#6f7075;line-height:1.8}
+
+    @media (max-width:1399.98px){.quick-admin-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media (max-width:1199.98px){.quick-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stage-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:991.98px){
+      .action-pill{padding:6px 8px;font-size:.72rem;border-radius:10px}
+      .action-pill span{font-size:.7rem}
+      .btn-label-mobile-hide{display:none}
+      .navbar .container{padding-top:4px;padding-bottom:4px}
+      .top-icon-btn{width:34px;height:34px;border-radius:10px!important}
+      .admin-page{padding-top:86px}
+      .admin-head{padding:14px;border-radius:20px}
+      .admin-head-title{font-size:1.15rem;margin-bottom:4px}
+      .admin-head-text{font-size:.86rem;line-height:1.7}
+      .head-actions .btn{padding:.42rem .52rem;font-size:.72rem;border-radius:10px}
+      .quick-admin-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+      .quick-admin-card{padding:10px;border-radius:14px}
+      .quick-admin-icon{width:36px;height:36px;border-radius:10px;font-size:.95rem;margin-bottom:8px}
+      .quick-admin-title{font-size:.78rem;line-height:1.4;margin-bottom:4px}
+      .quick-admin-text{display:none}
+      .quick-admin-card .btn{padding:.4rem .55rem;font-size:.72rem;border-radius:10px}
+      .stat-card{padding:10px;border-radius:14px}
+      .stat-label{font-size:.72rem;margin-bottom:4px}
+      .stat-value{font-size:1rem}
+      .stage-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+      .stage-card{padding:8px;border-radius:14px}
+      .stage-icon{width:24px;height:24px;border-radius:8px;font-size:.7rem;margin-bottom:5px}
+      .stage-title{font-size:.66rem;margin-bottom:2px}
+      .stage-text{display:none}
+      .stage-count{font-size:.58rem}
+      .filters-grid{grid-template-columns:1fr 1fr;gap:8px}
+      .filters-grid > div:last-child{grid-column:1/-1}
+      .admin-panel{padding:12px;border-radius:18px}
+      .panel-title{font-size:.98rem}
+      .table-shell{display:none}
+      .mobile-cards{display:grid;gap:10px}
+      .app-card-grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:575.98px){
+      .quick-admin-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .stage-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .app-card-grid{grid-template-columns:1fr}
+      .profile-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
+        <span>Live English</span>
+      </a>
+
+      <div class="ms-auto d-flex gap-2 head-actions flex-wrap">
+        <a href="index.html" class="btn btn-le-outline top-icon-btn" title="الرئيسية">
+          <i class="fa-solid fa-house"></i><span class="btn-label-mobile-hide"> الرئيسية</span>
+        </a>
+        <button id="refreshDashboardBtn" class="btn btn-le top-icon-btn" title="تحديث البيانات">
+          <i class="fa-solid fa-rotate"></i><span class="btn-label-mobile-hide"> تحديث</span>
+        </button>
+        <button id="logoutBtn" class="btn btn-le-dark top-icon-btn" title="خروج">
+          <i class="fa-solid fa-right-from-bracket"></i><span class="btn-label-mobile-hide"> خروج</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="admin-page">
+    <div class="container">
+      <div class="admin-head">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2">
+          <div>
+            <div class="admin-head-title">لوحة المشرف</div>
+            <p class="admin-head-text" id="welcomeText">جاري تحميل بيانات المستخدم...</p>
+          </div>
+          <div class="small text-muted fw-bold" id="lastBackgroundSync">—</div>
+        </div>
+      </div>
+
+      <div class="quick-admin-grid">
+        <a href="settings.html" class="quick-admin-card">
+          <div class="quick-admin-icon"><i class="fa-solid fa-gear"></i></div>
+          <div class="quick-admin-title">الإعدادات</div>
+          <span class="btn btn-le-outline w-100">فتح</span>
+        </a>
+        <a href="admin-categories.html" class="quick-admin-card">
+          <div class="quick-admin-icon"><i class="fa-solid fa-layer-group"></i></div>
+          <div class="quick-admin-title">الفئات</div>
+          <span class="btn btn-le-outline w-100">فتح</span>
+        </a>
+        <a href="admin-years.html" class="quick-admin-card">
+          <div class="quick-admin-icon"><i class="fa-solid fa-calendar-days"></i></div>
+          <div class="quick-admin-title">السنوات</div>
+          <span class="btn btn-le-outline w-100">فتح</span>
+        </a>
+        <a href="admin-users.html" class="quick-admin-card">
+          <div class="quick-admin-icon"><i class="fa-solid fa-users-gear"></i></div>
+          <div class="quick-admin-title">المستخدمون</div>
+          <span class="btn btn-le-outline w-100">فتح</span>
+        </a>
+        <a href="admin-rejected.html" class="quick-admin-card">
+          <div class="quick-admin-icon"><i class="fa-solid fa-user-xmark"></i></div>
+          <div class="quick-admin-title">المرفوضون</div>
+          <span class="btn btn-le-outline w-100">فتح</span>
+        </a>
+      </div>
+
+      <div class="row g-3 mb-1 stats-row">
+        <div class="col-md-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-label">إجمالي الطلبات</div>
+            <div class="stat-value" id="statTotal">0</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-label">جاري المعالجة</div>
+            <div class="stat-value" id="statRegistration">0</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-label">مرحلة السداد</div>
+            <div class="stat-value" id="statPayment">0</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-label">مقبول</div>
+            <div class="stat-value" id="statStudents">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-grid">
+        <div class="stage-card active" data-stage="registration">
+          <div class="stage-icon"><i class="fa-solid fa-user-plus"></i></div>
+          <div class="stage-title">التسجيل</div>
+          <div class="stage-text">طلبات قيد المعالجة</div>
+          <div class="stage-count" id="registrationCount">0</div>
+        </div>
+        <div class="stage-card" data-stage="payment">
+          <div class="stage-icon"><i class="fa-solid fa-wallet"></i></div>
+          <div class="stage-title">السداد</div>
+          <div class="stage-text">فواتير وتذكير</div>
+          <div class="stage-count" id="paymentCount">0</div>
+        </div>
+        <div class="stage-card" data-stage="students">
+          <div class="stage-icon"><i class="fa-solid fa-users"></i></div>
+          <div class="stage-title">الطلاب</div>
+          <div class="stage-text">المقبولون</div>
+          <div class="stage-count" id="studentsCount">0</div>
+        </div>
+        <div class="stage-card" onclick="window.location.href='admin-rejected.html'">
+          <div class="stage-icon"><i class="fa-solid fa-user-xmark"></i></div>
+          <div class="stage-title">المرفوضون</div>
+          <div class="stage-text">الطلبات المرفوضة</div>
+          <div class="stage-count">فتح</div>
+        </div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div class="panel-title mb-0" id="tableTitle">طلبات التسجيل</div>
+        </div>
+
+        <div class="filters-grid">
+          <div>
+            <label class="form-label">بحث</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="اسم الطالب أو الهوية أو رقم الطلب">
+          </div>
+          <div>
+            <label class="form-label">الفئة</label>
+            <select id="categoryFilter" class="form-select">
+              <option value="">الكل</option>
+              <option value="أشبال">أشبال</option>
+              <option value="قادة">قادة</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">الحالة</label>
+            <select id="statusFilter" class="form-select">
+              <option value="">الكل</option>
+            </select>
+          </div>
+          <div class="d-grid">
+            <button id="applyFiltersBtn" class="btn btn-le">
+              <i class="fa-solid fa-filter"></i>
+              تطبيق
+            </button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <table class="table table-admin">
+            <thead id="tableHead"></thead>
+            <tbody id="applicationsTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="mobile-cards" id="mobileCardsContainer"></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content border-0" style="border-radius:28px;overflow:hidden;">
+        <div class="modal-header" style="background:#fff7da;border-bottom:1px solid #eadca9;">
+          <h5 class="modal-title fw-bold" id="profileModalTitle">بطاقة الطالب</h5>
+          <button type="button" class="btn-close m-0 ms-auto shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body bg-white">
+          <div id="profileModalBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    const API_URL = window.APP_CONFIG.API_URL;
+    const profileModal = new bootstrap.Modal(document.getElementById('profileModal'));
+
+    let currentUser = null;
+    let activeStage = 'registration';
+    let currentRows = [];
+    let backgroundRefreshTimer = null;
+    let dashboardSignature = '';
+    let lastToastAt = 0;
+
+    const stageCache = { registration: [], payment: [], students: [] };
+    const profileCache = {};
+    const whatsappCache = { reminder: {} };
+    const publicSettings = {};
+    const teacherOptionsCache = {};
+    let teacherOptionsLoaded = false;
+
+    const stageConfig = {
+      registration: {
+        title: 'طلبات التسجيل',
+        statuses: ['', 'تسجيل أولي', 'تحت المراجعة'],
+        getUrl: (params) => `${API_URL}?action=getRegistrationApplications&${params.toString()}`,
+        columns: ['رقم الطلب','الاسم','الفئة','الحالة','ولي الأمر','الإجراءات']
+      },
+      payment: {
+        title: 'مرحلة السداد',
+        statuses: ['', 'مقبول مبدئيًا وبانتظار السداد', 'سداد جزئي', 'مؤجل السداد'],
+        getUrl: (params) => `${API_URL}?action=getPaymentStageApplications&${params.toString()}`,
+        columns: ['رقم الطلب','الاسم','الفئة','حالة الطلب','السداد','ولي الأمر','الإجراءات']
+      },
+      students: {
+        title: 'الطلاب',
+        statuses: ['', 'مقبول مبدئيًا وبانتظار السداد', 'سداد جزئي', 'مؤجل السداد', 'مكتمل السداد', 'طالب نشط'],
+        getUrl: (params) => `${API_URL}?action=getActiveStudents&${params.toString()}`,
+        columns: ['رقم الطلب','الاسم','الفئة','الحالة','المعلم','ولي الأمر','الإجراءات']
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      guardAuth();
+      bindEvents();
+      renderStageHeader();
+      await bootstrapDashboard(true);
+      startBackgroundRefresh();
+    });
+
+    function guardAuth() {
+      const raw = localStorage.getItem('liveEnglishStaffUser');
+      if (!raw) {
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      try {
+        currentUser = JSON.parse(raw);
+      } catch {
+        localStorage.removeItem('liveEnglishStaffUser');
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      if (String(currentUser.role || '') === 'معلم') {
+        window.location.href = 'teacher.html';
+        return;
+      }
+
+      document.getElementById('welcomeText').textContent = `مرحبًا ${currentUser.name || ''} — ${currentUser.role || ''}`;
+    }
+
+    function bindEvents() {
+      document.getElementById('refreshDashboardBtn').addEventListener('click', async () => {
+        await bootstrapDashboard(false, true);
+        toast('success', 'تم تحديث البيانات');
+      });
+
+      document.getElementById('applyFiltersBtn').addEventListener('click', async () => {
+        renderCurrentStageFromCache();
+        toast('success', 'تم تطبيق الفلاتر');
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('searchInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          renderCurrentStageFromCache();
+          toast('success', 'تم تطبيق البحث');
+        }
+      });
+
+      document.querySelectorAll('.stage-card[data-stage]').forEach(card => {
+        card.addEventListener('click', () => {
+          activeStage = card.dataset.stage;
+          document.querySelectorAll('.stage-card[data-stage]').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          renderStageHeader();
+          renderCurrentStageFromCache();
+          toast('success', `تم فتح ${stageConfig[activeStage].title}`);
+        });
+      });
+    }
+
+    async function bootstrapDashboard(isFirstLoad = false, force = false) {
+      renderLoadingState();
+      await Promise.all([
+        loadDashboard(),
+        preloadAllStages(force),
+        preloadPublicSettings()
+      ]);
+      renderCurrentStageFromCache();
+      preloadProfilesInBackground();
+      preloadWhatsappInBackground();
+      updateSyncStamp();
+      if (isFirstLoad) {
+        toast('success', 'تم تحميل لوحة المشرف');
+      }
+    }
+
+    function startBackgroundRefresh() {
+      if (backgroundRefreshTimer) clearInterval(backgroundRefreshTimer);
+      backgroundRefreshTimer = setInterval(async () => {
+        try {
+          const before = buildSignature();
+          await Promise.all([loadDashboard(), preloadAllStages(false)]);
+          const after = buildSignature();
+          if (before && after !== before) {
+            renderCurrentStageFromCache();
+            preloadProfilesInBackground();
+            preloadWhatsappInBackground();
+            throttledToast('success', 'تم تحديث البيانات بالخلفية');
+          }
+          updateSyncStamp();
+        } catch (e) {
+          console.error('Background refresh failed', e);
+        }
+      }, 15000);
+    }
+
+    function updateSyncStamp() {
+      const now = new Date();
+      document.getElementById('lastBackgroundSync').textContent = `آخر مزامنة: ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
+    function renderLoadingState() {
+      document.getElementById('applicationsTableBody').innerHTML = `
+        <tr><td colspan="10" class="text-center py-4">
+          <div class="loading-block"><div class="spinner-border loading-spinner" role="status"></div><div class="loading-text">جاري التحميل...</div></div>
+        </td></tr>`;
+      document.getElementById('mobileCardsContainer').innerHTML = `
+        <div class="loading-block"><div class="spinner-border loading-spinner" role="status"></div><div class="loading-text">جاري التحميل...</div></div>`;
+    }
+
+    async function preloadPublicSettings() {
+      try {
+        const res = await fetch(`${API_URL}?action=initData`);
+        const json = await res.json();
+        Object.assign(publicSettings, json?.data?.settings || {});
+      } catch (e) {
+        console.error('settings preload failed', e);
+      }
+    }
+
+    function buildSignature() {
+      return JSON.stringify({
+        registration: stageCache.registration.map(r => [r.applicationNo, r.applicationStatus, r.paymentStatus, r.updatedAt]),
+        payment: stageCache.payment.map(r => [r.applicationNo, r.applicationStatus, r.paymentStatus, r.updatedAt]),
+        students: stageCache.students.map(r => [r.applicationNo, r.applicationStatus, r.paymentStatus, r.updatedAt]),
+        stats: [document.getElementById('statTotal').textContent, document.getElementById('statRegistration').textContent, document.getElementById('statPayment').textContent, document.getElementById('statStudents').textContent]
+      });
+    }
+
+    async function preloadAllStages(force = false) {
+      const baseSearch = document.getElementById('searchInput').value.trim();
+      const baseCategory = document.getElementById('categoryFilter').value;
+
+      const tasks = Object.keys(stageConfig).map(async stage => {
+        const params = new URLSearchParams({ search: baseSearch, category: baseCategory, status: '' });
+        const res = await fetch(stageConfig[stage].getUrl(params));
+        const json = await res.json();
+        stageCache[stage] = Array.isArray(json?.data) ? json.data : [];
+      });
+
+      await Promise.all(tasks);
+      applyStageStatsFromCache();
+      dashboardSignature = buildSignature();
+    }
+
+    function applyStageStatsFromCache() {
+      document.getElementById('registrationCount').textContent = `${stageCache.registration.length}`;
+      document.getElementById('paymentCount').textContent = `${stageCache.payment.length}`;
+      document.getElementById('studentsCount').textContent = `${stageCache.students.length}`;
+    }
+
+
+    async function preloadTeachers() {
+      if (teacherOptionsLoaded) return;
+      try {
+        const usersRes = await fetch(`${API_URL}?action=getUsers&role=معلم&status=نشط`);
+        const usersJson = await usersRes.json();
+        const teachers = usersJson?.data || [];
+        teachers.forEach(t => { teacherOptionsCache[t.id] = `${t.name} (${t.username})`; });
+        teacherOptionsLoaded = true;
+      } catch (e) {
+        console.error('teacher preload failed', e);
+      }
+    }
+
+    async function preloadProfilesInBackground(waitForVisible = false) {
+      const allRows = [...stageCache.registration, ...stageCache.payment, ...stageCache.students];
+      const appNos = [...new Set(allRows.map(r => r.applicationNo).filter(Boolean))];
+      const preload = async (appNo) => {
+        if (profileCache[appNo]) return;
+        try {
+          const res = await fetch(`${API_URL}?action=getStudentProfile&applicationNo=${encodeURIComponent(appNo)}`);
+          const json = await res.json();
+          if (json.ok) profileCache[appNo] = json.data || {};
+        } catch (e) {
+          console.error('profile preload failed', appNo, e);
+        }
+      };
+      if (waitForVisible) {
+        await Promise.all(appNos.slice(0, 12).map(preload));
+      }
+      for (const appNo of appNos.slice(waitForVisible ? 12 : 0)) {
+        await preload(appNo);
+      }
+    }
+
+    async function preloadWhatsappInBackground() {
+      const rows = [...stageCache.payment, ...stageCache.students];
+      for (const row of rows) {
+        if (!row?.applicationNo || whatsappCache.reminder[row.applicationNo]) continue;
+        try {
+          const res = await fetch(`${API_URL}?action=getWhatsappMessage&applicationNo=${encodeURIComponent(row.applicationNo)}&type=reminder`);
+          const json = await res.json();
+          if (json.ok && json.data?.whatsappUrl) whatsappCache.reminder[row.applicationNo] = json.data.whatsappUrl;
+        } catch (e) {
+          console.error('whatsapp preload failed', row.applicationNo, e);
+        }
+      }
+    }
+
+    function renderStageHeader() {
+      const conf = stageConfig[activeStage];
+      document.getElementById('tableTitle').textContent = conf.title;
+      const statusFilter = document.getElementById('statusFilter');
+      const currentVal = statusFilter.value || '';
+      statusFilter.innerHTML = conf.statuses.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(mapStatusOptionLabel(s || 'الكل'))}</option>`).join('');
+      if (conf.statuses.includes(currentVal)) statusFilter.value = currentVal;
+      document.getElementById('tableHead').innerHTML = `<tr>${conf.columns.map(c => `<th>${c}</th>`).join('')}</tr>`;
+    }
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch(`${API_URL}?action=dashboardStats`);
+        const json = await res.json();
+        const data = json?.data || {};
+        const counts = data.statusCounts || {};
+        const registrationCount = toNum(counts['تسجيل أولي']) + toNum(counts['تحت المراجعة']);
+        const paymentCount = toNum(counts['مقبول مبدئيًا وبانتظار السداد']) + toNum(counts['سداد جزئي']) + toNum(counts['مؤجل السداد']);
+        const studentsCount = paymentCount + toNum(counts['مكتمل السداد']) + toNum(counts['طالب نشط']);
+        document.getElementById('statTotal').textContent = toNum(data.totalApplications);
+        document.getElementById('statRegistration').textContent = registrationCount;
+        document.getElementById('statPayment').textContent = paymentCount;
+        document.getElementById('statStudents').textContent = studentsCount;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderCurrentStageFromCache() {
+      const tableBody = document.getElementById('applicationsTableBody');
+      const cardsBody = document.getElementById('mobileCardsContainer');
+      const status = document.getElementById('statusFilter').value || '';
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      let rows = [...(stageCache[activeStage] || [])];
+
+      if (status) rows = rows.filter(r => String(r.applicationStatus || '') === status);
+      if (category) rows = rows.filter(r => String(r.category || '') === category);
+      if (search) {
+        rows = rows.filter(r => [r.applicationNo, r.name, r.studentIdentity, r.guardianPhone].join(' ').toLowerCase().includes(search));
+      }
+
+      currentRows = rows;
+      if (!rows.length) {
+        tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-4">لا توجد نتائج مطابقة.</td></tr>`;
+        cardsBody.innerHTML = `<div class="empty-box text-center py-4">لا توجد نتائج مطابقة.</div>`;
+        return;
+      }
+
+      if (activeStage === 'registration') {
+        tableBody.innerHTML = rows.map(renderRegistrationRow).join('');
+        cardsBody.innerHTML = rows.map(renderRegistrationCard).join('');
+      } else if (activeStage === 'payment') {
+        tableBody.innerHTML = rows.map(renderPaymentRow).join('');
+        cardsBody.innerHTML = rows.map(renderPaymentCard).join('');
+      } else {
+        tableBody.innerHTML = rows.map(renderStudentsRow).join('');
+        cardsBody.innerHTML = rows.map(renderStudentsCard).join('');
+      }
+    }
+
+    function renderRegistrationRow(item) {
+      return `<tr>
+        <td>${escapeHtml(item.applicationNo || '')}</td>
+        <td><div class="fw-bold">${escapeHtml(item.name || '')}</div><div class="text-muted small">${escapeHtml(item.studentIdentity || '')}</div></td>
+        <td>${escapeHtml(item.category || '')}</td>
+        <td>${renderStatus(item.applicationStatus)}</td>
+        <td>${escapeHtml(item.guardianPhone || '—')}</td>
+        <td>${buildActionButtons(item, 'registration')}</td>
+      </tr>`;
+    }
+
+    function renderPaymentRow(item) {
+      return `<tr>
+        <td>${escapeHtml(item.applicationNo || '')}</td>
+        <td><div class="fw-bold">${escapeHtml(item.name || '')}</div><div class="text-muted small">${escapeHtml(item.studentIdentity || '')}</div></td>
+        <td>${escapeHtml(item.category || '')}</td>
+        <td>${renderStatus(item.applicationStatus)}</td>
+        <td>${renderPaymentStatus(item.paymentStatus)}</td>
+        <td>${escapeHtml(item.guardianPhone || '—')}</td>
+        <td>${buildActionButtons(item, 'payment')}</td>
+      </tr>`;
+    }
+
+    function renderStudentsRow(item) {
+      return `<tr>
+        <td>${escapeHtml(item.applicationNo || '')}</td>
+        <td><div class="fw-bold">${escapeHtml(item.name || '')}</div><div class="text-muted small">${escapeHtml(item.studentIdentity || '')}</div></td>
+        <td>${escapeHtml(item.category || '')}</td>
+        <td>${renderStatus(item.applicationStatus)}</td>
+        <td>${escapeHtml(item.teacherName || 'غير مسكن')}</td>
+        <td>${escapeHtml(item.guardianPhone || '—')}</td>
+        <td>${buildActionButtons(item, 'students')}</td>
+      </tr>`;
+    }
+
+    function renderRegistrationCard(item) {
+      return renderMobileCard(item, {
+        stage: 'registration',
+        secondValue: renderStatus(item.applicationStatus),
+        secondLabel: 'الحالة'
+      });
+    }
+
+    function renderPaymentCard(item) {
+      return renderMobileCard(item, {
+        stage: 'payment',
+        secondValue: renderPaymentStatus(item.paymentStatus),
+        secondLabel: 'السداد'
+      });
+    }
+
+    function renderStudentsCard(item) {
+      return renderMobileCard(item, {
+        stage: 'students',
+        secondValue: escapeHtml(item.teacherName || 'غير مسكن'),
+        secondLabel: 'المعلم'
+      });
+    }
+
+    function renderMobileCard(item, opts) {
+      return `<div class="app-card">
+        <div class="app-card-top">
+          <div>
+            <div class="app-card-name">${escapeHtml(item.name || '')}</div>
+            <div class="app-card-sub">${escapeHtml(item.applicationNo || '')} • ${escapeHtml(item.studentIdentity || '')}</div>
+          </div>
+          ${renderStatus(item.applicationStatus)}
+        </div>
+        <div class="app-card-grid">
+          <div class="app-chip"><div class="app-chip-label">الفئة</div><div class="app-chip-value">${escapeHtml(item.category || '—')}</div></div>
+          <div class="app-chip"><div class="app-chip-label">${escapeHtml(opts.secondLabel || 'الحالة')}</div><div class="app-chip-value">${opts.secondValue || '—'}</div></div>
+          <div class="app-chip"><div class="app-chip-label">ولي الأمر</div><div class="app-chip-value">${escapeHtml(item.guardianPhone || '—')}</div></div>
+          <div class="app-chip"><div class="app-chip-label">الفاتورة</div><div class="app-chip-value">${escapeHtml(item.invoiceNo || '—')}</div></div>
+        </div>
+        <div class="card-actions">${buildActionButtons(item, opts.stage)}</div>
+      </div>`;
+    }
+
+    function buildActionButtons(item, stage) {
+      const appNo = escapeJs(item.applicationNo || '');
+      const invoiceUrl = item.invoiceUrl || buildInvoiceUrl(item.applicationNo);
+      const common = `
+        <button class="action-pill icon-view" onclick="openProfile('${appNo}')"><i class="fa-solid fa-eye"></i><span>عرض</span></button>
+        ${invoiceUrl ? `<a class="action-pill icon-print" href="${escapeAttr(invoiceUrl)}" target="_blank"><i class="fa-solid fa-file-invoice"></i><span>فاتورة</span></a>` : ''}`;
+      if (stage === 'registration') return `<div class="actions-row">${common}
+        <button class="action-pill icon-accept" onclick="acceptRegistration('${appNo}')"><i class="fa-solid fa-check"></i><span>قبول أولي</span></button>
+        <button class="action-pill icon-reject" onclick="rejectRegistration('${appNo}')"><i class="fa-solid fa-xmark"></i><span>رفض</span></button>
+      </div>`;
+      if (stage === 'payment') return `<div class="actions-row">${common}
+        <button class="action-pill icon-pay" onclick="openPaymentAction('${appNo}')"><i class="fa-solid fa-wallet"></i><span>السداد</span></button>
+        <button class="action-pill icon-wa" onclick="openReminderWhatsapp('${appNo}')"><i class="fa-brands fa-whatsapp"></i><span>تذكير</span></button>
+        <button class="action-pill icon-reject" onclick="cancelApplication('${appNo}')"><i class="fa-solid fa-ban"></i><span>إلغاء</span></button>
+      </div>`;
+      return `<div class="actions-row">${common}
+        <button class="action-pill icon-edit" onclick="editStudentData('${appNo}')"><i class="fa-solid fa-pen"></i><span>تعديل</span></button>
+        <button class="action-pill icon-pay" onclick="openPaymentAction('${appNo}')"><i class="fa-solid fa-wallet"></i><span>السداد</span></button>
+        <button class="action-pill icon-pay" onclick="assignTeacher('${appNo}')"><i class="fa-solid fa-user-plus"></i><span>تسكين</span></button>
+        <button class="action-pill icon-wa" onclick="openGuardianWhatsapp('${appNo}')"><i class="fa-brands fa-whatsapp"></i><span>واتساب</span></button>
+        <button class="action-pill icon-view" onclick="openTeacherReports('${appNo}')"><i class="fa-solid fa-file-lines"></i><span>تقارير</span></button>
+      </div>`;
+    }
+
+    function mapDisplayStatus(status) {
+      const s = String(status || '');
+      if (['تسجيل أولي', 'تحت المراجعة', 'جديد'].includes(s)) return 'جاري المعالجة';
+      if (['مقبول مبدئيًا وبانتظار السداد', 'سداد جزئي', 'مؤجل السداد'].includes(s)) return 'مرحلة السداد';
+      if (['مكتمل السداد', 'طالب نشط', 'مقبول'].includes(s)) return 'مقبول';
+      if (['مرفوض', 'منسحب'].includes(s)) return 'مرفوض';
+      return s || '—';
+    }
+
+    function mapStatusOptionLabel(status) {
+      if (!status || status === 'الكل') return 'الكل';
+      return mapDisplayStatus(status);
+    }
+
+    function renderStatus(status) {
+      const mapped = mapDisplayStatus(status);
+      let cls = 'status-progress';
+      if (mapped === 'مرفوض') cls = 'status-danger';
+      else if (mapped === 'مقبول') cls = 'status-success';
+      else if (mapped === 'مرحلة السداد') cls = 'status-pending';
+      return `<span class="status-badge ${cls}">${escapeHtml(mapped)}</span>`;
+    }
+
+    function renderPaymentStatus(status) {
+      const s = String(status || '');
+      let cls = 'status-progress';
+      if (s.includes('مكتمل')) cls = 'status-success';
+      else if (s.includes('بانتظار') || s.includes('جزئي') || s.includes('مؤجل')) cls = 'status-pending';
+      return `<span class="status-badge ${cls}">${escapeHtml(s || '—')}</span>`;
+    }
+
+    async function acceptRegistration(applicationNo) {
+      try {
+        toast('info', 'جاري تنفيذ القبول الأولي...');
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'acceptRegistrationAndPrepareWhatsapp', actor: currentUser?.name || 'مستخدم النظام', data: { 'رقم_الطلب': applicationNo } })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+        await bootstrapDashboard(false);
+        Swal.fire({ icon: 'success', title: 'تم القبول الأولي', text: 'سيتم فتح واتساب ولي الأمر', confirmButtonColor: '#fbc70d' });
+        if (json.data?.whatsappUrl) window.open(json.data.whatsappUrl, '_blank');
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر التنفيذ', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function rejectRegistration(applicationNo) {
+      const result = await Swal.fire({
+        title: 'رفض الطلب', input: 'textarea', inputLabel: 'سبب الرفض', inputValidator: v => !v ? 'سبب الرفض مطلوب' : null,
+        showCancelButton: true, confirmButtonText: 'رفض', cancelButtonText: 'إلغاء', confirmButtonColor: '#dc3545'
+      });
+      if (!result.isConfirmed) return;
+      try {
+        toast('info', 'جاري رفض الطلب...');
+        const res = await fetch(API_URL, {
+          method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action:'updateApplicationStatus', actor: currentUser?.name || 'مستخدم النظام', data:{ 'رقم_الطلب': applicationNo, 'حالة_الطلب':'مرفوض', 'سبب_الرفض': result.value, 'ملاحظات_عامة': result.value, 'وصف_الحركة':'تم رفض الطلب' } })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+        await bootstrapDashboard(false);
+        toast('success', 'تم رفض الطلب');
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر التنفيذ', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function openReminderWhatsapp(applicationNo) {
+      try {
+        const cached = whatsappCache.reminder[applicationNo];
+        if (cached) {
+          toast('success', 'تم تجهيز رسالة التذكير');
+          window.open(cached, '_blank');
+          return;
+        }
+        const res = await fetch(`${API_URL}?action=getWhatsappMessage&applicationNo=${encodeURIComponent(applicationNo)}&type=reminder`);
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'تعذر تجهيز الرسالة');
+        if (json.data?.whatsappUrl) {
+          whatsappCache.reminder[applicationNo] = json.data.whatsappUrl;
+          toast('success', 'تم تجهيز رسالة التذكير');
+          window.open(json.data.whatsappUrl, '_blank');
+        }
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر فتح واتساب', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function cancelApplication(applicationNo) {
+      const result = await Swal.fire({ title: 'إلغاء الطالب', input: 'textarea', inputLabel: 'سبب الإلغاء', showCancelButton: true, confirmButtonText: 'تأكيد', cancelButtonText: 'إلغاء', confirmButtonColor: '#dc3545' });
+      if (!result.isConfirmed) return;
+      try {
+        toast('info', 'جاري إلغاء الطلب...');
+        const res = await fetch(API_URL, {
+          method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action:'cancelApplication', actor: currentUser?.name || 'مستخدم النظام', data:{ 'رقم_الطلب': applicationNo, 'سبب': result.value || '' } })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+        await bootstrapDashboard(false);
+        toast('success', 'تم إلغاء الطلب');
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر التنفيذ', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function openPaymentAction(applicationNo) {
+      const row = currentRows.find(r => String(r.applicationNo) === String(applicationNo)) || {};
+      const { value: formValues } = await Swal.fire({
+        title: 'السداد الحالي',
+        html: `
+          <div class="text-end">
+            <label class="form-label">الإجراء</label>
+            <select id="swalPayAction" class="form-select mb-3">
+              <option value="بانتظار السداد">بانتظار السداد</option>
+              <option value="دفع جزئي">دفع جزئي</option>
+              <option value="مكتمل السداد">مكتمل السداد</option>
+              <option value="مؤجل">مؤجل</option>
+            </select>
+            <label class="form-label">المبلغ المدفوع الآن</label>
+            <input id="swalPaidNow" type="number" class="form-control mb-3" value="0">
+            <label class="form-label">رقم الفاتورة</label>
+            <input id="swalInvoiceNo" type="text" class="form-control mb-3" value="${escapeAttr(row.invoiceNo || '')}">
+            <label class="form-label">رابط الفاتورة</label>
+            <input id="swalInvoiceUrl" type="text" class="form-control mb-3" value="${escapeAttr(row.invoiceUrl || buildInvoiceUrl(applicationNo))}">
+            <label class="form-label">ملاحظات</label>
+            <textarea id="swalPayNote" class="form-control" rows="3"></textarea>
+          </div>
+        `,
+        focusConfirm: false, showCancelButton: true, confirmButtonText: 'حفظ', cancelButtonText: 'إلغاء', confirmButtonColor: '#fbc70d',
+        preConfirm: () => ({
+          actionType: document.getElementById('swalPayAction').value,
+          paidNow: document.getElementById('swalPaidNow').value,
+          invoiceNo: document.getElementById('swalInvoiceNo').value,
+          invoiceUrl: document.getElementById('swalInvoiceUrl').value,
+          note: document.getElementById('swalPayNote').value
+        })
+      });
+      if (!formValues) return;
+      try {
+        toast('info', 'جاري حفظ السداد...');
+        const res = await fetch(API_URL, {
+          method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action:'savePaymentAction', actor: currentUser?.name || 'مستخدم النظام', data:{ 'رقم_الطلب': applicationNo, 'الإجراء': formValues.actionType, 'المدفوع_الآن': Number(formValues.paidNow || 0), 'رقم_الفاتورة': formValues.invoiceNo || '', 'رابط_الفاتورة': formValues.invoiceUrl || '', 'ملاحظات': formValues.note || '' } })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+        await bootstrapDashboard(false);
+        toast('success', 'تم حفظ السداد');
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر حفظ السداد', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function editStudentData(applicationNo) {
+      const row = currentRows.find(r => String(r.applicationNo) === String(applicationNo));
+      if (!row) return;
+      const { value: formValues } = await Swal.fire({
+        title: 'تعديل بيانات الطالب', width: 720,
+        html: `
+          <div class="text-end">
+            <label class="form-label">اسم الطالب</label>
+            <input id="swalStudentName" class="form-control mb-3" value="${escapeAttr(row.name || '')}">
+            <label class="form-label">جوال ولي الأمر</label>
+            <input id="swalGuardianPhone" class="form-control mb-3" value="${escapeAttr(row.guardianPhone || '')}">
+            <label class="form-label">الفئة</label>
+            <select id="swalCategory" class="form-select mb-3">
+              <option value="أشبال" ${row.category === 'أشبال' ? 'selected' : ''}>أشبال</option>
+              <option value="قادة" ${row.category === 'قادة' ? 'selected' : ''}>قادة</option>
+            </select>
+          </div>
+        `,
+        showCancelButton: true, confirmButtonText: 'حفظ', cancelButtonText: 'إلغاء', confirmButtonColor: '#fbc70d',
+        preConfirm: () => ({ name: document.getElementById('swalStudentName').value.trim(), guardianPhone: document.getElementById('swalGuardianPhone').value.trim(), category: document.getElementById('swalCategory').value })
+      });
+      if (!formValues) return;
+      try {
+        toast('info', 'جاري تحديث البيانات...');
+        const res = await fetch(API_URL, {
+          method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action:'updateStudentProfile', actor: currentUser?.name || 'مستخدم النظام', data:{ 'رقم_الطلب': applicationNo, 'اسم_الطالب_الثلاثي': formValues.name, 'جوال_ولي_الأمر': formValues.guardianPhone, 'الفئة': formValues.category } })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل الحفظ');
+        await bootstrapDashboard(false);
+        toast('success', 'تم تحديث البيانات');
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر الحفظ', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function assignTeacher(applicationNo) {
+      if (!teacherOptionsLoaded) await preloadTeachers();
+      const options = { ...teacherOptionsCache };
+      if (!Object.keys(options).length) {
+        Swal.fire({ icon:'warning', title:'لا يوجد معلمون نشطون', confirmButtonColor:'#fbc70d' });
+        return;
+      }
+      const { value: teacherId } = await Swal.fire({ title: 'تسكين الطالب لمعلم', input: 'select', inputOptions: options, inputPlaceholder: 'اختر المعلم', showCancelButton: true, confirmButtonText: 'حفظ', cancelButtonText: 'إلغاء', confirmButtonColor: '#fbc70d' });
+      if (!teacherId) return;
+      try {
+        toast('info', 'جاري التسكين...');
+        const res = await fetch(API_URL, {
+          method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action:'assignStudentToTeacher', actor: currentUser?.name || 'مستخدم النظام', data:{ 'رقم_الطلب': applicationNo, 'معرف_المعلم': teacherId } })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+        await bootstrapDashboard(false);
+        toast('success', 'تم تسكين الطالب');
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر التسكين', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function openGuardianWhatsapp(applicationNo) {
+      try {
+        const profile = await getProfileData(applicationNo);
+        const app = profile.application || {};
+        const studentName = app['اسم_الطالب_الثلاثي'] || '';
+        const guardianPhone = String(app['جوال_ولي_الأمر'] || '').replace(/^0/, '966');
+        const message = applyTemplate((publicSettings['رسالة_تذكير_السداد'] || 'السلام عليكم، بخصوص الطالب {اسم_الطالب}').trim(), {
+          'اسم_الطالب': studentName,
+          'رقم_الطلب': app['رقم_الطلب'] || '',
+          'رابط_الفاتورة': app['رابط_الفاتورة'] || '',
+          'المتبقي': app['المتبقي'] || ''
+        });
+        if (!guardianPhone) throw new Error('رقم ولي الأمر غير متوفر');
+        window.open(`https://wa.me/${guardianPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        toast('success', 'تم فتح واتساب ولي الأمر');
+      } catch (e) {
+        console.error(e);
+        Swal.fire({ icon:'error', title:'تعذر فتح واتساب', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
+      }
+    }
+
+    async function openTeacherReports(applicationNo) {
+      try {
+        const profile = await getProfileData(applicationNo);
+        const reports = profile.reports || [];
+        await Swal.fire({
+          title: 'تقارير المعلمين', width: 820,
+          html: reports.length ? `<div class="text-end" style="display:flex;flex-direction:column;gap:12px">${reports.map(r => `<div style="border:1px solid #efe7cf;border-radius:18px;padding:14px 16px;background:#fffaf0"><div style="font-weight:900;color:#58595b;margin-bottom:6px">${escapeHtml(r['المعلم'] || '')}</div><div style="color:#8a8b90;font-size:.92rem;margin-bottom:6px">${escapeHtml(r['تاريخ_الإنشاء'] || '')}</div><div style="color:#6f7075;line-height:1.9">${escapeHtml(r['ملاحظات'] || r['التوصيات'] || '—')}</div></div>`).join('')}</div>` : '<div class="empty-box">لا توجد تقارير تعليمية.</div>',
+          confirmButtonColor: '#fbc70d', confirmButtonText: 'إغلاق'
+        });
+        toast('success', 'تم عرض التقارير');
+      } catch (e) {
+        console.error(e);
+        await Swal.fire({ icon:'warning', title:'لا توجد تقارير متاحة حاليًا', text:e.message || 'تعذر جلب التقارير من الخدمة الحالية', confirmButtonColor:'#fbc70d' });
+      }
+    }
+
+    function normalizeProfileData(raw) {
+      raw = raw || {};
+      const appRaw = raw.application || raw.app || {};
+      const studentRaw = raw.student || {};
+      const invoiceRaw = raw.invoice || {};
+      const assignedTeacher = raw.assignedTeacher || {};
+
+      const application = {
+        'رقم_الطلب': appRaw['رقم_الطلب'] || appRaw.applicationNo || '',
+        'معرف_الطالب': appRaw['معرف_الطالب'] || appRaw.studentId || '',
+        'اسم_الطالب_الثلاثي': appRaw['اسم_الطالب_الثلاثي'] || appRaw.name || '',
+        'هوية_الطالب': appRaw['هوية_الطالب'] || appRaw.studentIdentity || '',
+        'رقم_الجواز': appRaw['رقم_الجواز'] || appRaw.passportNo || '',
+        'جوال_الابن': appRaw['جوال_الابن'] || appRaw.studentPhone || '',
+        'جوال_ولي_الأمر': appRaw['جوال_ولي_الأمر'] || appRaw.guardianPhone || '',
+        'هوية_ولي_الأمر': appRaw['هوية_ولي_الأمر'] || appRaw.guardianIdentity || '',
+        'الفئة': appRaw['الفئة'] || appRaw.category || '',
+        'الباقة': appRaw['الباقة'] || appRaw.packageName || '',
+        'حالة_الطلب': appRaw['حالة_الطلب'] || appRaw.applicationStatus || '',
+        'حالة_السداد': appRaw['حالة_السداد'] || appRaw.paymentStatus || invoiceRaw['حالة_السداد'] || invoiceRaw.paymentStatus || '',
+        'مبلغ_الباقة': appRaw['مبلغ_الباقة'] ?? appRaw.amount ?? invoiceRaw['الإجمالي'] ?? invoiceRaw.total ?? 0,
+        'المدفوع': appRaw['المدفوع'] ?? appRaw.paid ?? invoiceRaw['المدفوع'] ?? invoiceRaw.paid ?? 0,
+        'المتبقي': appRaw['المتبقي'] ?? appRaw.remaining ?? invoiceRaw['المتبقي'] ?? invoiceRaw.remaining ?? 0,
+        'رقم_الفاتورة': appRaw['رقم_الفاتورة'] || appRaw.invoiceNo || '',
+        'رابط_الفاتورة': appRaw['رابط_الفاتورة'] || appRaw.invoiceUrl || '',
+        'موعد_المقابلة': appRaw['موعد_المقابلة'] || appRaw.interviewDate || '',
+        'ملاحظات_عامة': appRaw['ملاحظات_عامة'] || appRaw.notes || '',
+        'سبب_الرفض': appRaw['سبب_الرفض'] || appRaw.rejectReason || '',
+        'تاريخ_الإنشاء': appRaw['تاريخ_الإنشاء'] || appRaw.createdAt || '',
+        'آخر_تحديث': appRaw['آخر_تحديث'] || appRaw.updatedAt || ''
+      };
+
+      const student = {
+        'معرف_الطالب': studentRaw['معرف_الطالب'] || studentRaw.id || application['معرف_الطالب'] || '',
+        'اسم_الطالب_الثلاثي': studentRaw['اسم_الطالب_الثلاثي'] || studentRaw.name || application['اسم_الطالب_الثلاثي'] || '',
+        'هوية_الطالب': studentRaw['هوية_الطالب'] || studentRaw.identity || application['هوية_الطالب'] || '',
+        'رقم_الجواز': studentRaw['رقم_الجواز'] || studentRaw.passportNo || application['رقم_الجواز'] || '',
+        'مدينة_السكن': studentRaw['مدينة_السكن'] || studentRaw.city || '',
+        'المدرسة': studentRaw['المدرسة'] || studentRaw.school || '',
+        'الصف_الدراسي': studentRaw['الصف_الدراسي'] || studentRaw.grade || '',
+        'العمر_بالميلادي': studentRaw['العمر_بالميلادي'] || studentRaw.age || '',
+        'الهوايات': studentRaw['الهوايات'] || studentRaw.hobbies || '',
+        'المستوى_الدراسي': studentRaw['المستوى_الدراسي'] || studentRaw.academicLevel || '',
+        'مستوى_اللغة_الإنجليزية': studentRaw['مستوى_اللغة_الإنجليزية'] || studentRaw.englishLevel || '',
+        'الحالة_الصحية': studentRaw['الحالة_الصحية'] || studentRaw.healthStatus || '',
+        'جوال_الابن': studentRaw['جوال_الابن'] || studentRaw.studentPhone || application['جوال_الابن'] || '',
+        'جوال_ولي_الأمر': studentRaw['جوال_ولي_الأمر'] || studentRaw.guardianPhone || application['جوال_ولي_الأمر'] || '',
+        'هوية_ولي_الأمر': studentRaw['هوية_ولي_الأمر'] || studentRaw.guardianIdentity || application['هوية_ولي_الأمر'] || '',
+        'الفئة': studentRaw['الفئة'] || studentRaw.category || application['الفئة'] || '',
+        'كيف_عرفت_عن_البرنامج': studentRaw['كيف_عرفت_عن_البرنامج'] || studentRaw.source || '',
+        'حالة_الطالب': studentRaw['حالة_الطالب'] || studentRaw.studentStatus || '',
+        'تاريخ_الإنشاء': studentRaw['تاريخ_الإنشاء'] || studentRaw.createdAt || '',
+        'آخر_تحديث': studentRaw['آخر_تحديث'] || studentRaw.updatedAt || ''
+      };
+
+      const attachments = (raw.attachments || []).map(item => ({
+        ...item,
+        'معرف_المرفق': item['معرف_المرفق'] || item.id || '',
+        'نوع_المرفق': item['نوع_المرفق'] || item.type || '',
+        'اسم_الملف': item['اسم_الملف'] || item.fileName || item.name || '',
+        'نوع_الملف': item['نوع_الملف'] || item.fileType || '',
+        'حجم_الملف': item['حجم_الملف'] || item.size || '',
+        'رابط_الملف': item['رابط_الملف'] || item.url || '',
+        'تاريخ_الرفع': item['تاريخ_الرفع'] || item.uploadedAt || ''
+      }));
+
+      const timeline = (raw.timeline || []).map(item => ({
+        ...item,
+        'الحالة': item['الحالة'] || item.status || '',
+        'الوصف': item['الوصف'] || item.description || '',
+        'نوع_الحركة': item['نوع_الحركة'] || item.type || '',
+        'بواسطة': item['بواسطة'] || item.by || '',
+        'التاريخ': item['التاريخ'] || item.date || ''
+      }));
+
+      const reports = (raw.reports || []).map(item => ({
+        ...item,
+        'المعلم': item['المعلم'] || item.teacher || '',
+        'تاريخ_الإنشاء': item['تاريخ_الإنشاء'] || item.createdAt || '',
+        'ملاحظات': item['ملاحظات'] || item.notes || '',
+        'التوصيات': item['التوصيات'] || item.recommendations || ''
+      }));
+
+      let payments = (raw.payments || []).map(item => ({
+        ...item,
+        'حالة_السداد': item['حالة_السداد'] || item.paymentStatus || '',
+        'تاريخ_العملية': item['تاريخ_العملية'] || item.date || item.updatedAt || item.createdAt || '',
+        'المدفوع': item['المدفوع'] ?? item.paid ?? 0,
+        'المتبقي': item['المتبقي'] ?? item.remaining ?? 0
+      }));
+
+      if (!payments.length && Object.keys(invoiceRaw).length) {
+        payments = [{
+          'حالة_السداد': invoiceRaw['حالة_السداد'] || invoiceRaw.paymentStatus || application['حالة_السداد'] || '',
+          'تاريخ_العملية': invoiceRaw['آخر_تحديث'] || invoiceRaw.updatedAt || invoiceRaw['تاريخ_الإنشاء'] || invoiceRaw.createdAt || '',
+          'المدفوع': invoiceRaw['المدفوع'] ?? invoiceRaw.paid ?? application['المدفوع'] ?? 0,
+          'المتبقي': invoiceRaw['المتبقي'] ?? invoiceRaw.remaining ?? application['المتبقي'] ?? 0
+        }];
+      }
+
+      return {
+        application,
+        student,
+        attachments,
+        timeline,
+        payments,
+        reports,
+        assignedTeacher: {
+          teacherName: assignedTeacher.teacherName || assignedTeacher['اسم_المعلم'] || '',
+          teacherId: assignedTeacher.teacherId || assignedTeacher['معرف_المعلم'] || '',
+          assignedAt: assignedTeacher.assignedAt || assignedTeacher['تاريخ_التسكين'] || '',
+          assignedBy: assignedTeacher.assignedBy || assignedTeacher['بواسطة'] || ''
+        }
+      };
+    }
+
+    async function getProfileData(applicationNo) {
+      if (profileCache[applicationNo]) return profileCache[applicationNo];
+      const res = await fetch(`${API_URL}?action=getStudentProfile&applicationNo=${encodeURIComponent(applicationNo)}`);
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.message || 'تعذر تحميل البيانات');
+      profileCache[applicationNo] = normalizeProfileData(json.data || {});
+      return profileCache[applicationNo];
+    }
+
+    async function openProfile(applicationNo) {
+      document.getElementById('profileModalTitle').textContent = `بطاقة الطالب — ${applicationNo}`;
+      const cached = profileCache[applicationNo];
+      document.getElementById('profileModalBody').innerHTML = cached ? '' : `<div class="loading-block"><div class="spinner-border loading-spinner" role="status"></div><div class="loading-text">جاري التحميل...</div></div>`;
+      profileModal.show();
+      try {
+        const data = cached || await getProfileData(applicationNo);
+        const app = data.application || {};
+        const student = data.student || {};
+        const attachments = data.attachments || [];
+        const timeline = data.timeline || [];
+        const payments = data.payments || [];
+        const reports = data.reports || [];
+        const assignedTeacher = data.assignedTeacher || {};
+        const invoiceUrl = app['رابط_الفاتورة'] || buildInvoiceUrl(app['رقم_الطلب'] || applicationNo);
+
+        document.getElementById('profileModalBody').innerHTML = `
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="profile-grid">
+                <div class="profile-item"><div class="profile-key">اسم الطالب</div><div class="profile-value">${escapeHtml(app['اسم_الطالب_الثلاثي'] || student['اسم_الطالب_الثلاثي'] || '')}</div></div>
+                <div class="profile-item"><div class="profile-key">رقم الطلب</div><div class="profile-value">${escapeHtml(app['رقم_الطلب'] || '')}</div></div>
+                <div class="profile-item"><div class="profile-key">هوية الطالب</div><div class="profile-value">${escapeHtml(student['هوية_الطالب'] || app['هوية_الطالب'] || '')}</div></div>
+                <div class="profile-item"><div class="profile-key">الفئة</div><div class="profile-value">${escapeHtml(app['الفئة'] || '')}</div></div>
+                <div class="profile-item"><div class="profile-key">حالة الطلب</div><div class="profile-value">${renderStatus(app['حالة_الطلب'] || '')}</div></div>
+                <div class="profile-item"><div class="profile-key">حالة السداد</div><div class="profile-value">${escapeHtml(app['حالة_السداد'] || '—')}</div></div>
+                <div class="profile-item"><div class="profile-key">جوال ولي الأمر</div><div class="profile-value">${escapeHtml(student['جوال_ولي_الأمر'] || app['جوال_ولي_الأمر'] || '')}</div></div>
+                <div class="profile-item"><div class="profile-key">رقم الفاتورة</div><div class="profile-value">${escapeHtml(app['رقم_الفاتورة'] || '—')}</div></div>
+                <div class="profile-item"><div class="profile-key">المعلم</div><div class="profile-value">${escapeHtml(assignedTeacher.teacherName || 'غير مسكن')}</div></div>
+                <div class="profile-item full"><div class="profile-key">ملاحظات عامة</div><div class="profile-value">${escapeHtml(app['ملاحظات_عامة'] || '—')}</div></div>
+              </div>
+
+              <div class="mt-4 d-flex gap-2 flex-wrap">
+                ${invoiceUrl ? `<a href="${escapeAttr(invoiceUrl)}" target="_blank" class="btn btn-le-outline"><i class="fa-solid fa-file-invoice"></i> فتح الفاتورة</a>` : ''}
+                <button class="btn btn-le" onclick="openGuardianWhatsapp('${escapeJs(app['رقم_الطلب'] || applicationNo)}')"><i class="fa-brands fa-whatsapp"></i> واتساب ولي الأمر</button>
+              </div>
+
+              <div class="mt-4">
+                <div class="panel-title">المرفقات</div>
+                ${attachments.length ? `<div class="modal-box-list">${attachments.map(item => `<div class="timeline-box"><div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-2"><div><div class="timeline-box-title">${escapeHtml(item['اسم_الملف'] || '')}</div><div class="timeline-box-meta">${escapeHtml(item['نوع_المرفق'] || '')}</div></div><a href="${escapeAttr(item['رابط_الملف'] || '#')}" target="_blank" class="btn btn-le-outline btn-sm"><i class="fa-solid fa-up-right-from-square"></i> فتح</a></div>${renderAttachmentPreview(item)}</div>`).join('')}</div>` : `<div class="empty-box">لا توجد مرفقات.</div>`}
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="panel-title">الخط الزمني</div>
+              ${timeline.length ? `<div class="modal-box-list mb-4">${timeline.map(item => `<div class="timeline-box"><div class="timeline-box-title">${escapeHtml(mapDisplayStatus(item['الحالة'] || ''))}</div><div class="timeline-box-meta">${escapeHtml(item['التاريخ'] || '')}</div><div class="timeline-box-text">${escapeHtml(item['الوصف'] || '—')}</div></div>`).join('')}</div>` : `<div class="empty-box mb-4">لا يوجد خط زمني.</div>`}
+              <div class="panel-title">السداد</div>
+              ${payments.length ? `<div class="modal-box-list mb-4">${payments.map(item => `<div class="timeline-box"><div class="timeline-box-title">${escapeHtml(item['حالة_السداد'] || '')}</div><div class="timeline-box-meta">${escapeHtml(item['تاريخ_العملية'] || '')}</div><div class="timeline-box-text">المدفوع: ${formatMoney(item['المدفوع'])} — المتبقي: ${formatMoney(item['المتبقي'])}</div></div>`).join('')}</div>` : `<div class="empty-box mb-4">لا توجد سجلات سداد.</div>`}
+              <div class="panel-title">التقارير التعليمية</div>
+              ${reports.length ? `<div class="modal-box-list">${reports.map(item => `<div class="timeline-box"><div class="timeline-box-title">${escapeHtml(item['المعلم'] || '')}</div><div class="timeline-box-meta">${escapeHtml(item['تاريخ_الإنشاء'] || '')}</div><div class="timeline-box-text">${escapeHtml(item['ملاحظات'] || item['التوصيات'] || '—')}</div></div>`).join('')}</div>` : `<div class="empty-box">لا توجد تقارير تعليمية.</div>`}
+            </div>
+          </div>`;
+        toast('success', 'تم عرض بطاقة الطالب');
+      } catch (e) {
+        console.error(e);
+        const row = currentRows.find(r => String(r.applicationNo) === String(applicationNo)) || {};
+        document.getElementById('profileModalBody').innerHTML = `<div class="empty-box">تعذر تحميل كامل البطاقة من الخدمة، لكن هذه بيانات أساسية:</div><div class="profile-grid mt-3"><div class="profile-item"><div class="profile-key">الاسم</div><div class="profile-value">${escapeHtml(row.name || '—')}</div></div><div class="profile-item"><div class="profile-key">رقم الطلب</div><div class="profile-value">${escapeHtml(row.applicationNo || '—')}</div></div><div class="profile-item"><div class="profile-key">هوية الطالب</div><div class="profile-value">${escapeHtml(row.studentIdentity || '—')}</div></div><div class="profile-item"><div class="profile-key">ولي الأمر</div><div class="profile-value">${escapeHtml(row.guardianPhone || '—')}</div></div></div>`;
+      }
+    }
+
+
+    function renderAttachmentPreview(item) {
+      const url = String(item['رابط_الملف'] || '').trim();
+      const name = String(item['اسم_الملف'] || '').toLowerCase();
+      const type = String(item['نوع_المرفق'] || '').toLowerCase();
+      if (!url) return '<div class="empty-box">لا يوجد رابط للملف.</div>';
+      if (type.includes('video') || /\.(mp4|webm|mov|m4v)$/i.test(name)) return `<video controls style="width:100%;border-radius:14px;background:#000"><source src="${escapeAttr(url)}"></video>`;
+      if (type.includes('image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(name)) return `<img src="${escapeAttr(url)}" alt="مرفق" style="width:100%;border-radius:14px;display:block;background:#f8f1db">`;
+      if (type.includes('pdf') || /\.pdf$/i.test(name)) return `<iframe src="${escapeAttr(url)}" style="width:100%;height:420px;border:0;border-radius:14px;background:#fff"></iframe>`;
+      return `<iframe src="${escapeAttr(url)}" style="width:100%;height:420px;border:0;border-radius:14px;background:#fff"></iframe>`;
+    }
+
+    function buildInvoiceUrl(applicationNo) {
+      const base = String((publicSettings['رابط_الواجهة'] || '').trim() || window.location.origin + window.location.pathname.replace(/\/[^/]*$/, ''));
+      if (!applicationNo) return '';
+      return `${base.replace(/\/+$/,'')}/invoice.html?applicationNo=${encodeURIComponent(applicationNo)}`;
+    }
+
+    function applyTemplate(template, vars) {
+      let text = String(template || '');
+      Object.entries(vars || {}).forEach(([key, value]) => {
+        const rgx = new RegExp(`\\{${key}\\}`, 'g');
+        text = text.replace(rgx, String(value ?? ''));
+      });
+      return text;
+    }
+
+    function toast(icon, title) {
+      Swal.fire({ toast:true, position:'top-end', showConfirmButton:false, timer:1600, timerProgressBar:true, icon, title });
+    }
+
+    function throttledToast(icon, title) {
+      const now = Date.now();
+      if (now - lastToastAt < 5000) return;
+      lastToastAt = now;
+      toast(icon, title);
+    }
+
+    function logout() {
+      localStorage.removeItem('liveEnglishStaffUser');
+      window.location.href = 'staff-login.html';
+    }
+
+    function formatMoney(value) { return `${toNum(value).toLocaleString('en-US')} ر.س`; }
+    function toNum(v) { const n = Number(v || 0); return Number.isFinite(n) ? n : 0; }
+    function escapeHtml(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+    function escapeAttr(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function escapeJs(value) { return String(value ?? '').replace(/'/g, "\\'"); }
+  </script>
+</body>
+</html>
