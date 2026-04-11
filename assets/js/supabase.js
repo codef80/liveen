@@ -1,6 +1,6 @@
 /**
  * supabase.js – Live English
- * يحل محل Google Apps Script بالكامل
+ * البيانات → Supabase | الملفات → Google Drive
  * ضعه في: assets/js/supabase.js
  *
  * المتطلبات:
@@ -14,7 +14,10 @@
   // ─── إعدادات Supabase ────────────────────────────────────────────────────
   const SUPABASE_URL = 'https://ixzhntzkxoufpbrlelnx.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_IZQOeekcFcwleIILJmwf3A_TrjYWmnN';
-  const STORAGE_BUCKET = 'live-english';
+
+  // ─── رابط Apps Script لرفع الملفات لـ Drive ──────────────────────────────
+  // ← ضع هنا رابط الـ Web App بعد النشر
+  const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwADSBTPigKPc1vQyfwOFgzVNG0H84aEhYVNO-G8LubWoAMVmPEcuoE1pWP1Nr-BdJB/exec';
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -30,17 +33,36 @@
     return 'INV-' + Date.now().toString().slice(-8);
   }
 
-  // ─── رفع ملف إلى Storage ─────────────────────────────────────────────────
-  async function uploadFile(base64, mimeType, extension, folder) {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    const blob = new Blob([bytes], { type: mimeType });
-    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
-    const { data, error } = await sb.storage.from(STORAGE_BUCKET).upload(fileName, blob, { contentType: mimeType, upsert: false });
-    if (error) throw new Error('فشل رفع الملف: ' + error.message);
-    const { data: urlData } = sb.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
-    return urlData.publicUrl;
+  // ─── رفع ملفات الطلب إلى Google Drive عبر Apps Script ───────────────────
+  async function uploadFilesToDrive(studentName, applicationNo, passport, video) {
+    if (!DRIVE_UPLOAD_URL || DRIVE_UPLOAD_URL.startsWith('ضع')) {
+      console.warn('DRIVE_UPLOAD_URL غير مضبوط – الملفات لن تُرفع');
+      return { passportFile: null, videoFile: null };
+    }
+
+    const payload = {
+      action: 'uploadFiles',
+      studentName,
+      applicationNo,
+      passport: passport || null,
+      video: video || null
+    };
+
+    const res = await fetch(DRIVE_UPLOAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+
+    const json = await res.json();
+    if (!json.ok) throw new Error('فشل رفع الملفات: ' + (json.message || ''));
+
+    return {
+      passportFile: json.passportFile || null,
+      videoFile:    json.videoFile    || null,
+      appFolderId:  json.appFolderId  || '',
+      appFolderPath: json.appFolderPath || ''
+    };
   }
 
   // ─── سجّل حركة طلب ───────────────────────────────────────────────────────
@@ -172,50 +194,66 @@
     // ── submitRegistration ────────────────────────────────────────────────────
     async submitRegistration({ data: d }) {
       const applicationNo = generateApplicationNo();
+      const studentName   = d['اسم_الطالب_الثلاثي'] || 'طالب';
 
-      // رفع الجواز
-      let passportUrl = '';
-      if (d['صورة_الجواز']?.base64) {
-        passportUrl = await uploadFile(
-          d['صورة_الجواز'].base64,
-          d['صورة_الجواز'].mimeType,
-          d['صورة_الجواز'].extension,
-          'passports'
+      // ── رفع الملفات لـ Google Drive ──────────────────────────────────────
+      let passportUrl    = '';
+      let passportFileId = '';
+      let videoUrl       = '';
+      let videoFileId    = '';
+      let appFolderId    = '';
+      let appFolderPath  = '';
+
+      try {
+        const uploadResult = await uploadFilesToDrive(
+          studentName,
+          applicationNo,
+          d['صورة_الجواز'] || null,
+          d['فيديو_تعريفي'] || null
         );
+
+        if (uploadResult.passportFile) {
+          passportUrl    = uploadResult.passportFile.url    || '';
+          passportFileId = uploadResult.passportFile.fileId || '';
+        }
+        if (uploadResult.videoFile) {
+          videoUrl    = uploadResult.videoFile.url    || '';
+          videoFileId = uploadResult.videoFile.fileId || '';
+        }
+        appFolderId   = uploadResult.appFolderId   || '';
+        appFolderPath = uploadResult.appFolderPath || '';
+      } catch (uploadErr) {
+        // لا توقف التسجيل إذا فشل الرفع – سجّل الخطأ فقط
+        console.error('خطأ في رفع الملفات:', uploadErr);
       }
 
-      // رفع الفيديو
-      let videoUrl = '';
-      if (d['فيديو_تعريفي']?.base64) {
-        videoUrl = await uploadFile(
-          d['فيديو_تعريفي'].base64,
-          d['فيديو_تعريفي'].mimeType,
-          d['فيديو_تعريفي'].extension,
-          'videos'
-        );
-      }
-
+      // ── حفظ الطلب في Supabase ────────────────────────────────────────────
       const { data: inserted, error } = await sb.from('applications').insert({
-        application_no:    applicationNo,
-        student_name:      d['اسم_الطالب_الثلاثي'],
-        student_identity:  d['هوية_الطالب'],
-        passport_no:       d['رقم_الجواز'] || '',
-        city:              d['مدينة_السكن'] || '',
-        school:            d['المدرسة'] || '',
-        grade:             d['الصف_الدراسي'] || '',
-        age:               d['العمر_بالميلادي'] || '',
-        hobbies:           d['الهوايات'] || '',
-        academic_level:    d['المستوى_الدراسي'] || '',
-        english_level:     d['مستوى_اللغة_الإنجليزية'] || '',
-        health_status:     d['الحالة_الصحية'] || '',
-        student_phone:     d['جوال_الابن'] || '',
-        guardian_phone:    d['جوال_ولي_الأمر'] || '',
-        guardian_identity: d['هوية_ولي_الأمر'] || '',
-        category:          d['الفئة'] || '',
-        source:            d['كيف_عرفت_عن_البرنامج'] || '',
-        application_status:'تسجيل أولي',
+        application_no:      applicationNo,
+        student_name:        studentName,
+        student_identity:    d['هوية_الطالب'],
+        passport_no:         d['رقم_الجواز']               || '',
+        city:                d['مدينة_السكن']               || '',
+        school:              d['المدرسة']                   || '',
+        grade:               d['الصف_الدراسي']              || '',
+        age:                 d['العمر_بالميلادي']           || '',
+        hobbies:             d['الهوايات']                  || '',
+        academic_level:      d['المستوى_الدراسي']           || '',
+        english_level:       d['مستوى_اللغة_الإنجليزية']   || '',
+        health_status:       d['الحالة_الصحية']             || '',
+        student_phone:       d['جوال_الابن']                || '',
+        guardian_phone:      d['جوال_ولي_الأمر']            || '',
+        guardian_identity:   d['هوية_ولي_الأمر']            || '',
+        category:            d['الفئة']                     || '',
+        source:              d['كيف_عرفت_عن_البرنامج']      || '',
+        application_status:  'تسجيل أولي',
+        // روابط Drive
         passport_image_path: passportUrl,
-        intro_video_path:    videoUrl
+        passport_file_id:    passportFileId,
+        intro_video_path:    videoUrl,
+        intro_video_file_id: videoFileId,
+        drive_folder_id:     appFolderId,
+        drive_folder_path:   appFolderPath
       }).select('id').single();
 
       if (error) throw error;
