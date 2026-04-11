@@ -268,7 +268,13 @@
       if (stage === 'registration') {
         q = q.in('application_status', ['تسجيل أولي', 'تحت المراجعة']);
       } else if (stage === 'payment') {
-        q = q.in('application_status', ['مقبول مبدئيًا وبانتظار السداد', 'سداد جزئي', 'مؤجل السداد']);
+        // يشمل مكتمل السداد أيضاً حتى يبقى الطالب في تبويب السداد
+        q = q.in('application_status', [
+          'مقبول مبدئيًا وبانتظار السداد',
+          'سداد جزئي',
+          'مؤجل السداد',
+          'مكتمل السداد'
+        ]);
       } else if (stage === 'students') {
         q = q.in('application_status', ['مكتمل السداد', 'طالب نشط', 'مقبول']);
       }
@@ -518,32 +524,56 @@
         .eq('application_no', d['رقم_الطلب']).single();
       if (!app) throw new Error('الطلب غير موجود');
 
-      const newPaid   = Number(d['المبلغ_المدفوع'] || 0);
-      const newStatus = d['حالة_الطلب'];
-      const total     = Number(d['المبلغ_الإجمالي'] || 0);
+      // ── ترجمة الإجراء إلى حالة الطلب ────────────────────────────────────
+      const actionMap = {
+        'مكتمل السداد':        'مكتمل السداد',
+        'دفع جزئي':            'سداد جزئي',
+        'مؤجل':                'مؤجل السداد',
+        'بانتظار السداد':      'مقبول مبدئيًا وبانتظار السداد',
+        // دعم الحقل القديم حالة_الطلب أيضاً
+        'سداد جزئي':           'سداد جزئي',
+        'مؤجل السداد':         'مؤجل السداد'
+      };
+
+      const rawAction = d['الإجراء'] || d['حالة_الطلب'] || '';
+      const newStatus = actionMap[rawAction] || rawAction;
+
+      if (!newStatus) throw new Error('الإجراء غير محدد');
+
+      const newPaid = Number(d['المدفوع_الآن'] || d['المبلغ_المدفوع'] || 0);
+      const total   = Number(d['المبلغ_الإجمالي'] || 0);
+      const notes   = d['ملاحظات'] || '';
 
       const { error } = await sb.from('applications').update({
         application_status: newStatus,
-        paid_amount: newPaid,
-        updated_at: new Date().toISOString()
+        paid_amount:        newPaid || app.paid_amount || 0,
+        payment_status:     newStatus,
+        updated_at:         new Date().toISOString()
       }).eq('id', app.id);
       if (error) throw error;
 
       await logAction(app.id, actor, 'عملية سداد', app.application_status, newStatus,
-        `المبلغ المدفوع: ${newPaid} | الإجمالي: ${total}`);
+        `الإجراء: ${rawAction} | المدفوع: ${newPaid} | ${notes}`);
 
-      // أنشئ فاتورة إذا اكتمل السداد
-      if (newStatus === 'مكتمل السداد') {
-        const invoiceNo = generateInvoiceNo();
+      // ── أنشئ/حدّث فاتورة ────────────────────────────────────────────────
+      const { data: existingInv } = await sb.from('invoices')
+        .select('id, amount')
+        .eq('application_no', app.application_no)
+        .maybeSingle();
+
+      if (!existingInv) {
+        const { data: pkg } = await sb.from('packages')
+          .select('price').eq('title', app.category).maybeSingle();
         await sb.from('invoices').insert({
-          invoice_no: invoiceNo,
+          invoice_no:     d['رقم_الفاتورة'] || generateInvoiceNo(),
           application_id: app.id,
           application_no: app.application_no,
-          student_name: app.student_name,
-          category: app.category,
-          amount: total || newPaid
+          student_name:   app.student_name,
+          category:       app.category,
+          amount:         total || pkg?.price || 0
         });
-        return { ok: true, data: { invoiceNo } };
+      } else if (total && total !== existingInv.amount) {
+        await sb.from('invoices').update({ amount: total }).eq('id', existingInv.id);
       }
 
       return { ok: true };
