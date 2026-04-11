@@ -229,6 +229,16 @@
 
       await logAction(inserted.id, 'النظام', 'تم إرسال الطلب', null, 'تسجيل أولي', 'طلب جديد');
 
+      // ── أنشئ فاتورة فورية بسعر 0 (تُحدَّث عند تحديد السعر) ───────────────
+      await sb.from('invoices').insert({
+        invoice_no:     generateInvoiceNo(),
+        application_id: inserted.id,
+        application_no: applicationNo,
+        student_name:   studentName,
+        category:       d['الفئة'] || '',
+        amount:         0
+      });
+
       // ── 2. ارفع الملفات في الخلفية (لا تنتظر النتيجة) ────────────────────
       const hasPassport = d['صورة_الجواز']?.base64;
       const hasVideo    = d['فيديو_تعريفي']?.base64;
@@ -263,17 +273,18 @@
 
     // ── getApplications ───────────────────────────────────────────────────────
     async getApplications({ stage, status, search, category } = {}) {
-      let q = sb.from('applications').select('*, staff_users(name)').order('submitted_at', { ascending: false });
+      let q = sb.from('applications')
+        .select('*, staff_users(id, name), invoices(invoice_no, amount)')
+        .order('submitted_at', { ascending: false });
 
       if (stage === 'registration') {
         q = q.in('application_status', ['تسجيل أولي', 'تحت المراجعة']);
       } else if (stage === 'payment') {
-        // يشمل مكتمل السداد أيضاً حتى يبقى الطالب في تبويب السداد
+        // السداد: يشمل المقبولين وحالات السداد الجزئي فقط - مكتمل ينتقل للطلاب
         q = q.in('application_status', [
           'مقبول مبدئيًا وبانتظار السداد',
           'سداد جزئي',
-          'مؤجل السداد',
-          'مكتمل السداد'
+          'مؤجل السداد'
         ]);
       } else if (stage === 'students') {
         q = q.in('application_status', ['مكتمل السداد', 'طالب نشط', 'مقبول']);
@@ -393,7 +404,12 @@
         'ملاحظات':       r.report_text  || '',
         'التوصيات':      r.report_text  || '',
         'التقدير':       r.grade        || '',
-        'تاريخ_الإنشاء': formatDate(r.created_at)
+        'تاريخ_الإنشاء': formatDate(r.created_at),
+        // حقول منفصلة للعرض
+        teacher:    r.teacher_name || '',
+        reportText: r.report_text  || '',
+        grade:      r.grade        || '',
+        createdAt:  formatDate(r.created_at)
       }));
 
       // ── بيانات الفاتورة ───────────────────────────────────────────────────
@@ -496,20 +512,45 @@
 
     // ── getWhatsappMessage ────────────────────────────────────────────────────
     async getWhatsappMessage({ applicationNo, type } = {}) {
+      // جلب بيانات الطلب كاملة
       const { data: app } = await sb.from('applications')
-        .select('guardian_phone, student_name, application_no')
+        .select('guardian_phone, student_name, application_no, category, paid_amount, payment_status, application_status')
         .eq('application_no', applicationNo).single();
 
+      // جلب الفاتورة
+      const { data: inv } = await sb.from('invoices')
+        .select('invoice_no, amount')
+        .eq('application_no', applicationNo)
+        .maybeSingle();
+
       const keyMap = {
-        'acceptance': 'رسالة_قبول_أولي',
+        'acceptance':       'رسالة_قبول_أولي',
         'payment_reminder': 'رسالة_تذكير_السداد',
-        'paid': 'رسالة_السداد_المكتمل'
+        'reminder':         'رسالة_تذكير_السداد',
+        'paid':             'رسالة_السداد_المكتمل'
       };
 
-      const { data: settingRow } = await sb.from('settings').select('value').eq('key', keyMap[type] || 'رسالة_قبول_أولي').single();
-      let msg = (settingRow?.value || '')
-        .replace('{اسم_الطالب}', app?.student_name || '')
-        .replace('{رقم_الطلب}', app?.application_no || '');
+      const { data: settingRow } = await sb.from('settings')
+        .select('value').eq('key', keyMap[type] || 'رسالة_تذكير_السداد').maybeSingle();
+
+      const paidAmount  = app?.paid_amount   || 0;
+      const totalAmount = inv?.amount        || 0;
+      const remaining   = totalAmount - paidAmount;
+      const invoiceUrl  = inv?.invoice_no
+        ? `invoice.html?applicationNo=${encodeURIComponent(applicationNo)}`
+        : '';
+
+      let msg = (settingRow?.value || 'السلام عليكم، بخصوص الطالب {اسم_الطالب} 👋')
+        .replace(/\{اسم_الطالب\}/g,    app?.student_name      || '')
+        .replace(/\{رقم_الطلب\}/g,     app?.application_no    || '')
+        .replace(/\{الفئة\}/g,          app?.category          || '')
+        .replace(/\{رقم_الفاتورة\}/g,  inv?.invoice_no         || '')
+        .replace(/\{رابط_الفاتورة\}/g, invoiceUrl)
+        .replace(/\{المبلغ_الكلي\}/g,  totalAmount.toLocaleString('en-US'))
+        .replace(/\{المدفوع\}/g,        paidAmount.toLocaleString('en-US'))
+        .replace(/\{المتبقي\}/g,        remaining.toLocaleString('en-US'))
+        .replace(/\{حالة_السداد\}/g,    app?.payment_status    || app?.application_status || '')
+        .replace(/\{حالة_الطلب\}/g,     app?.application_status || '');
 
       const phone = (app?.guardian_phone || '').replace(/\D/g, '').replace(/^0/, '966');
       const whatsappUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : null;
@@ -668,18 +709,24 @@
 
     // ── assignStudentToTeacher ────────────────────────────────────────────────
     async assignStudentToTeacher({ actor, data: d } = {}) {
-      const { data: app } = await sb.from('applications').select('id').eq('application_no', d['رقم_الطلب']).single();
+      const { data: app } = await sb.from('applications')
+        .select('id, application_status').eq('application_no', d['رقم_الطلب']).single();
       if (!app) throw new Error('الطلب غير موجود');
 
       const { error } = await sb.from('applications').update({
         assigned_teacher_id: d['معرف_المعلم'],
-        application_status: 'طالب نشط',
         updated_at: new Date().toISOString()
       }).eq('id', app.id);
       if (error) throw error;
 
-      await logAction(app.id, actor, 'تسكين الطالب', null, 'طالب نشط', `تم التسكين لدى المعلم`);
-      return { ok: true };
+      // جلب اسم المعلم للـ log
+      const { data: teacher } = await sb.from('staff_users')
+        .select('name').eq('id', d['معرف_المعلم']).maybeSingle();
+
+      await logAction(app.id, actor, 'تسكين الطالب', null, null,
+        `تم التسكين لدى المعلم: ${teacher?.name || d['معرف_المعلم']}`);
+
+      return { ok: true, data: { teacherName: teacher?.name || '' } };
     },
 
     // ── getTeacherAssignedStudents ─────────────────────────────────────────────
@@ -706,17 +753,31 @@
 
     // ── saveTeacherReport ─────────────────────────────────────────────────────
     async saveTeacherReport({ actor, data: d } = {}) {
-      const { data: app } = await sb.from('applications').select('id').eq('application_no', d['رقم_الطلب']).single();
+      const { data: app } = await sb.from('applications')
+        .select('id').eq('application_no', d['رقم_الطلب']).single();
       if (!app) throw new Error('الطلب غير موجود');
 
-      const { data: teacher } = await sb.from('staff_users').select('id').eq('name', actor).single();
+      const { data: teacher } = await sb.from('staff_users')
+        .select('id').eq('name', actor).maybeSingle();
+
+      // دمج كل حقول التقرير في نص واحد منظم
+      const reportText = [
+        d['الحالة_التعليمية'] ? `الحالة التعليمية: ${d['الحالة_التعليمية']}` : '',
+        d['مستوى_اللغة']      ? `مستوى اللغة: ${d['مستوى_اللغة']}`           : '',
+        d['الحضور']            ? `الحضور: ${d['الحضور']}`                     : '',
+        d['السلوك']            ? `السلوك: ${d['السلوك']}`                     : '',
+        d['المهارات']          ? `المهارات: ${d['المهارات']}`                 : '',
+        d['التوصيات']          ? `التوصيات: ${d['التوصيات']}`                 : '',
+        d['ملاحظات']           ? `ملاحظات: ${d['ملاحظات']}`                   : '',
+        d['نص_التقرير']        ? d['نص_التقرير']                              : ''
+      ].filter(Boolean).join('\n');
 
       const { error } = await sb.from('teacher_reports').insert({
         application_id: app.id,
-        teacher_id: teacher?.id || null,
-        teacher_name: actor || '',
-        report_text: d['نص_التقرير'] || '',
-        grade: d['التقدير'] || ''
+        teacher_id:     teacher?.id   || null,
+        teacher_name:   d['المعلم']   || actor || '',
+        report_text:    reportText,
+        grade:          d['التقدير']  || d['الحالة_التعليمية'] || ''
       });
       if (error) throw error;
 
@@ -845,6 +906,8 @@
   }
 
   function mapApplication(r) {
+    // الفاتورة - Supabase يرجع array من invoices
+    const inv = Array.isArray(r.invoices) ? (r.invoices[0] || {}) : (r.invoices || {});
     return {
       id:                r.id,
       applicationNo:     r.application_no,
@@ -871,8 +934,12 @@
       introVideoUrl:     r.intro_video_path,
       assignedTeacherId: r.assigned_teacher_id,
       assignedTeacher:   r.staff_users?.name || '',
-      paymentStatus:     r.payment_status,
-      paidAmount:        r.paid_amount,
+      teacherName:       r.staff_users?.name || '',   // للكرت في admin
+      paymentStatus:     r.payment_status || r.application_status || '',
+      paidAmount:        r.paid_amount || 0,
+      invoiceNo:         inv.invoice_no  || '',
+      invoiceAmount:     inv.amount      || 0,
+      invoiceUrl:        inv.invoice_no  ? `invoice.html?applicationNo=${encodeURIComponent(r.application_no)}` : '',
       submittedAt:       formatDate(r.submitted_at),
       updatedAt:         formatDate(r.updated_at)
     };
@@ -935,13 +1002,20 @@
     };
   }
 
-  // ─── بناء رابط عرض Drive ─────────────────────────────────────────────────
+  // ─── بناء رابط عرض Drive مباشر (بدون طلب إذن) ──────────────────────────
   function buildDriveViewUrl(url, fileId) {
-    // إذا عندنا fileId نبني رابط عرض مباشر
-    if (fileId) return `https://drive.google.com/file/d/${fileId}/view`;
-    // إذا الرابط من Drive نرجعه كما هو
-    if (url && url.includes('drive.google.com')) return url;
+    const id = fileId || extractFileIdFromUrl(url);
+    if (id) {
+      // رابط preview مباشر لا يطلب إذن طالما الملف مشارك بـ "anyone with link"
+      return `https://drive.google.com/file/d/${id}/preview`;
+    }
     return url || '#';
+  }
+
+  function extractFileIdFromUrl(url) {
+    if (!url) return '';
+    const m = url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
+    return m ? m[1] : '';
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
