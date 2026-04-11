@@ -325,17 +325,103 @@
 
     // ── getStudentProfile ─────────────────────────────────────────────────────
     async getStudentProfile({ applicationNo } = {}) {
+      // جلب الطلب مع الـ logs
       const { data, error } = await sb.from('applications')
         .select('*, application_logs(*), staff_users(name)')
         .eq('application_no', applicationNo)
         .single();
       if (error) throw error;
 
+      // جلب تقارير المعلم
+      const { data: reportRows } = await sb.from('teacher_reports')
+        .select('*')
+        .eq('application_id', data.id)
+        .order('created_at', { ascending: false });
+
+      // جلب الفاتورة إن وجدت
+      const { data: invoiceRow } = await sb.from('invoices')
+        .select('*')
+        .eq('application_no', applicationNo)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      // ── بناء المرفقات من حقول Drive ──────────────────────────────────────
+      const attachments = [];
+
+      if (data.passport_image_path) {
+        attachments.push({
+          id:              data.id + '_passport',
+          'معرف_المرفق':   data.id + '_passport',
+          'نوع_المرفق':   'صورة الجواز',
+          'اسم_الملف':    'صورة الجواز',
+          'نوع_الملف':    'image',
+          'رابط_الملف':   buildDriveViewUrl(data.passport_image_path, data.passport_file_id),
+          url:             buildDriveViewUrl(data.passport_image_path, data.passport_file_id),
+          type:            'image',
+          fileName:        'صورة الجواز'
+        });
+      }
+
+      if (data.intro_video_path) {
+        attachments.push({
+          id:              data.id + '_video',
+          'معرف_المرفق':   data.id + '_video',
+          'نوع_المرفق':   'فيديو تعريفي',
+          'اسم_الملف':    'الفيديو التعريفي',
+          'نوع_الملف':    'video',
+          'رابط_الملف':   buildDriveViewUrl(data.intro_video_path, data.intro_video_file_id),
+          url:             buildDriveViewUrl(data.intro_video_path, data.intro_video_file_id),
+          type:            'video',
+          fileName:        'الفيديو التعريفي'
+        });
+      }
+
+      // ── timeline ──────────────────────────────────────────────────────────
+      const timeline = (data.application_logs || [])
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .map(mapLog);
+
+      // ── تقارير المعلم ─────────────────────────────────────────────────────
+      const reports = (reportRows || []).map(r => ({
+        id:              r.id,
+        'المعلم':        r.teacher_name || '',
+        'ملاحظات':       r.report_text  || '',
+        'التوصيات':      r.report_text  || '',
+        'التقدير':       r.grade        || '',
+        'تاريخ_الإنشاء': formatDate(r.created_at)
+      }));
+
+      // ── بيانات الفاتورة ───────────────────────────────────────────────────
+      const invoice = invoiceRow ? {
+        'رقم_الفاتورة':   invoiceRow.invoice_no,
+        'الإجمالي':       invoiceRow.amount,
+        'المدفوع':        data.paid_amount || 0,
+        'حالة_السداد':    data.payment_status || '',
+        'تاريخ_الإنشاء': formatDate(invoiceRow.created_at)
+      } : {};
+
+      const appFull = mapApplicationFull(data);
+
       return {
         ok: true,
         data: {
-          application: mapApplicationFull(data),
-          timeline: (data.application_logs || []).sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).map(mapLog)
+          application: appFull,
+          student:     appFull,   // نفس البيانات – الكود يقرأ من الاثنين
+          attachments,
+          timeline,
+          reports,
+          invoice,
+          payments: invoiceRow ? [{
+            'حالة_السداد':    data.payment_status || '',
+            'تاريخ_العملية': formatDate(invoiceRow.created_at),
+            'المدفوع':        data.paid_amount || 0,
+            'المتبقي':        (invoiceRow.amount || 0) - (data.paid_amount || 0)
+          }] : [],
+          assignedTeacher: {
+            teacherName: data.staff_users?.name || '',
+            teacherId:   data.assigned_teacher_id || ''
+          }
         }
       };
     },
@@ -368,13 +454,32 @@
         }
       });
 
-      // اجلب بيانات الطلب لرسالة الواتساب
+      // جلب بيانات الطلب
       const { data: app } = await sb.from('applications')
-        .select('guardian_phone, student_name, application_no')
+        .select('id, guardian_phone, student_name, application_no, category, paid_amount')
         .eq('application_no', d['رقم_الطلب']).single();
 
-      // اجلب رسالة القبول من الإعدادات
-      const { data: settingRow } = await sb.from('settings').select('value').eq('key', 'رسالة_قبول_أولي').single();
+      // ── أنشئ فاتورة عند القبول المبدئي إذا لم تكن موجودة ────────────────
+      const { data: existingInv } = await sb.from('invoices')
+        .select('id').eq('application_no', d['رقم_الطلب']).maybeSingle();
+
+      if (!existingInv && app) {
+        // جلب سعر الفئة
+        const { data: pkg } = await sb.from('packages')
+          .select('price').eq('title', app.category).maybeSingle();
+
+        await sb.from('invoices').insert({
+          invoice_no:     generateInvoiceNo(),
+          application_id: app.id,
+          application_no: app.application_no,
+          student_name:   app.student_name,
+          category:       app.category,
+          amount:         pkg?.price || 0
+        });
+      }
+
+      // جلب رسالة القبول من الإعدادات
+      const { data: settingRow } = await sb.from('settings').select('value').eq('key', 'رسالة_قبول_أولي').maybeSingle();
       let msg = (settingRow?.value || 'مرحباً، تم قبول طلبكم مبدئياً في برنامج Live English 🎉\nرقم الطلب: {رقم_الطلب}')
         .replace('{اسم_الطالب}', app?.student_name || '')
         .replace('{رقم_الطلب}', app?.application_no || '');
@@ -766,8 +871,14 @@
       'حالة_الطلب':             r.application_status,
       'سبب_الرفض':              r.rejection_reason,
       'ملاحظات_عامة':           r.general_notes,
-      'صورة_الجواز_رابط':       r.passport_image_path,
-      'فيديو_تعريفي_رابط':      r.intro_video_path
+      // روابط Drive – صحيحة للعرض
+      'صورة_الجواز_رابط':    buildDriveViewUrl(r.passport_image_path, r.passport_file_id),
+      'فيديو_تعريفي_رابط':   buildDriveViewUrl(r.intro_video_path,   r.intro_video_file_id),
+      'مجلد_الطلب_رابط':     r.drive_folder_id
+        ? `https://drive.google.com/drive/folders/${r.drive_folder_id}`
+        : '',
+      passportImageUrl:  buildDriveViewUrl(r.passport_image_path, r.passport_file_id),
+      introVideoUrl:     buildDriveViewUrl(r.intro_video_path,    r.intro_video_file_id)
     };
   }
 
@@ -794,6 +905,15 @@
       notes:     r.notes,
       date:      formatDate(r.created_at)
     };
+  }
+
+  // ─── بناء رابط عرض Drive ─────────────────────────────────────────────────
+  function buildDriveViewUrl(url, fileId) {
+    // إذا عندنا fileId نبني رابط عرض مباشر
+    if (fileId) return `https://drive.google.com/file/d/${fileId}/view`;
+    // إذا الرابط من Drive نرجعه كما هو
+    if (url && url.includes('drive.google.com')) return url;
+    return url || '#';
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
