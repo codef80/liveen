@@ -17,7 +17,7 @@
 
   // ─── رابط Apps Script لرفع الملفات لـ Drive ──────────────────────────────
   // ← ضع هنا رابط الـ Web App بعد النشر
-  const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwADSBTPigKPc1vQyfwOFgzVNG0H84aEhYVNO-G8LubWoAMVmPEcuoE1pWP1Nr-BdJB/exec';
+  const DRIVE_UPLOAD_URL = 'ضع_رابط_Apps_Script_هنا';
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -170,23 +170,48 @@
     // ── saveYearMedia ─────────────────────────────────────────────────────────
     async saveYearMedia({ data: d }) {
       const yearId = d['معرف_السنة'];
-      const mediaList = d['الوسائط'] || [];
 
-      // احذف القديم وأعد الإدراج
-      await sb.from('year_media').delete().eq('year_id', yearId);
-
-      if (mediaList.length) {
-        const rows = mediaList.map((m, i) => ({
-          year_id: yearId,
-          type: m.type || 'image',
-          url: m.url || '',
-          file_id: m.fileId || '',
-          caption: m.caption || '',
-          display_order: i
-        }));
-        const { error } = await sb.from('year_media').insert(rows);
-        if (error) throw error;
+      // وضع الاستبدال الكامل (إذا أُرسلت قائمة الوسائط)
+      if (Array.isArray(d['الوسائط'])) {
+        await sb.from('year_media').delete().eq('year_id', yearId);
+        if (d['الوسائط'].length) {
+          const rows = d['الوسائط'].map((m, i) => ({
+            year_id:       yearId,
+            type:          m.type || 'image',
+            url:           m.url  || '',
+            file_id:       m.fileId || m['معرف_الملف'] || '',
+            caption:       m.caption || m['العنوان'] || '',
+            display_order: i
+          }));
+          const { error } = await sb.from('year_media').insert(rows);
+          if (error) throw error;
+        }
+        return { ok: true };
       }
+
+      // وضع إضافة وسيط واحد (append)
+      const type = String(d['نوع_الوسيط'] || 'image');
+      const normalizedType = type === 'صورة' ? 'image' : type === 'فيديو' ? 'video' : 'link';
+
+      // احسب آخر ترتيب
+      const { data: existing } = await sb.from('year_media')
+        .select('display_order')
+        .eq('year_id', yearId)
+        .order('display_order', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const nextOrder = existing ? (existing.display_order + 1) : 0;
+
+      const { error } = await sb.from('year_media').insert({
+        year_id:       yearId,
+        type:          normalizedType,
+        url:           d['الرابط'] || '',
+        file_id:       d['معرف_الملف'] || '',
+        caption:       d['العنوان'] || d['الوصف'] || '',
+        display_order: Number(d['ترتيب_الظهور'] || nextOrder)
+      });
+      if (error) throw error;
 
       return { ok: true };
     },
@@ -413,15 +438,28 @@
       }));
 
       // ── بيانات الفاتورة ───────────────────────────────────────────────────
+      const totalAmount = invoiceRow?.amount   || 0;
+      const paidAmount  = data.paid_amount     || 0;
+      const remaining   = totalAmount - paidAmount;
+
       const invoice = invoiceRow ? {
         'رقم_الفاتورة':   invoiceRow.invoice_no,
-        'الإجمالي':       invoiceRow.amount,
-        'المدفوع':        data.paid_amount || 0,
-        'حالة_السداد':    data.payment_status || '',
-        'تاريخ_الإنشاء': formatDate(invoiceRow.created_at)
+        'الإجمالي':       totalAmount,
+        'المدفوع':        paidAmount,
+        'المتبقي':        remaining,
+        'حالة_السداد':    data.payment_status || data.application_status || '',
+        'تاريخ_الإنشاء': formatDate(invoiceRow.created_at),
+        'رابط_الفاتورة': `invoice.html?applicationNo=${encodeURIComponent(applicationNo)}`
       } : {};
 
       const appFull = mapApplicationFull(data);
+      // أضف بيانات الفاتورة للـ application مباشرة
+      appFull['رقم_الفاتورة']  = invoiceRow?.invoice_no || '';
+      appFull['رابط_الفاتورة'] = invoiceRow ? `invoice.html?applicationNo=${encodeURIComponent(applicationNo)}` : '';
+      appFull['المدفوع']        = paidAmount;
+      appFull['المتبقي']        = remaining;
+      appFull['مبلغ_الباقة']   = totalAmount;
+      appFull['حالة_السداد']   = data.payment_status || data.application_status || '';
 
       return {
         ok: true,
@@ -433,10 +471,12 @@
           reports,
           invoice,
           payments: invoiceRow ? [{
-            'حالة_السداد':    data.payment_status || '',
-            'تاريخ_العملية': formatDate(invoiceRow.created_at),
-            'المدفوع':        data.paid_amount || 0,
-            'المتبقي':        (invoiceRow.amount || 0) - (data.paid_amount || 0)
+            'حالة_السداد':    data.payment_status || data.application_status || '',
+            'تاريخ_العملية': formatDate(data.updated_at),
+            'المدفوع':        paidAmount,
+            'المتبقي':        remaining,
+            'الإجمالي':       totalAmount,
+            'رابط_الفاتورة': `invoice.html?applicationNo=${encodeURIComponent(applicationNo)}`
           }] : [],
           assignedTeacher: {
             teacherName: data.staff_users?.name || '',
@@ -587,7 +627,7 @@
 
       const { error } = await sb.from('applications').update({
         application_status: newStatus,
-        paid_amount:        newPaid || app.paid_amount || 0,
+        paid_amount:        newPaid > 0 ? newPaid : (app.paid_amount || 0),
         payment_status:     newStatus,
         updated_at:         new Date().toISOString()
       }).eq('id', app.id);
@@ -605,15 +645,17 @@
       if (!existingInv) {
         const { data: pkg } = await sb.from('packages')
           .select('price').eq('title', app.category).maybeSingle();
+        const finalAmount = total > 0 ? total : (pkg?.price || 0);
         await sb.from('invoices').insert({
           invoice_no:     d['رقم_الفاتورة'] || generateInvoiceNo(),
           application_id: app.id,
           application_no: app.application_no,
           student_name:   app.student_name,
           category:       app.category,
-          amount:         total || pkg?.price || 0
+          amount:         finalAmount
         });
-      } else if (total && total !== existingInv.amount) {
+      } else if (total > 0) {
+        // حدّث المبلغ إذا أُدخل
         await sb.from('invoices').update({ amount: total }).eq('id', existingInv.id);
       }
 
@@ -872,7 +914,7 @@
       id:              r.id,
       title:           r.title,
       description:     r.description,
-      price:           r.price,
+      price:           r.price || 0,
       order:           r.display_order,
       enabled:         r.enabled,
       registerEnabled: r.register_enabled,
@@ -894,14 +936,18 @@
       driveFolderId:  r.drive_folder_id,
       driveFolderUrl: r.drive_folder_url,
       youtubeLinks:   r.youtube_links || [],
-      media:          (r.year_media || []).map(m => ({
-        id:     m.id,
-        type:   m.type,
-        url:    m.url,
-        fileId: m.file_id,
-        caption: m.caption,
-        order:  m.display_order
-      }))
+      media:          (r.year_media || [])
+        .sort((a, b) => a.display_order - b.display_order)
+        .map(m => ({
+          id:      m.id,
+          type:    m.type,
+          url:     m.url,
+          fileId:  m.file_id,
+          title:   m.caption || '',
+          caption: m.caption || '',
+          order:   m.display_order,
+          enabled: true
+        }))
     };
   }
 
@@ -991,14 +1037,28 @@
   }
 
   function mapLog(r) {
+    const title  = r.new_status || r.action || '';
+    const desc   = [
+      r.notes   ? r.notes                              : '',
+      r.actor   ? `بواسطة: ${r.actor}`                 : '',
+      r.old_status && r.new_status
+        ? `${r.old_status} ← ${r.new_status}` : ''
+    ].filter(Boolean).join(' | ');
+
     return {
-      id:        r.id,
-      actor:     r.actor,
-      action:    r.action,
-      oldStatus: r.old_status,
-      newStatus: r.new_status,
-      notes:     r.notes,
-      date:      formatDate(r.created_at)
+      id:          r.id,
+      actor:       r.actor,
+      action:      r.action,
+      oldStatus:   r.old_status,
+      newStatus:   r.new_status,
+      notes:       r.notes,
+      date:        formatDate(r.created_at),
+      // حقول عربية يقرأها الكود القديم
+      'الحالة':    title,
+      'الوصف':     desc || r.action || '',
+      'بواسطة':    r.actor || '',
+      'التاريخ':   formatDate(r.created_at),
+      'نوع_الحركة': r.action || ''
     };
   }
 
