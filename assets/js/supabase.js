@@ -341,7 +341,12 @@
         );
       }
 
-      return { ok: true, data: rows.map(mapApplication) };
+      // جلب أسعار الفئات ودمجها
+      const { data: pkgs } = await sb.from('packages').select('title, price');
+      const priceMap = {};
+      (pkgs || []).forEach(p => { priceMap[p.title] = Number(p.price || 0); });
+
+      return { ok: true, data: rows.map(r => mapApplication(r, priceMap)) };
     },
 
     // ── getRegistrationApplications ───────────────────────────────────────────
@@ -546,23 +551,27 @@
         .select('id, guardian_phone, student_name, application_no, category, paid_amount')
         .eq('application_no', d['رقم_الطلب']).single();
 
-      // ── أنشئ فاتورة عند القبول المبدئي إذا لم تكن موجودة ────────────────
+      // ── أنشئ/حدّث فاتورة عند القبول المبدئي بسعر الفئة ────────────────────
       const { data: existingInv } = await sb.from('invoices')
-        .select('id').eq('application_no', d['رقم_الطلب']).maybeSingle();
+        .select('id, amount').eq('application_no', d['رقم_الطلب']).maybeSingle();
+
+      // جلب سعر الفئة دائماً
+      const { data: pkg } = await sb.from('packages')
+        .select('price').eq('title', app?.category || '').maybeSingle();
+      const pkgPrice = Number(pkg?.price || 0);
 
       if (!existingInv && app) {
-        // جلب سعر الفئة
-        const { data: pkg } = await sb.from('packages')
-          .select('price').eq('title', app.category).maybeSingle();
-
         await sb.from('invoices').insert({
           invoice_no:     generateInvoiceNo(),
           application_id: app.id,
           application_no: app.application_no,
           student_name:   app.student_name,
           category:       app.category,
-          amount:         pkg?.price || 0
+          amount:         pkgPrice
         });
+      } else if (existingInv && existingInv.amount === 0 && pkgPrice > 0) {
+        // حدّث الفاتورة بسعر الفئة إذا كانت 0
+        await sb.from('invoices').update({ amount: pkgPrice }).eq('id', existingInv.id);
       }
 
       // جلب رسالة القبول من الإعدادات — مع كل المتغيرات
@@ -1016,9 +1025,15 @@
     };
   }
 
-  function mapApplication(r) {
+  function mapApplication(r, priceMap = {}) {
     // الفاتورة - Supabase يرجع array من invoices
-    const inv = Array.isArray(r.invoices) ? (r.invoices[0] || {}) : (r.invoices || {});
+    const inv         = Array.isArray(r.invoices) ? (r.invoices[0] || {}) : (r.invoices || {});
+    const pkgPrice    = Number(priceMap[r.category] || 0);
+    // سعر الفاتورة: من الفاتورة إذا موجودة وغير 0، وإلا من سعر الفئة
+    const invoiceAmt  = Number(inv.amount || 0) || pkgPrice;
+    const paidAmt     = Number(r.paid_amount || 0);
+    const remaining   = invoiceAmt - paidAmt;
+
     return {
       id:                r.id,
       applicationNo:     r.application_no,
@@ -1045,12 +1060,14 @@
       introVideoUrl:     r.intro_video_path,
       assignedTeacherId: r.assigned_teacher_id,
       assignedTeacher:   r.staff_users?.name || '',
-      teacherName:       r.staff_users?.name || '',   // للكرت في admin
-      paymentStatus:     r.payment_status || r.application_status || '',
-      paidAmount:        r.paid_amount || 0,
-      invoiceNo:         inv.invoice_no  || '',
-      invoiceAmount:     inv.amount      || 0,
-      invoiceUrl:        inv.invoice_no  ? `invoice.html?applicationNo=${encodeURIComponent(r.application_no)}` : '',
+      teacherName:       r.staff_users?.name || '',
+      paymentStatus:     r.payment_status    || r.application_status || '',
+      paidAmount:        paidAmt,
+      remaining:         remaining,
+      packagePrice:      pkgPrice,
+      invoiceNo:         inv.invoice_no || '',
+      invoiceAmount:     invoiceAmt,
+      invoiceUrl:        inv.invoice_no ? `invoice.html?applicationNo=${encodeURIComponent(r.application_no)}` : '',
       submittedAt:       formatDate(r.submitted_at),
       updatedAt:         formatDate(r.updated_at)
     };
