@@ -16,7 +16,6 @@
   const SUPABASE_KEY = 'sb_publishable_IZQOeekcFcwleIILJmwf3A_TrjYWmnN';
 
   // ─── رابط Apps Script لرفع الملفات لـ Drive ──────────────────────────────
-  // ← ضع هنا رابط الـ Web App بعد النشر
   const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwADSBTPigKPc1vQyfwOFgzVNG0H84aEhYVNO-G8LubWoAMVmPEcuoE1pWP1Nr-BdJB/exec';
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -260,14 +259,18 @@
 
       await logAction(inserted.id, 'النظام', 'تم إرسال الطلب', null, 'تسجيل أولي', 'طلب جديد');
 
-      // ── أنشئ فاتورة فورية بسعر 0 (تُحدَّث عند تحديد السعر) ───────────────
+      // ── أنشئ فاتورة فورية بسعر الفئة ──────────────────────────────────────
+      const { data: pkg } = await sb.from('packages')
+        .select('price').eq('title', d['الفئة'] || '').maybeSingle();
+      const pkgPrice = Number(pkg?.price || 0);
+
       await sb.from('invoices').insert({
         invoice_no:     generateInvoiceNo(),
         application_id: inserted.id,
         application_no: applicationNo,
         student_name:   studentName,
         category:       d['الفئة'] || '',
-        amount:         0
+        amount:         pkgPrice
       });
 
       // ── 2. ارفع الملفات في الخلفية (لا تنتظر النتيجة) ────────────────────
@@ -562,16 +565,13 @@
         });
       }
 
-      // جلب رسالة القبول من الإعدادات
-      const { data: settingRow } = await sb.from('settings').select('value').eq('key', 'رسالة_قبول_أولي').maybeSingle();
-      let msg = (settingRow?.value || 'مرحباً، تم قبول طلبكم مبدئياً في برنامج Live English 🎉\nرقم الطلب: {رقم_الطلب}')
-        .replace('{اسم_الطالب}', app?.student_name || '')
-        .replace('{رقم_الطلب}', app?.application_no || '');
+      // جلب رسالة القبول من الإعدادات — مع كل المتغيرات
+      const waResult = await actions.getWhatsappMessage({
+        applicationNo: d['رقم_الطلب'],
+        type: 'acceptance'
+      });
 
-      const phone = (app?.guardian_phone || '').replace(/\D/g, '').replace(/^0/, '966');
-      const whatsappUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : null;
-
-      return { ok: true, data: { whatsappUrl } };
+      return { ok: true, data: { whatsappUrl: waResult.data?.whatsappUrl } };
     },
 
     // ── getWhatsappMessage ────────────────────────────────────────────────────
@@ -703,28 +703,42 @@
 
       return { ok: true };
     },
-    
 
     // ── getInvoiceByApplicationNo ─────────────────────────────────────────────
     async getInvoiceByApplicationNo({ applicationNo } = {}) {
-      const { data, error } = await sb.from('invoices')
+      // جلب الفاتورة
+      const { data: inv, error } = await sb.from('invoices')
         .select('*')
         .eq('application_no', applicationNo)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (error || !data) throw new Error('لا توجد فاتورة لهذا الطلب');
+      if (error || !inv) throw new Error('لا توجد فاتورة لهذا الطلب');
+
+      // جلب المبلغ المدفوع من الطلب
+      const { data: app } = await sb.from('applications')
+        .select('paid_amount, paid_history, application_status, payment_status')
+        .eq('application_no', applicationNo)
+        .maybeSingle();
+
+      const totalAmount = Number(inv.amount    || 0);
+      const paidAmount  = Number(app?.paid_amount || 0);
+      const remaining   = totalAmount - paidAmount;
 
       return {
         ok: true,
         data: {
-          invoiceNo:     data.invoice_no,
-          applicationNo: data.application_no,
-          studentName:   data.student_name,
-          category:      data.category,
-          amount:        data.amount,
-          createdAt:     formatDate(data.created_at)
+          invoiceNo:     inv.invoice_no,
+          applicationNo: inv.application_no,
+          studentName:   inv.student_name,
+          category:      inv.category,
+          amount:        totalAmount,
+          paidAmount,
+          remaining,
+          paymentStatus: app?.payment_status || app?.application_status || '',
+          paidHistory:   app?.paid_history   || [],
+          createdAt:     formatDate(inv.created_at)
         }
       };
     },
