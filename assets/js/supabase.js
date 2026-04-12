@@ -479,11 +479,17 @@
         const displayText = lines.length > 0 ? lines.join('\n') : (r.report_text || '');
         return {
           id:              r.id,
-          'المعلم':        r.teacher_name        || '',
-          'ملاحظات':       displayText,
-          'التوصيات':      r.recommendations     || '',
-          'التقدير':       r.grade               || r.edu_status || '',
-          'تاريخ_الإنشاء': formatDate(r.created_at),
+          'المعلم':           r.teacher_name        || '',
+          'ملاحظات':          r.notes               || displayText,
+          'التوصيات':         r.recommendations     || '',
+          'التقدير':          r.grade               || r.edu_status || '',
+          'تاريخ_الإنشاء':    formatDate(r.created_at),
+          'الحالة_التعليمية': r.edu_status          || '',
+          'مستوى_اللغة':      r.lang_level          || '',
+          'الحضور':           r.attendance          || '',
+          'السلوك':           r.behavior            || '',
+          'المهارات':         r.skills              || '',
+          // حقول إنجليزية للاستخدام في admin
           teacher:         r.teacher_name        || '',
           reportText:      displayText,
           eduStatus:       r.edu_status          || '',
