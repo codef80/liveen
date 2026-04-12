@@ -870,10 +870,10 @@
 
     async function openPaymentAction(applicationNo) {
       const row = currentRows.find(r => String(r.applicationNo) === String(applicationNo)) || {};
-      // جلب آخر بيانات السداد
-      const profile = profileCache[applicationNo];
-      const prevPaid    = toNum(row.paidAmount || profile?.application?.['المدفوع'] || 0);
-      const invoiceAmt  = toNum(row.invoiceAmount || profile?.application?.['مبلغ_الباقة'] || 0);
+
+      // المبلغ الإجمالي من الفاتورة أو سعر الفئة
+      const invoiceAmt  = toNum(row.invoiceAmount || row.packagePrice || 0);
+      const prevPaid    = toNum(row.paidAmount || 0);
       const remaining   = invoiceAmt - prevPaid;
 
       const { value: formValues } = await Swal.fire({
@@ -894,8 +894,9 @@
             </select>
             <label class="form-label">المبلغ المدفوع الآن</label>
             <input id="swalPaidNow" type="number" class="form-control mb-3" value="0" min="0">
-            <label class="form-label">المبلغ الإجمالي للفاتورة (اتركه 0 إذا لم يتغير)</label>
-            <input id="swalTotalAmount" type="number" class="form-control mb-3" value="${invoiceAmt || 0}" min="0">
+            <label class="form-label">المبلغ الإجمالي للفاتورة</label>
+            <input id="swalTotalAmount" type="number" class="form-control mb-3" value="${invoiceAmt}" min="0">
+            <div class="form-text text-muted mb-3" style="font-size:.86rem">يُحدَّث تلقائياً من سعر الفئة. غيّره فقط إذا احتجت.</div>
             <label class="form-label">ملاحظات</label>
             <textarea id="swalPayNote" class="form-control" rows="2"></textarea>
           </div>
@@ -912,7 +913,7 @@
       try {
         toast('info', 'جاري حفظ السداد...');
         const res = await fetch(API_URL, {
-          method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'savePaymentAction',
             actor:  currentUser?.name || 'مستخدم النظام',
@@ -927,7 +928,6 @@
         });
         const json = await res.json();
         if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
-        // امسح الكاش لهذا الطلب
         delete profileCache[applicationNo];
         await bootstrapDashboard(false);
         toast('success', 'تم حفظ السداد');
