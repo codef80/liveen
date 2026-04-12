@@ -429,19 +429,37 @@
         .map(mapLog);
 
       // ── تقارير المعلم ─────────────────────────────────────────────────────
-      const reports = (reportRows || []).map(r => ({
-        id:              r.id,
-        'المعلم':        r.teacher_name || '',
-        'ملاحظات':       r.report_text  || '',
-        'التوصيات':      r.report_text  || '',
-        'التقدير':       r.grade        || '',
-        'تاريخ_الإنشاء': formatDate(r.created_at),
-        // حقول منفصلة للعرض
-        teacher:    r.teacher_name || '',
-        reportText: r.report_text  || '',
-        grade:      r.grade        || '',
-        createdAt:  formatDate(r.created_at)
-      }));
+      const reports = (reportRows || []).map(r => {
+        const lines = [
+          r.edu_status      ? `الحالة التعليمية: ${r.edu_status}`   : '',
+          r.lang_level      ? `مستوى اللغة: ${r.lang_level}`         : '',
+          r.attendance      ? `الحضور: ${r.attendance}`               : '',
+          r.behavior        ? `السلوك: ${r.behavior}`                 : '',
+          r.skills          ? `المهارات: ${r.skills}`                 : '',
+          r.recommendations ? `التوصيات: ${r.recommendations}`         : '',
+          r.notes           ? `ملاحظات: ${r.notes}`                   : ''
+        ].filter(Boolean);
+        const displayText = lines.length > 0 ? lines.join('\n') : (r.report_text || '');
+        return {
+          id:              r.id,
+          'المعلم':        r.teacher_name        || '',
+          'ملاحظات':       displayText,
+          'التوصيات':      r.recommendations     || '',
+          'التقدير':       r.grade               || r.edu_status || '',
+          'تاريخ_الإنشاء': formatDate(r.created_at),
+          teacher:         r.teacher_name        || '',
+          reportText:      displayText,
+          eduStatus:       r.edu_status          || '',
+          langLevel:       r.lang_level          || '',
+          attendance:      r.attendance          || '',
+          behavior:        r.behavior            || '',
+          skills:          r.skills              || '',
+          recommendations: r.recommendations     || '',
+          notes:           r.notes               || '',
+          grade:           r.grade               || '',
+          createdAt:       formatDate(r.created_at)
+        };
+      });
 
       // ── بيانات الفاتورة ───────────────────────────────────────────────────
       const totalAmount = invoiceRow?.amount   || 0;
@@ -607,65 +625,84 @@
     // ── savePaymentAction ─────────────────────────────────────────────────────
     async savePaymentAction({ actor, data: d } = {}) {
       const { data: app } = await sb.from('applications')
-        .select('id,application_status,paid_amount,guardian_phone,student_name,application_no,category')
+        .select('id,application_status,paid_amount,paid_history,guardian_phone,student_name,application_no,category')
         .eq('application_no', d['رقم_الطلب']).single();
       if (!app) throw new Error('الطلب غير موجود');
 
       // ── ترجمة الإجراء إلى حالة الطلب ────────────────────────────────────
       const actionMap = {
-        'مكتمل السداد':        'مكتمل السداد',
-        'دفع جزئي':            'سداد جزئي',
-        'مؤجل':                'مؤجل السداد',
-        'بانتظار السداد':      'مقبول مبدئيًا وبانتظار السداد',
-        // دعم الحقل القديم حالة_الطلب أيضاً
-        'سداد جزئي':           'سداد جزئي',
-        'مؤجل السداد':         'مؤجل السداد'
+        'مكتمل السداد':              'مكتمل السداد',
+        'دفع جزئي':                  'سداد جزئي',
+        'مؤجل':                      'مؤجل السداد',
+        'بانتظار السداد':            'مقبول مبدئيًا وبانتظار السداد',
+        'سداد جزئي':                 'سداد جزئي',
+        'مؤجل السداد':               'مؤجل السداد'
       };
 
       const rawAction = d['الإجراء'] || d['حالة_الطلب'] || '';
       const newStatus = actionMap[rawAction] || rawAction;
-
       if (!newStatus) throw new Error('الإجراء غير محدد');
 
-      const newPaid = Number(d['المدفوع_الآن'] || d['المبلغ_المدفوع'] || 0);
-      const total   = Number(d['المبلغ_الإجمالي'] || 0);
-      const notes   = d['ملاحظات'] || '';
+      const addedNow  = Number(d['المدفوع_الآن'] || d['المبلغ_المدفوع'] || 0);
+      const notes     = d['ملاحظات'] || '';
+
+      // ── السداد التراكمي: اجمع على القديم ─────────────────────────────────
+      const prevPaid   = Number(app.paid_amount || 0);
+      const totalPaid  = prevPaid + addedNow;
+
+      // ── سجل تاريخ السداد ────────────────────────────────────────────────
+      const history    = Array.isArray(app.paid_history) ? app.paid_history : [];
+      if (addedNow > 0) {
+        history.push({
+          amount: addedNow,
+          action: rawAction,
+          actor:  actor || '',
+          date:   new Date().toISOString(),
+          notes
+        });
+      }
 
       const { error } = await sb.from('applications').update({
         application_status: newStatus,
-        paid_amount:        newPaid > 0 ? newPaid : (app.paid_amount || 0),
+        paid_amount:        totalPaid,
         payment_status:     newStatus,
+        paid_history:       history,
         updated_at:         new Date().toISOString()
       }).eq('id', app.id);
       if (error) throw error;
 
       await logAction(app.id, actor, 'عملية سداد', app.application_status, newStatus,
-        `الإجراء: ${rawAction} | المدفوع: ${newPaid} | ${notes}`);
+        `الإجراء: ${rawAction} | مدفوع الآن: ${addedNow} | الإجمالي المدفوع: ${totalPaid} | ${notes}`);
 
       // ── أنشئ/حدّث فاتورة ────────────────────────────────────────────────
       const { data: existingInv } = await sb.from('invoices')
-        .select('id, amount')
-        .eq('application_no', app.application_no)
-        .maybeSingle();
+        .select('id, amount').eq('application_no', app.application_no).maybeSingle();
+
+      // جلب سعر الفئة من packages
+      const { data: pkg } = await sb.from('packages')
+        .select('price').eq('title', app.category).maybeSingle();
+      const packagePrice = Number(pkg?.price || 0);
+
+      const invoiceTotal = Number(d['المبلغ_الإجمالي'] || 0) || packagePrice;
 
       if (!existingInv) {
-        const { data: pkg } = await sb.from('packages')
-          .select('price').eq('title', app.category).maybeSingle();
-        const finalAmount = total > 0 ? total : (pkg?.price || 0);
         await sb.from('invoices').insert({
           invoice_no:     d['رقم_الفاتورة'] || generateInvoiceNo(),
           application_id: app.id,
           application_no: app.application_no,
           student_name:   app.student_name,
           category:       app.category,
-          amount:         finalAmount
+          amount:         invoiceTotal
         });
-      } else if (total > 0) {
-        // حدّث المبلغ إذا أُدخل
-        await sb.from('invoices').update({ amount: total }).eq('id', existingInv.id);
+      } else if (invoiceTotal > 0 && invoiceTotal !== existingInv.amount) {
+        await sb.from('invoices').update({ amount: invoiceTotal }).eq('id', existingInv.id);
+      } else if (existingInv.amount === 0 && packagePrice > 0) {
+        // حدّث المبلغ من سعر الباقة إذا كان 0
+        await sb.from('invoices').update({ amount: packagePrice }).eq('id', existingInv.id);
       }
 
       return { ok: true };
+    },
     },
 
     // ── getInvoiceByApplicationNo ─────────────────────────────────────────────
@@ -808,7 +845,7 @@
       const { data: teacher } = await sb.from('staff_users')
         .select('id').eq('name', actor).maybeSingle();
 
-      // دمج كل حقول التقرير في نص واحد منظم
+      // نص موحد للعرض
       const reportText = [
         d['الحالة_التعليمية'] ? `الحالة التعليمية: ${d['الحالة_التعليمية']}` : '',
         d['مستوى_اللغة']      ? `مستوى اللغة: ${d['مستوى_اللغة']}`           : '',
@@ -821,11 +858,19 @@
       ].filter(Boolean).join('\n');
 
       const { error } = await sb.from('teacher_reports').insert({
-        application_id: app.id,
-        teacher_id:     teacher?.id   || null,
-        teacher_name:   d['المعلم']   || actor || '',
-        report_text:    reportText,
-        grade:          d['التقدير']  || d['الحالة_التعليمية'] || ''
+        application_id:  app.id,
+        teacher_id:      teacher?.id        || null,
+        teacher_name:    d['المعلم']        || actor || '',
+        report_text:     reportText,
+        grade:           d['التقدير']       || d['الحالة_التعليمية'] || '',
+        // حقول منفصلة
+        edu_status:      d['الحالة_التعليمية'] || '',
+        lang_level:      d['مستوى_اللغة']      || '',
+        attendance:      d['الحضور']            || '',
+        behavior:        d['السلوك']            || '',
+        skills:          d['المهارات']          || '',
+        recommendations: d['التوصيات']          || '',
+        notes:           d['ملاحظات']           || ''
       });
       if (error) throw error;
 
