@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -351,7 +349,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="assets/js/supabase.js"></script>
+  <script src="assets/js/supabase.js"></script>
   <script src="assets/js/config.js"></script>
   <script>
     const API_URL = window.APP_CONFIG.API_URL;
@@ -386,7 +384,7 @@
       },
       students: {
         title: 'الطلاب',
-        statuses: ['', 'مقبول مبدئيًا وبانتظار السداد', 'سداد جزئي', 'مؤجل السداد', 'مكتمل السداد', 'طالب نشط'],
+        statuses: ['', 'مكتمل السداد', 'طالب نشط', 'مقبول'],
         getUrl: (params) => `${API_URL}?action=getActiveStudents&${params.toString()}`,
         columns: ['رقم الطلب','الاسم','الفئة','الحالة','المعلم','ولي الأمر','الإجراءات']
       }
@@ -872,10 +870,21 @@
 
     async function openPaymentAction(applicationNo) {
       const row = currentRows.find(r => String(r.applicationNo) === String(applicationNo)) || {};
+      // جلب آخر بيانات السداد
+      const profile = profileCache[applicationNo];
+      const prevPaid    = toNum(row.paidAmount || profile?.application?.['المدفوع'] || 0);
+      const invoiceAmt  = toNum(row.invoiceAmount || profile?.application?.['مبلغ_الباقة'] || 0);
+      const remaining   = invoiceAmt - prevPaid;
+
       const { value: formValues } = await Swal.fire({
-        title: 'السداد الحالي',
+        title: 'السداد',
         html: `
           <div class="text-end">
+            ${invoiceAmt > 0 ? `<div style="background:#fff7da;border-radius:14px;padding:10px 14px;margin-bottom:14px;font-weight:800;color:#58595b">
+              الإجمالي: ${invoiceAmt.toLocaleString('en-US')} ر.س |
+              مدفوع: ${prevPaid.toLocaleString('en-US')} ر.س |
+              متبقي: <span style="color:${remaining > 0 ? '#dc3545':'#198754'}">${remaining.toLocaleString('en-US')} ر.س</span>
+            </div>` : ''}
             <label class="form-label">الإجراء</label>
             <select id="swalPayAction" class="form-select mb-3">
               <option value="بانتظار السداد">بانتظار السداد</option>
@@ -884,22 +893,19 @@
               <option value="مؤجل">مؤجل</option>
             </select>
             <label class="form-label">المبلغ المدفوع الآن</label>
-            <input id="swalPaidNow" type="number" class="form-control mb-3" value="0">
-            <label class="form-label">رقم الفاتورة</label>
-            <input id="swalInvoiceNo" type="text" class="form-control mb-3" value="${escapeAttr(row.invoiceNo || '')}">
-            <label class="form-label">رابط الفاتورة</label>
-            <input id="swalInvoiceUrl" type="text" class="form-control mb-3" value="${escapeAttr(row.invoiceUrl || buildInvoiceUrl(applicationNo))}">
+            <input id="swalPaidNow" type="number" class="form-control mb-3" value="0" min="0">
+            <label class="form-label">المبلغ الإجمالي للفاتورة (اتركه 0 إذا لم يتغير)</label>
+            <input id="swalTotalAmount" type="number" class="form-control mb-3" value="${invoiceAmt || 0}" min="0">
             <label class="form-label">ملاحظات</label>
-            <textarea id="swalPayNote" class="form-control" rows="3"></textarea>
+            <textarea id="swalPayNote" class="form-control" rows="2"></textarea>
           </div>
         `,
         focusConfirm: false, showCancelButton: true, confirmButtonText: 'حفظ', cancelButtonText: 'إلغاء', confirmButtonColor: '#fbc70d',
         preConfirm: () => ({
-          actionType: document.getElementById('swalPayAction').value,
-          paidNow: document.getElementById('swalPaidNow').value,
-          invoiceNo: document.getElementById('swalInvoiceNo').value,
-          invoiceUrl: document.getElementById('swalInvoiceUrl').value,
-          note: document.getElementById('swalPayNote').value
+          actionType:   document.getElementById('swalPayAction').value,
+          paidNow:      document.getElementById('swalPaidNow').value,
+          totalAmount:  document.getElementById('swalTotalAmount').value,
+          note:         document.getElementById('swalPayNote').value
         })
       });
       if (!formValues) return;
@@ -907,10 +913,22 @@
         toast('info', 'جاري حفظ السداد...');
         const res = await fetch(API_URL, {
           method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action:'savePaymentAction', actor: currentUser?.name || 'مستخدم النظام', data:{ 'رقم_الطلب': applicationNo, 'الإجراء': formValues.actionType, 'المدفوع_الآن': Number(formValues.paidNow || 0), 'رقم_الفاتورة': formValues.invoiceNo || '', 'رابط_الفاتورة': formValues.invoiceUrl || '', 'ملاحظات': formValues.note || '' } })
+          body: JSON.stringify({
+            action: 'savePaymentAction',
+            actor:  currentUser?.name || 'مستخدم النظام',
+            data: {
+              'رقم_الطلب':       applicationNo,
+              'الإجراء':         formValues.actionType,
+              'المدفوع_الآن':    Number(formValues.paidNow    || 0),
+              'المبلغ_الإجمالي': Number(formValues.totalAmount || 0),
+              'ملاحظات':         formValues.note || ''
+            }
+          })
         });
         const json = await res.json();
         if (!json.ok) throw new Error(json.message || 'فشل التنفيذ');
+        // امسح الكاش لهذا الطلب
+        delete profileCache[applicationNo];
         await bootstrapDashboard(false);
         toast('success', 'تم حفظ السداد');
       } catch (e) {
@@ -984,18 +1002,13 @@
 
     async function openGuardianWhatsapp(applicationNo) {
       try {
-        const profile = await getProfileData(applicationNo);
-        const app = profile.application || {};
-        const studentName = app['اسم_الطالب_الثلاثي'] || '';
-        const guardianPhone = String(app['جوال_ولي_الأمر'] || '').replace(/^0/, '966');
-        const message = applyTemplate((publicSettings['رسالة_تذكير_السداد'] || 'السلام عليكم، بخصوص الطالب {اسم_الطالب}').trim(), {
-          'اسم_الطالب': studentName,
-          'رقم_الطلب': app['رقم_الطلب'] || '',
-          'رابط_الفاتورة': app['رابط_الفاتورة'] || '',
-          'المتبقي': app['المتبقي'] || ''
-        });
-        if (!guardianPhone) throw new Error('رقم ولي الأمر غير متوفر');
-        window.open(`https://wa.me/${guardianPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        // استخدم API مع كل المتغيرات بدل القالب المحلي
+        const res = await fetch(`${API_URL}?action=getWhatsappMessage&applicationNo=${encodeURIComponent(applicationNo)}&type=reminder`);
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'تعذر تجهيز الرسالة');
+        const url = json.data?.whatsappUrl;
+        if (!url) throw new Error('رقم ولي الأمر غير متوفر');
+        window.open(url, '_blank');
         toast('success', 'تم فتح واتساب ولي الأمر');
       } catch (e) {
         console.error(e);
@@ -1009,7 +1022,23 @@
         const reports = profile.reports || [];
         await Swal.fire({
           title: 'تقارير المعلمين', width: 820,
-          html: reports.length ? `<div class="text-end" style="display:flex;flex-direction:column;gap:12px">${reports.map(r => `<div style="border:1px solid #efe7cf;border-radius:18px;padding:14px 16px;background:#fffaf0"><div style="font-weight:900;color:#58595b;margin-bottom:6px">${escapeHtml(r['المعلم'] || '')}</div><div style="color:#8a8b90;font-size:.92rem;margin-bottom:6px">${escapeHtml(r['تاريخ_الإنشاء'] || '')}</div><div style="color:#6f7075;line-height:1.9">${escapeHtml(r['ملاحظات'] || r['التوصيات'] || '—')}</div></div>`).join('')}</div>` : '<div class="empty-box">لا توجد تقارير تعليمية.</div>',
+          html: reports.length ? `<div class="text-end" style="display:flex;flex-direction:column;gap:12px">${reports.map(r => {
+            const fields = [
+              r.eduStatus      ? `<div><span style="font-weight:800;color:#58595b">الحالة التعليمية:</span> ${escapeHtml(r.eduStatus)}</div>`   : '',
+              r.langLevel      ? `<div><span style="font-weight:800;color:#58595b">مستوى اللغة:</span> ${escapeHtml(r.langLevel)}</div>`           : '',
+              r.attendance     ? `<div><span style="font-weight:800;color:#58595b">الحضور:</span> ${escapeHtml(r.attendance)}</div>`               : '',
+              r.behavior       ? `<div><span style="font-weight:800;color:#58595b">السلوك:</span> ${escapeHtml(r.behavior)}</div>`                 : '',
+              r.skills         ? `<div><span style="font-weight:800;color:#58595b">المهارات:</span> ${escapeHtml(r.skills)}</div>`                 : '',
+              r.recommendations? `<div><span style="font-weight:800;color:#58595b">التوصيات:</span> ${escapeHtml(r.recommendations)}</div>`         : '',
+              r.notes          ? `<div><span style="font-weight:800;color:#58595b">ملاحظات:</span> ${escapeHtml(r.notes)}</div>`                   : ''
+            ].filter(Boolean).join('');
+            const body = fields || `<div style="color:#6f7075">${escapeHtml(r['ملاحظات'] || '—')}</div>`;
+            return `<div style="border:1px solid #efe7cf;border-radius:18px;padding:14px 16px;background:#fffaf0">
+              <div style="font-weight:900;color:#58595b;margin-bottom:4px">${escapeHtml(r['المعلم'] || '')}</div>
+              <div style="color:#8a8b90;font-size:.88rem;margin-bottom:10px">${escapeHtml(r['تاريخ_الإنشاء'] || '')}</div>
+              <div style="color:#6f7075;line-height:2">${body}</div>
+            </div>`;
+          }).join('')}</div>` : '<div class="empty-box">لا توجد تقارير تعليمية.</div>',
           confirmButtonColor: '#fbc70d', confirmButtonText: 'إغلاق'
         });
         toast('success', 'تم عرض التقارير');
@@ -1096,10 +1125,19 @@
 
       const reports = (raw.reports || []).map(item => ({
         ...item,
-        'المعلم': item['المعلم'] || item.teacher || '',
-        'تاريخ_الإنشاء': item['تاريخ_الإنشاء'] || item.createdAt || '',
-        'ملاحظات': item['ملاحظات'] || item.notes || '',
-        'التوصيات': item['التوصيات'] || item.recommendations || ''
+        'المعلم':        item['المعلم']        || item.teacher      || '',
+        'تاريخ_الإنشاء': item['تاريخ_الإنشاء'] || item.createdAt    || '',
+        'ملاحظات':       item['ملاحظات']       || item.reportText   || item.notes || '',
+        'التوصيات':      item['التوصيات']      || item.recommendations || '',
+        // حقول منفصلة
+        eduStatus:       item.eduStatus        || '',
+        langLevel:       item.langLevel        || '',
+        attendance:      item.attendance       || '',
+        behavior:        item.behavior         || '',
+        skills:          item.skills           || '',
+        recommendations: item.recommendations  || item['التوصيات'] || '',
+        notes:           item.notes            || item['ملاحظات']  || '',
+        reportText:      item.reportText       || item['ملاحظات']  || ''
       }));
 
       let payments = (raw.payments || []).map(item => ({
@@ -1192,7 +1230,22 @@
               <div class="panel-title">السداد</div>
               ${payments.length ? `<div class="modal-box-list mb-4">${payments.map(item => `<div class="timeline-box"><div class="timeline-box-title">${escapeHtml(item['حالة_السداد'] || '')}</div><div class="timeline-box-meta">${escapeHtml(item['تاريخ_العملية'] || '')}</div><div class="timeline-box-text">المدفوع: ${formatMoney(item['المدفوع'])} — المتبقي: ${formatMoney(item['المتبقي'])}</div></div>`).join('')}</div>` : `<div class="empty-box mb-4">لا توجد سجلات سداد.</div>`}
               <div class="panel-title">التقارير التعليمية</div>
-              ${reports.length ? `<div class="modal-box-list">${reports.map(item => `<div class="timeline-box"><div class="timeline-box-title">${escapeHtml(item['المعلم'] || '')}</div><div class="timeline-box-meta">${escapeHtml(item['تاريخ_الإنشاء'] || '')}</div><div class="timeline-box-text">${escapeHtml(item['ملاحظات'] || item['التوصيات'] || '—')}</div></div>`).join('')}</div>` : `<div class="empty-box">لا توجد تقارير تعليمية.</div>`}
+              ${reports.length ? `<div class="modal-box-list">${reports.map(item => {
+                const fields = [
+                  item.eduStatus      ? `<div><span style="font-weight:800">الحالة التعليمية:</span> ${escapeHtml(item.eduStatus)}</div>`       : '',
+                  item.langLevel      ? `<div><span style="font-weight:800">مستوى اللغة:</span> ${escapeHtml(item.langLevel)}</div>`             : '',
+                  item.attendance     ? `<div><span style="font-weight:800">الحضور:</span> ${escapeHtml(item.attendance)}</div>`                 : '',
+                  item.behavior       ? `<div><span style="font-weight:800">السلوك:</span> ${escapeHtml(item.behavior)}</div>`                   : '',
+                  item.skills         ? `<div><span style="font-weight:800">المهارات:</span> ${escapeHtml(item.skills)}</div>`                   : '',
+                  item.recommendations? `<div><span style="font-weight:800">التوصيات:</span> ${escapeHtml(item.recommendations)}</div>`           : '',
+                  item.notes          ? `<div><span style="font-weight:800">ملاحظات:</span> ${escapeHtml(item.notes)}</div>`                     : ''
+                ].filter(Boolean).join('');
+                return `<div class="timeline-box">
+                  <div class="timeline-box-title">${escapeHtml(item['المعلم'] || '')}</div>
+                  <div class="timeline-box-meta">${escapeHtml(item['تاريخ_الإنشاء'] || '')}</div>
+                  <div class="timeline-box-text" style="line-height:2">${fields || escapeHtml(item['ملاحظات'] || '—')}</div>
+                </div>`;
+              }).join('')}</div>` : `<div class="empty-box">لا توجد تقارير تعليمية.</div>`}
             </div>
           </div>`;
         toast('success', 'تم عرض بطاقة الطالب');
