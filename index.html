@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -24,7 +25,7 @@
     }
 
     .home-hero{
-      padding:120px 0 72px;
+      padding:28px 0 48px;
       position:relative;
       overflow:hidden;
     }
@@ -394,6 +395,7 @@
     /* ── بنر الصور المتحركة ── */
     .banner-section{
       padding:0;
+      margin-top:72px; /* ارتفاع الهيدر */
       margin-bottom:0;
       background:#0a0a0a;
     }
@@ -611,10 +613,11 @@
     }
 
     @media (max-width:991.98px){
-      .home-hero{ padding-top:105px; }
+      .home-hero{ padding-top:20px; }
       .quick-links-grid{ grid-template-columns:1fr; }
     }
   </style>
+
 </head>
 <body>
 
@@ -625,37 +628,37 @@
         <span>Live English</span>
       </a>
 
-      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-        <i class="fa-solid fa-bars-staggered"></i>
-      </button>
+```
+  <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+    <i class="fa-solid fa-bars-staggered"></i>
+  </button>
 
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav ms-auto mb-3 mb-lg-0 align-items-lg-center gap-lg-2">
-          <li class="nav-item"><a class="nav-link" href="categories.html">الفئات</a></li>
-          <li class="nav-item"><a class="nav-link" href="years.html">عبر السنوات</a></li>
-          <li class="nav-item"><a class="nav-link" href="track.html">متابعة الطلب</a></li>
-          <li class="nav-item"><a class="nav-link" href="staff-login.html">دخول العاملين</a></li>
-        </ul>
+  <div class="collapse navbar-collapse" id="mainNav">
+    <ul class="navbar-nav ms-auto mb-3 mb-lg-0 align-items-lg-center gap-lg-2">
+      <li class="nav-item"><a class="nav-link" href="categories.html">الفئات</a></li>
+      <li class="nav-item"><a class="nav-link" href="years.html">عبر السنوات</a></li>
+      <li class="nav-item"><a class="nav-link" href="track.html">متابعة الطلب</a></li>
+      <li class="nav-item"><a class="nav-link" href="staff-login.html">دخول العاملين</a></li>
+    </ul>
 
-        <div class="d-flex flex-column flex-lg-row gap-2 ms-lg-3">
-          <a href="register.html" class="btn btn-le">
-            <i class="fa-solid fa-pen-to-square"></i>
-            ابدأ التسجيل
-          </a>
-        </div>
-      </div>
+    <div class="d-flex flex-column flex-lg-row gap-2 ms-lg-3">
+      <a href="register.html" class="btn btn-le">
+        <i class="fa-solid fa-pen-to-square"></i>
+        ابدأ التسجيل
+      </a>
     </div>
+  </div>
+</div>
+```
+
   </nav>
 
   <!-- بنر الصور المتحرك -->
+
   <section class="banner-section">
     <div class="banner-wrap" id="bannerWrap">
       <div class="banner-loading" id="bannerLoading">
         <span><i class="fa-solid fa-spinner fa-spin me-2"></i>جاري تحميل الصور...</span>
-      </div>
-      <div class="banner-arrows">
-        <button class="banner-arrow" id="bannerNext" aria-label="التالي"><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="banner-arrow" id="bannerPrev" aria-label="السابق"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
       <div class="banner-overlay"></div>
       <div class="banner-caption">
@@ -667,6 +670,7 @@
   </section>
 
   <!-- لايت بوكس -->
+
   <div class="lightbox-overlay" id="lightbox">
     <button class="lightbox-close" id="lightboxClose"><i class="fa-solid fa-xmark"></i></button>
     <button class="lightbox-nav prev" id="lightboxPrev"><i class="fa-solid fa-chevron-right"></i></button>
@@ -684,30 +688,33 @@
               التسجيل مفتوح الآن
             </div>
 
-            <h1 class="home-title">Live English</h1>
+```
+        <h1 class="home-title">Live English</h1>
 
-            <p class="home-desc">
-              برنامج صيفي لتعلّم اللغة الإنجليزية، بتجربة تسجيل منظمة، متابعة واضحة، واستعراض أنيق لمحتوى البرنامج عبر السنوات.
-            </p>
+        <p class="home-desc">
+          برنامج صيفي لتعلّم اللغة الإنجليزية، بتجربة تسجيل منظمة، متابعة واضحة، واستعراض أنيق لمحتوى البرنامج عبر السنوات.
+        </p>
 
-            <div class="home-actions">
-              <a href="register.html" class="btn btn-le btn-lg">
-                <i class="fa-solid fa-arrow-left-long"></i>
-                التسجيل الآن
-              </a>
-              <a href="categories.html" class="btn btn-le-dark btn-lg">
-                <i class="fa-solid fa-layer-group"></i>
-                الفئات
-              </a>
-              <a href="years.html" class="btn btn-le-outline btn-lg">
-                <i class="fa-solid fa-calendar-days"></i>
-                عبر السنوات
-              </a>
-            </div>
-          </div>
+        <div class="home-actions">
+          <a href="register.html" class="btn btn-le btn-lg">
+            <i class="fa-solid fa-arrow-left-long"></i>
+            التسجيل الآن
+          </a>
+          <a href="categories.html" class="btn btn-le-dark btn-lg">
+            <i class="fa-solid fa-layer-group"></i>
+            الفئات
+          </a>
+          <a href="years.html" class="btn btn-le-outline btn-lg">
+            <i class="fa-solid fa-calendar-days"></i>
+            عبر السنوات
+          </a>
         </div>
       </div>
     </div>
+  </div>
+</div>
+```
+
   </section>
 
   <section id="categoriesSection" class="section-padding">
@@ -719,15 +726,18 @@
         </div>
       </div>
 
-      <div class="row g-4" id="categoriesContainer">
-        <div class="col-12">
-          <div class="loading-box">
-            <div class="spinner-border loading-spinner" role="status"></div>
-            <div class="loading-text">جاري التحميل...</div>
-          </div>
-        </div>
+```
+  <div class="row g-4" id="categoriesContainer">
+    <div class="col-12">
+      <div class="loading-box">
+        <div class="spinner-border loading-spinner" role="status"></div>
+        <div class="loading-text">جاري التحميل...</div>
       </div>
     </div>
+  </div>
+</div>
+```
+
   </section>
 
   <section id="yearsSection" class="section-padding soft-section">
@@ -739,15 +749,18 @@
         </div>
       </div>
 
-      <div class="row g-4" id="yearsContainer">
-        <div class="col-12">
-          <div class="loading-box">
-            <div class="spinner-border loading-spinner" role="status"></div>
-            <div class="loading-text">جاري التحميل...</div>
-          </div>
-        </div>
+```
+  <div class="row g-4" id="yearsContainer">
+    <div class="col-12">
+      <div class="loading-box">
+        <div class="spinner-border loading-spinner" role="status"></div>
+        <div class="loading-text">جاري التحميل...</div>
       </div>
     </div>
+  </div>
+</div>
+```
+
   </section>
 
   <section class="section-padding">
@@ -777,27 +790,30 @@
           </a>
         </div>
 
-        <div class="quick-link-card">
-          <div class="quick-link-icon"><i class="fa-solid fa-timeline"></i></div>
-          <div class="quick-link-title">متابعة الطلب</div>
-          <div class="quick-link-text">ابحث بهوية الطالب أو ولي الأمر واطلع على حالة الطلب والخط الزمني والملاحظات.</div>
-          <a href="track.html" class="btn btn-le-dark">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            متابعة الطلب
-          </a>
-        </div>
-
-        <div class="quick-link-card">
-          <div class="quick-link-icon"><i class="fa-solid fa-user-lock"></i></div>
-          <div class="quick-link-title">دخول العاملين</div>
-          <div class="quick-link-text">دخول مخصص للعاملين للوصول إلى لوحة الإدارة ومراجعة الطلبات والمتابعة الداخلية.</div>
-          <a href="staff-login.html" class="btn btn-le-outline">
-            <i class="fa-solid fa-right-to-bracket"></i>
-            دخول العاملين
-          </a>
-        </div>
-      </div>
+```
+    <div class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-timeline"></i></div>
+      <div class="quick-link-title">متابعة الطلب</div>
+      <div class="quick-link-text">ابحث بهوية الطالب أو ولي الأمر واطلع على حالة الطلب والخط الزمني والملاحظات.</div>
+      <a href="track.html" class="btn btn-le-dark">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        متابعة الطلب
+      </a>
     </div>
+
+    <div class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-user-lock"></i></div>
+      <div class="quick-link-title">دخول العاملين</div>
+      <div class="quick-link-text">دخول مخصص للعاملين للوصول إلى لوحة الإدارة ومراجعة الطلبات والمتابعة الداخلية.</div>
+      <a href="staff-login.html" class="btn btn-le-outline">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        دخول العاملين
+      </a>
+    </div>
+  </div>
+</div>
+```
+
   </section>
 
   <footer class="footer-clean">
@@ -829,7 +845,13 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <script src="assets/js/supabase.js"></script>
+
   <script src="assets/js/config.js"></script>
 
   <script>
@@ -886,8 +908,8 @@
         dots.appendChild(dot);
       });
 
-      document.getElementById('bannerPrev').addEventListener('click', () => { goToBannerSlide((bannerCurrent - 1 + bannerImages.length) % bannerImages.length); resetBannerAuto(); });
-      document.getElementById('bannerNext').addEventListener('click', () => { goToBannerSlide((bannerCurrent + 1) % bannerImages.length); resetBannerAuto(); });
+      document.getElementById('bannerPrev')?.addEventListener('click', () => { goToBannerSlide((bannerCurrent - 1 + bannerImages.length) % bannerImages.length); resetBannerAuto(); });
+      document.getElementById('bannerNext')?.addEventListener('click', () => { goToBannerSlide((bannerCurrent + 1) % bannerImages.length); resetBannerAuto(); });
     }
 
     function goToBannerSlide(index) {
@@ -1185,5 +1207,6 @@
         .replace(/>/g, '&gt;');
     }
   </script>
+
 </body>
 </html>
