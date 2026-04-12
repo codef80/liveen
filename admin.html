@@ -384,7 +384,7 @@
       },
       students: {
         title: 'الطلاب',
-        statuses: ['', 'مكتمل السداد', 'طالب نشط', 'مقبول'],
+        statuses: ['', 'مقبول مبدئيًا وبانتظار السداد', 'سداد جزئي', 'مؤجل السداد', 'مكتمل السداد', 'طالب نشط', 'مقبول'],
         getUrl: (params) => `${API_URL}?action=getActiveStudents&${params.toString()}`,
         columns: ['رقم الطلب','الاسم','الفئة','الحالة','المعلم','ولي الأمر','الإجراءات']
       }
@@ -752,6 +752,7 @@
         <button class="action-pill icon-pay" onclick="assignTeacher('${appNo}')"><i class="fa-solid fa-user-plus"></i><span>تسكين</span></button>
         <button class="action-pill icon-wa" onclick="openGuardianWhatsapp('${appNo}')"><i class="fa-brands fa-whatsapp"></i><span>واتساب</span></button>
         <button class="action-pill icon-view" onclick="openTeacherReports('${appNo}')"><i class="fa-solid fa-file-lines"></i><span>تقارير</span></button>
+        <button class="action-pill icon-reject" onclick="cancelApplication('${appNo}')"><i class="fa-solid fa-ban"></i><span>إلغاء</span></button>
       </div>`;
     }
 
