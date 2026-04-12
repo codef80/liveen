@@ -308,20 +308,28 @@
     // ── getApplications ───────────────────────────────────────────────────────
     async getApplications({ stage, status, search, category } = {}) {
       let q = sb.from('applications')
-        .select('*, staff_users(id, name), invoices(invoice_no, amount)')
+        .select('*, staff_users(id, name)')
         .order('submitted_at', { ascending: false });
 
       if (stage === 'registration') {
         q = q.in('application_status', ['تسجيل أولي', 'تحت المراجعة']);
       } else if (stage === 'payment') {
-        // السداد: يشمل المقبولين وحالات السداد الجزئي فقط - مكتمل ينتقل للطلاب
+        // السداد: للمعالجة المالية فقط
         q = q.in('application_status', [
           'مقبول مبدئيًا وبانتظار السداد',
           'سداد جزئي',
           'مؤجل السداد'
         ]);
       } else if (stage === 'students') {
-        q = q.in('application_status', ['مكتمل السداد', 'طالب نشط', 'مقبول']);
+        // الطلاب: كل من قُبل (بغض النظر عن حالة السداد)
+        q = q.in('application_status', [
+          'مقبول مبدئيًا وبانتظار السداد',
+          'سداد جزئي',
+          'مؤجل السداد',
+          'مكتمل السداد',
+          'طالب نشط',
+          'مقبول'
+        ]);
       }
 
       if (status) q = q.eq('application_status', status);
@@ -335,18 +343,32 @@
         const s = search.toLowerCase();
         rows = rows.filter(r =>
           (r.application_no || '').toLowerCase().includes(s) ||
-          (r.student_name || '').toLowerCase().includes(s) ||
+          (r.student_name   || '').toLowerCase().includes(s) ||
           (r.student_identity || '').toLowerCase().includes(s) ||
           (r.guardian_phone || '').includes(s)
         );
       }
 
-      // جلب أسعار الفئات ودمجها
-      const { data: pkgs } = await sb.from('packages').select('title, price');
+      if (!rows.length) return { ok: true, data: [] };
+
+      // ── جلب الفواتير والأسعار بشكل منفصل ────────────────────────────────
+      const appNos = rows.map(r => r.application_no).filter(Boolean);
+
+      const [{ data: invRows }, { data: pkgs }] = await Promise.all([
+        sb.from('invoices')
+          .select('application_no, invoice_no, amount')
+          .in('application_no', appNos),
+        sb.from('packages').select('title, price')
+      ]);
+
+      // بناء خرائط للبحث السريع
+      const invMap   = {};
+      (invRows || []).forEach(i => { invMap[i.application_no] = i; });
+
       const priceMap = {};
       (pkgs || []).forEach(p => { priceMap[p.title] = Number(p.price || 0); });
 
-      return { ok: true, data: rows.map(r => mapApplication(r, priceMap)) };
+      return { ok: true, data: rows.map(r => mapApplication(r, priceMap, invMap)) };
     },
 
     // ── getRegistrationApplications ───────────────────────────────────────────
@@ -1025,9 +1047,9 @@
     };
   }
 
-  function mapApplication(r, priceMap = {}) {
-    // الفاتورة - Supabase يرجع array من invoices
-    const inv         = Array.isArray(r.invoices) ? (r.invoices[0] || {}) : (r.invoices || {});
+  function mapApplication(r, priceMap = {}, invMap = {}) {
+    // الفاتورة من الخريطة
+    const inv         = invMap[r.application_no] || {};
     const pkgPrice    = Number(priceMap[r.category] || 0);
     // سعر الفاتورة: من الفاتورة إذا موجودة وغير 0، وإلا من سعر الفئة
     const invoiceAmt  = Number(inv.amount || 0) || pkgPrice;
