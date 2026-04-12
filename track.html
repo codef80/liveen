@@ -212,6 +212,31 @@
       grid-column:1/-1;
     }
 
+    /* كروت السداد */
+    .payment-amounts{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .pay-card{border-radius:22px;padding:20px;text-align:center}
+    .pay-card.total{background:linear-gradient(135deg,#fbc70d,#ffe06f)}
+    .pay-card.paid{background:linear-gradient(135deg,#d4edda,#b8dfc4)}
+    .pay-card.remaining{background:linear-gradient(135deg,#f8d7da,#f5c2c7)}
+    .pay-card.remaining.zero{background:linear-gradient(135deg,#d4edda,#b8dfc4)}
+    .pay-card-label{font-weight:800;margin-bottom:8px;font-size:.9rem}
+    .pay-card.total .pay-card-label{color:#6f5600}
+    .pay-card.paid .pay-card-label{color:#0f5132}
+    .pay-card.remaining .pay-card-label,.pay-card.remaining.zero .pay-card-label{color:#842029}
+    .pay-card.remaining.zero .pay-card-label{color:#0f5132}
+    .pay-card-value{font-size:1.55rem;font-weight:900;color:#58595b}
+
+    .history-item{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,249,229,.90));border:1px solid #efe7cf;border-radius:16px;padding:12px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .history-amount{font-weight:900;color:#198754;font-size:1.05rem}
+    .history-meta{color:#8a8b90;font-size:.86rem}
+
+    @media(max-width:767.98px){.payment-amounts{grid-template-columns:1fr}}
+
     .report-label{
       color:#7b7c80;
       font-weight:700;
@@ -423,12 +448,22 @@
               <ul class="nav nav-tabs custom-tabs" id="trackTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                   <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal-pane" type="button" role="tab">
-                    المعلومات الشخصية
+                    <i class="fa-solid fa-user me-1"></i> المعلومات الشخصية
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment-pane" type="button" role="tab">
+                    <i class="fa-solid fa-wallet me-1"></i> السداد
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline-pane" type="button" role="tab">
+                    <i class="fa-solid fa-timeline me-1"></i> الخط الزمني
                   </button>
                 </li>
                 <li class="nav-item" role="presentation">
                   <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-pane" type="button" role="tab">
-                    التقارير
+                    <i class="fa-solid fa-file-lines me-1"></i> التقارير
                   </button>
                 </li>
               </ul>
@@ -436,11 +471,14 @@
               <div class="tab-content">
                 <div class="tab-pane fade show active" id="personal-pane" role="tabpanel">
                   <div class="info-grid" id="personalInfoGrid"></div>
+                </div>
 
-                  <div class="mt-4">
-                    <div class="panel-title" style="font-size:1.05rem;">الخط الزمني</div>
-                    <div class="timeline-list" id="timelineList"></div>
-                  </div>
+                <div class="tab-pane fade" id="payment-pane" role="tabpanel">
+                  <div id="paymentContent"></div>
+                </div>
+
+                <div class="tab-pane fade" id="timeline-pane" role="tabpanel">
+                  <div class="timeline-list mt-2" id="timelineList"></div>
                 </div>
 
                 <div class="tab-pane fade" id="reports-pane" role="tabpanel">
@@ -496,8 +534,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="assets/js/supabase.js"></script>
   <script src="assets/js/config.js"></script>
 
   <script>
@@ -585,18 +621,28 @@
     }
 
     async function findProfile(applicationNo, studentIdentity) {
+      // بحث برقم الطلب
       if (applicationNo) {
         const res = await fetch(`${API_URL}?action=getStudentProfile&applicationNo=${encodeURIComponent(applicationNo)}`);
         const json = await res.json();
         if (json.ok) return json.data || {};
+        throw new Error(json.message || 'لم يتم العثور على الطلب');
       }
 
-      const appsRes = await fetch(`${API_URL}?action=getApplications&search=${encodeURIComponent(studentIdentity)}&includeRejected=true&sortDir=desc`);
-      const appsJson = await appsRes.json();
-      const rows = appsJson?.data || [];
+      // بحث بالهوية — نبحث في كل المراحل
+      const searches = await Promise.all([
+        fetch(`${API_URL}?action=getRegistrationApplications&search=${encodeURIComponent(studentIdentity)}`).then(r => r.json()),
+        fetch(`${API_URL}?action=getPaymentStageApplications&search=${encodeURIComponent(studentIdentity)}`).then(r => r.json()),
+        fetch(`${API_URL}?action=getActiveStudents&search=${encodeURIComponent(studentIdentity)}`).then(r => r.json()),
+        fetch(`${API_URL}?action=getRejectedApplications&search=${encodeURIComponent(studentIdentity)}`).then(r => r.json())
+      ]);
 
-      const found = rows.find(r => String(r.studentIdentity || '') === String(studentIdentity || ''));
-      if (!found) throw new Error('لم يتم العثور على طلب مطابق.');
+      const allRows = searches.flatMap(j => j?.data || []);
+      const found = allRows.find(r =>
+        String(r.studentIdentity || '').trim() === String(studentIdentity).trim()
+      );
+
+      if (!found) throw new Error('لم يتم العثور على طلب مطابق لهذه الهوية.');
 
       const profileRes = await fetch(`${API_URL}?action=getStudentProfile&applicationNo=${encodeURIComponent(found.applicationNo)}`);
       const profileJson = await profileRes.json();
@@ -606,144 +652,174 @@
     }
 
     function renderProfile(data) {
-      const app = data.application || {};
-      const student = data.student || {};
-      const payments = data.payments || [];
-      const timeline = data.timeline || [];
-      const reports = data.reports || [];
+      const app      = data.application || {};
+      const student  = data.student     || {};
+      const payments = data.payments    || [];
+      const timeline = data.timeline    || [];
+      const reports  = data.reports     || [];
+      const invoice  = data.invoice     || {};
 
-      const latestPayment = payments.length ? payments[0] : {};
-      const paymentStatus = app['حالة_السداد'] || latestPayment['حالة_السداد'] || '—';
-      const invoiceUrl = latestPayment['رابط_الفاتورة'] || app['رابط_الفاتورة'] || '';
-      const paid = latestPayment['المدفوع'] || app['المدفوع'] || 0;
-      const remaining = latestPayment['المتبقي'] || app['المتبقي'] || 0;
+      // ── بيانات السداد ──────────────────────────────────────────────────────
+      const totalAmount   = Number(app['مبلغ_الباقة'] || invoice['الإجمالي'] || 0);
+      const paidAmount    = Number(app['المدفوع']      || 0);
+      const remaining     = Number(app['المتبقي']      !== undefined ? app['المتبقي'] : (totalAmount - paidAmount));
+      const paymentStatus = app['حالة_السداد'] || app['حالة_الطلب'] || '—';
+      const invoiceUrl    = app['رابط_الفاتورة'] || (app['رقم_الطلب'] ? `invoice.html?applicationNo=${encodeURIComponent(app['رقم_الطلب'])}` : '');
+      const paidHistory   = invoice['paidHistory'] || data.paidHistory || [];
 
+      // ── تبويب المعلومات الشخصية ────────────────────────────────────────────
       document.getElementById('personalInfoGrid').innerHTML = `
         <div class="info-item">
           <div class="info-label">رقم الطلب</div>
           <div class="info-value">${escapeHtml(app['رقم_الطلب'] || '—')}</div>
         </div>
-
         <div class="info-item">
-          <div class="info-label">رقم الطالب</div>
+          <div class="info-label">هوية الطالب</div>
           <div class="info-value">${escapeHtml(student['هوية_الطالب'] || app['هوية_الطالب'] || '—')}</div>
         </div>
-
         <div class="info-item">
           <div class="info-label">اسم الطالب</div>
           <div class="info-value">${escapeHtml(app['اسم_الطالب_الثلاثي'] || student['اسم_الطالب_الثلاثي'] || '—')}</div>
         </div>
-
         <div class="info-item">
           <div class="info-label">الفئة</div>
           <div class="info-value">${escapeHtml(app['الفئة'] || student['الفئة'] || '—')}</div>
         </div>
-
         <div class="info-item">
-          <div class="info-label">حالة السداد</div>
-          <div class="info-value">${renderPaymentStatus(paymentStatus)}</div>
+          <div class="info-label">حالة الطلب</div>
+          <div class="info-value">${renderStatusPill(app['حالة_الطلب'] || '')}</div>
         </div>
-
-        <div class="info-item">
-          <div class="info-label">المدفوع</div>
-          <div class="info-value">${formatMoney(paid)}</div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-label">المتبقي</div>
-          <div class="info-value">${formatMoney(remaining)}</div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-label">رابط الفاتورة</div>
-          <div class="info-value">
-            ${
-              invoiceUrl
-                ? `<a href="${escapeAttr(invoiceUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-le-outline btn-sm">
-                     <i class="fa-solid fa-up-right-from-square"></i>
-                     فتح الفاتورة
-                   </a>`
-                : '—'
-            }
-          </div>
-        </div>
-
         <div class="info-item">
           <div class="info-label">جوال ولي الأمر</div>
           <div class="info-value">${escapeHtml(student['جوال_ولي_الأمر'] || app['جوال_ولي_الأمر'] || '—')}</div>
         </div>
-
         <div class="info-item">
           <div class="info-label">مدينة السكن</div>
           <div class="info-value">${escapeHtml(student['مدينة_السكن'] || '—')}</div>
         </div>
-
         <div class="info-item">
           <div class="info-label">المدرسة</div>
           <div class="info-value">${escapeHtml(student['المدرسة'] || '—')}</div>
         </div>
-
         <div class="info-item">
           <div class="info-label">الصف الدراسي</div>
           <div class="info-value">${escapeHtml(student['الصف_الدراسي'] || '—')}</div>
         </div>
+        <div class="info-item">
+          <div class="info-label">رقم الجواز</div>
+          <div class="info-value">${escapeHtml(student['رقم_الجواز'] || app['رقم_الجواز'] || '—')}</div>
+        </div>
       `;
 
+      // ── تبويب السداد ───────────────────────────────────────────────────────
+      document.getElementById('paymentContent').innerHTML = `
+        <div class="payment-amounts mt-2">
+          <div class="pay-card total">
+            <div class="pay-card-label">إجمالي الفاتورة</div>
+            <div class="pay-card-value">${formatMoney(totalAmount)}</div>
+          </div>
+          <div class="pay-card paid">
+            <div class="pay-card-label">المبلغ المدفوع</div>
+            <div class="pay-card-value">${formatMoney(paidAmount)}</div>
+          </div>
+          <div class="pay-card remaining ${remaining <= 0 ? 'zero' : ''}">
+            <div class="pay-card-label">المبلغ المتبقي</div>
+            <div class="pay-card-value">${formatMoney(remaining)}</div>
+          </div>
+        </div>
+
+        <div class="info-grid mb-3">
+          <div class="info-item">
+            <div class="info-label">حالة السداد</div>
+            <div class="info-value">${renderPaymentStatus(paymentStatus)}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">الفاتورة</div>
+            <div class="info-value">
+              ${invoiceUrl
+                ? `<a href="${escapeAttr(invoiceUrl)}" target="_blank" class="btn btn-le-outline btn-sm"><i class="fa-solid fa-file-invoice"></i> فتح الفاتورة</a>`
+                : '—'}
+            </div>
+          </div>
+        </div>
+
+        ${paidHistory.length ? `
+          <div style="font-weight:900;color:#58595b;margin-bottom:10px">سجل الدفعات</div>
+          ${paidHistory.map(h => `
+            <div class="history-item">
+              <div>
+                <div style="font-weight:800;color:#58595b">${escapeHtml(h.action || 'دفعة')}</div>
+                <div class="history-meta">${escapeHtml(h.actor || '')} — ${escapeHtml(formatDateAr(h.date))}</div>
+                ${h.notes ? `<div class="history-meta">${escapeHtml(h.notes)}</div>` : ''}
+              </div>
+              <div class="history-amount">+ ${formatMoney(h.amount)}</div>
+            </div>
+          `).join('')}
+        ` : payments.length ? `
+          ${payments.map(p => `
+            <div class="history-item">
+              <div>
+                <div style="font-weight:800;color:#58595b">${escapeHtml(p['حالة_السداد'] || '')}</div>
+                <div class="history-meta">${escapeHtml(p['تاريخ_العملية'] || '')}</div>
+              </div>
+              <div>
+                <div style="font-weight:800;color:#198754">${formatMoney(p['المدفوع'])}</div>
+              </div>
+            </div>
+          `).join('')}
+        ` : '<div class="text-muted py-3 text-center">لا توجد سجلات سداد.</div>'}
+      `;
+
+      // ── تبويب الخط الزمني ──────────────────────────────────────────────────
       document.getElementById('timelineList').innerHTML = timeline.length
         ? timeline.map(item => `
             <div class="timeline-item">
-              <div class="timeline-title">${escapeHtml(item['الحالة'] || '—')}</div>
-              <div class="timeline-date">${escapeHtml(item['التاريخ'] || '—')}</div>
-              <div class="timeline-text">${escapeHtml(item['الوصف'] || '—')}</div>
+              <div class="timeline-title">${escapeHtml(item['الحالة'] || item.action || '—')}</div>
+              <div class="timeline-date">${escapeHtml(item['التاريخ'] || item.date || '—')}</div>
+              <div class="timeline-text">${escapeHtml(item['الوصف'] || item.notes || '—')}</div>
             </div>
           `).join('')
-        : '<div class="text-muted">لا يوجد خط زمني حاليًا.</div>';
+        : '<div class="text-muted py-3 text-center">لا يوجد خط زمني حاليًا.</div>';
 
+      // ── تبويب التقارير ─────────────────────────────────────────────────────
       document.getElementById('reportsList').innerHTML = reports.length
         ? reports.map(r => `
             <div class="report-card">
-              <div class="report-title">${escapeHtml(r['المعلم'] || 'المعلم')}</div>
-              <div class="report-meta">${escapeHtml(r['تاريخ_الإنشاء'] || '—')}</div>
-
+              <div class="report-title">${escapeHtml(r['المعلم'] || r.teacher || 'المعلم')}</div>
+              <div class="report-meta">${escapeHtml(r['تاريخ_الإنشاء'] || r.createdAt || '—')}</div>
               <div class="report-grid">
                 <div class="report-box">
                   <div class="report-label">الحالة التعليمية</div>
-                  <div class="report-value">${escapeHtml(r['الحالة_التعليمية'] || '—')}</div>
+                  <div class="report-value">${escapeHtml(r['الحالة_التعليمية'] || r.eduStatus || '—')}</div>
                 </div>
-
                 <div class="report-box">
                   <div class="report-label">مستوى اللغة</div>
-                  <div class="report-value">${escapeHtml(r['مستوى_اللغة'] || '—')}</div>
+                  <div class="report-value">${escapeHtml(r['مستوى_اللغة'] || r.langLevel || '—')}</div>
                 </div>
-
                 <div class="report-box">
                   <div class="report-label">الحضور</div>
-                  <div class="report-value">${escapeHtml(r['الحضور'] || '—')}</div>
+                  <div class="report-value">${escapeHtml(r['الحضور'] || r.attendance || '—')}</div>
                 </div>
-
                 <div class="report-box">
                   <div class="report-label">السلوك</div>
-                  <div class="report-value">${escapeHtml(r['السلوك'] || '—')}</div>
+                  <div class="report-value">${escapeHtml(r['السلوك'] || r.behavior || '—')}</div>
                 </div>
-
                 <div class="report-box full">
                   <div class="report-label">المهارات</div>
-                  <div class="report-value">${escapeHtml(r['المهارات'] || '—')}</div>
+                  <div class="report-value">${escapeHtml(r['المهارات'] || r.skills || '—')}</div>
                 </div>
-
                 <div class="report-box full">
                   <div class="report-label">التوصيات</div>
-                  <div class="report-value">${escapeHtml(r['التوصيات'] || '—')}</div>
+                  <div class="report-value">${escapeHtml(r['التوصيات'] || r.recommendations || '—')}</div>
                 </div>
-
                 <div class="report-box full">
                   <div class="report-label">ملاحظات</div>
-                  <div class="report-value">${escapeHtml(r['ملاحظات'] || '—')}</div>
+                  <div class="report-value">${escapeHtml(r['ملاحظات'] || r.notes || '—')}</div>
                 </div>
               </div>
             </div>
           `).join('')
-        : '<div class="text-muted">لا توجد تقارير تعليمية حاليًا.</div>';
+        : '<div class="text-muted py-3 text-center">لا توجد تقارير تعليمية حاليًا.</div>';
 
       document.getElementById('emptyState').classList.add('d-none');
       document.getElementById('resultContent').classList.remove('d-none');
@@ -754,14 +830,29 @@
       let cls = 'pill-default';
       if (s.includes('مكتمل')) cls = 'pill-success';
       else if (s.includes('بانتظار') || s.includes('جزئي') || s.includes('مؤجل')) cls = 'pill-pending';
-      else if (s.includes('مرفوض')) cls = 'pill-danger';
+      else if (s.includes('مرفوض') || s.includes('منسحب')) cls = 'pill-danger';
+      return `<span class="status-pill ${cls}">${escapeHtml(s || '—')}</span>`;
+    }
 
+    function renderStatusPill(status) {
+      const s = String(status || '');
+      let cls = 'pill-default';
+      if (['مكتمل السداد','طالب نشط','مقبول'].includes(s)) cls = 'pill-success';
+      else if (['تسجيل أولي','تحت المراجعة'].includes(s)) cls = 'pill-pending';
+      else if (['مقبول مبدئيًا وبانتظار السداد','سداد جزئي','مؤجل السداد'].includes(s)) cls = 'pill-pending';
+      else if (['مرفوض','منسحب'].includes(s)) cls = 'pill-danger';
       return `<span class="status-pill ${cls}">${escapeHtml(s || '—')}</span>`;
     }
 
     function formatMoney(value) {
       const n = Number(value || 0);
       return `${Number.isFinite(n) ? n.toLocaleString('en-US') : '0'} ر.س`;
+    }
+
+    function formatDateAr(iso) {
+      if (!iso) return '';
+      try { return new Date(iso).toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' }); }
+      catch { return iso; }
     }
 
     function setLoading(flag) {
