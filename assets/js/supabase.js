@@ -17,7 +17,7 @@
 
   // ─── رابط Apps Script لرفع الملفات لـ Drive ──────────────────────────────
   // ← ضع هنا رابط الـ Web App بعد النشر
-  const DRIVE_UPLOAD_URL = 'ضع_رابط_Apps_Script_هنا';
+  const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwADSBTPigKPc1vQyfwOFgzVNG0H84aEhYVNO-G8LubWoAMVmPEcuoE1pWP1Nr-BdJB/exec';
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
