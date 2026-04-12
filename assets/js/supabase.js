@@ -260,9 +260,7 @@
       await logAction(inserted.id, 'النظام', 'تم إرسال الطلب', null, 'تسجيل أولي', 'طلب جديد');
 
       // ── أنشئ فاتورة فورية بسعر الفئة ──────────────────────────────────────
-      const { data: pkg } = await sb.from('packages')
-        .select('price').eq('title', d['الفئة'] || '').maybeSingle();
-      const pkgPrice = Number(pkg?.price || 0);
+      const pkgPrice = await getPackagePrice(d['الفئة']);
 
       await sb.from('invoices').insert({
         invoice_no:     generateInvoiceNo(),
@@ -365,8 +363,17 @@
       const invMap   = {};
       (invRows || []).forEach(i => { invMap[i.application_no] = i; });
 
+      // priceMap يدعم الاسم مع وبدون "ال" للمرونة
       const priceMap = {};
-      (pkgs || []).forEach(p => { priceMap[p.title] = Number(p.price || 0); });
+      (pkgs || []).forEach(p => {
+        const title = String(p.title || '');
+        const price = Number(p.price || 0);
+        priceMap[title] = price;
+        // أضف نسخة بدون "ال" في البداية
+        if (title.startsWith('ال')) priceMap[title.slice(2)] = price;
+        // أضف نسخة مع "ال" في البداية
+        else priceMap['ال' + title] = price;
+      });
 
       return { ok: true, data: rows.map(r => mapApplication(r, priceMap, invMap)) };
     },
@@ -577,10 +584,8 @@
       const { data: existingInv } = await sb.from('invoices')
         .select('id, amount').eq('application_no', d['رقم_الطلب']).maybeSingle();
 
-      // جلب سعر الفئة دائماً
-      const { data: pkg } = await sb.from('packages')
-        .select('price').eq('title', app?.category || '').maybeSingle();
-      const pkgPrice = Number(pkg?.price || 0);
+      // جلب سعر الفئة بمرونة
+      const pkgPrice = await getPackagePrice(app?.category);
 
       if (!existingInv && app) {
         await sb.from('invoices').insert({
@@ -710,10 +715,7 @@
         .select('id, amount').eq('application_no', app.application_no).maybeSingle();
 
       // جلب سعر الفئة من packages
-      const { data: pkg } = await sb.from('packages')
-        .select('price').eq('title', app.category).maybeSingle();
-      const packagePrice = Number(pkg?.price || 0);
-
+      const packagePrice = await getPackagePrice(app.category);
       const invoiceTotal = Number(d['المبلغ_الإجمالي'] || 0) || packagePrice;
 
       if (!existingInv) {
@@ -728,7 +730,6 @@
       } else if (invoiceTotal > 0 && invoiceTotal !== existingInv.amount) {
         await sb.from('invoices').update({ amount: invoiceTotal }).eq('id', existingInv.id);
       } else if (existingInv.amount === 0 && packagePrice > 0) {
-        // حدّث المبلغ من سعر الباقة إذا كان 0
         await sb.from('invoices').update({ amount: packagePrice }).eq('id', existingInv.id);
       }
 
@@ -1164,6 +1165,27 @@
       'التاريخ':   formatDate(r.created_at),
       'نوع_الحركة': r.action || ''
     };
+  }
+
+  // ─── جلب سعر الفئة مع دعم الاسم مع/بدون "ال" ──────────────────────────
+  async function getPackagePrice(categoryTitle) {
+    const title = String(categoryTitle || '').trim();
+    if (!title) return 0;
+
+    // جرب الاسم كما هو أولاً
+    let { data } = await sb.from('packages').select('price').eq('title', title).maybeSingle();
+    if (data) return Number(data.price || 0);
+
+    // جرب بدون "ال"
+    if (title.startsWith('ال')) {
+      ({ data } = await sb.from('packages').select('price').eq('title', title.slice(2)).maybeSingle());
+      if (data) return Number(data.price || 0);
+    } else {
+      // جرب مع "ال"
+      ({ data } = await sb.from('packages').select('price').eq('title', 'ال' + title).maybeSingle());
+      if (data) return Number(data.price || 0);
+    }
+    return 0;
   }
 
   // ─── بناء رابط عرض Drive مباشر (بدون طلب إذن) ──────────────────────────
