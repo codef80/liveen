@@ -577,20 +577,11 @@
       color:#58595b;
       border:1px solid rgba(88,89,91,.18);
       font-weight:800;
-      border-radius:14px;
-      padding:.65rem 1.1rem;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      transition:.25s ease;
-      text-decoration:none;
     }
     .btn-grey:hover{
       background:rgba(88,89,91,.18);
       color:#3a3b3d;
-      transform:translateY(-2px);
     }
-    .btn-grey.btn-lg{ padding:.8rem 1.4rem; font-size:1rem; border-radius:16px; }
 
     /* ── فريق النجاح ── */
     .team-section{ padding:64px 0; }
@@ -725,7 +716,7 @@
             <i class="fa-solid fa-arrow-left-long"></i>
             التسجيل الآن
           </a>
-          <a href="categories.html" class="btn btn-le btn-lg">
+          <a href="categories.html" class="btn btn-le-dark btn-lg">
             <i class="fa-solid fa-layer-group"></i>
             الفئات
           </a>
@@ -793,7 +784,7 @@
       <div class="section-head">
         <div>
           <h2 class="section-title-home">فريق النجاح</h2>
-          <p class="section-note-home">الفريق المتميز خلف نجاح Live English.</p>
+          <p class="section-note-home">الفريق المتميز خلف نجاح برنامج Live English.</p>
         </div>
       </div>
       <div class="team-grid" id="teamGrid">
@@ -805,6 +796,8 @@
   </section>
 
   <section class="section-padding">
+    <div class="container">
+      <div class="quick-links-grid">
         <div class="quick-link-card">
           <div class="quick-link-icon"><i class="fa-solid fa-pen-ruler"></i></div>
           <div class="quick-link-title">بوابة التسجيل</div>
@@ -820,7 +813,7 @@
       <div class="quick-link-icon"><i class="fa-solid fa-timeline"></i></div>
       <div class="quick-link-title">متابعة الطلب</div>
       <div class="quick-link-text">ابحث بهوية الطالب أو ولي الأمر واطلع على حالة الطلب والخط الزمني والملاحظات.</div>
-      <a href="track.html" class="btn btn-le">
+      <a href="track.html" class="btn btn-le-dark">
         <i class="fa-solid fa-magnifying-glass"></i>
         متابعة الطلب
       </a>
@@ -1072,7 +1065,7 @@
               </div>
               <div class="category-title">${escapeHtml(item.title || '')}</div>
               <div class="category-text">${escapeHtml(item.description || '')}</div>
-              <span class="btn btn-le-outline">
+              <span class="btn btn-le">
                 <i class="fa-solid fa-arrow-left-long"></i>
                 عرض الفئة
               </span>
@@ -1125,7 +1118,7 @@
                   </div>
                   <div class="year-title-home">${escapeHtml(item.title || ('Live English ' + item.year))}</div>
                   <div class="year-desc-home">${escapeHtml(item.description || '')}</div>
-                  <span class="btn btn-le-outline w-100">
+                  <span class="btn btn-le w-100">
                     <i class="fa-solid fa-images"></i>
                     عرض السنة
                   </span>
