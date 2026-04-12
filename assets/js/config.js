@@ -53,7 +53,13 @@
       // طلب GET – البيانات في query string
       const qs = url.includes('?') ? new URLSearchParams(url.split('?')[1]) : new URLSearchParams();
       action = qs.get('action') || '';
-      qs.forEach((v, k) => { params[k] = v; });
+      qs.forEach((v, k) => {
+        // حوّل القيم النصية لأنواعها الصحيحة
+        if (v === 'true')  params[k] = true;
+        else if (v === 'false') params[k] = false;
+        else if (v !== '' && !isNaN(Number(v)) && k !== 'applicationNo' && k !== 'search') params[k] = Number(v);
+        else params[k] = v;
+      });
     }
 
     if (!action) {
