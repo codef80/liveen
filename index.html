@@ -571,20 +571,41 @@
       font-size:1rem;
     }
 
+    /* زر رصاصي مخفف */
+    .btn-grey{
+      background:rgba(88,89,91,.10);
+      color:#58595b;
+      border:1px solid rgba(88,89,91,.18);
+      font-weight:800;
+      border-radius:14px;
+      padding:.65rem 1.1rem;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition:.25s ease;
+      text-decoration:none;
+    }
+    .btn-grey:hover{
+      background:rgba(88,89,91,.18);
+      color:#3a3b3d;
+      transform:translateY(-2px);
+    }
+    .btn-grey.btn-lg{ padding:.8rem 1.4rem; font-size:1rem; border-radius:16px; }
+
     /* ── فريق النجاح ── */
     .team-section{ padding:64px 0; }
     .team-grid{
       display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-      gap:18px;
+      grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+      gap:14px;
       margin-top:26px;
     }
     .team-card{
-      border-radius:22px;
+      border-radius:18px;
       overflow:hidden;
       cursor:pointer;
       position:relative;
-      aspect-ratio:1/1;
+      aspect-ratio:3/4;
       background:#f8f1db;
       transition:.28s ease;
       box-shadow:0 12px 28px rgba(88,89,91,.10);
@@ -594,14 +615,15 @@
       width:100%;
       height:100%;
       object-fit:cover;
+      object-position:top center;
       display:block;
       transition:transform .5s ease;
     }
-    .team-card:hover img{ transform:scale(1.06); }
+    .team-card:hover img{ transform:scale(1.04); }
     .team-card-overlay{
       position:absolute;
       inset:0;
-      background:linear-gradient(to top,rgba(0,0,0,.4),transparent 60%);
+      background:linear-gradient(to top,rgba(0,0,0,.35),transparent 55%);
       opacity:0;
       transition:.28s;
     }
@@ -609,7 +631,7 @@
 
     @media(max-width:767.98px){
       .banner-caption{ bottom:16px; right:16px; left:16px; }
-      .team-grid{ grid-template-columns:repeat(2,1fr); gap:12px; }
+      .team-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
     }
 
     @media (max-width:991.98px){
@@ -692,7 +714,10 @@
         <h1 class="home-title">Live English</h1>
 
         <p class="home-desc">
-          برنامج صيفي لتعلّم اللغة الإنجليزية، بتجربة تسجيل منظمة، متابعة واضحة، واستعراض أنيق لمحتوى البرنامج عبر السنوات.
+          برنامج لتعليم اللغة الانجليزية وتطوير المهارات الحياتية للأبناء بإشراف نخبة من التربويين المتخصصين في بريطانيا 🇬🇧 ..
+        </p>
+        <p class="home-desc">
+          لايف انقلش حيث يولد المستقبل ..
         </p>
 
         <div class="home-actions">
@@ -700,11 +725,11 @@
             <i class="fa-solid fa-arrow-left-long"></i>
             التسجيل الآن
           </a>
-          <a href="categories.html" class="btn btn-le-dark btn-lg">
+          <a href="categories.html" class="btn btn-le btn-lg">
             <i class="fa-solid fa-layer-group"></i>
             الفئات
           </a>
-          <a href="years.html" class="btn btn-le-outline btn-lg">
+          <a href="years.html" class="btn btn-grey btn-lg">
             <i class="fa-solid fa-calendar-days"></i>
             عبر السنوات
           </a>
@@ -768,7 +793,7 @@
       <div class="section-head">
         <div>
           <h2 class="section-title-home">فريق النجاح</h2>
-          <p class="section-note-home">الفريق المتميز خلف نجاح برنامج Live English.</p>
+          <p class="section-note-home">الفريق المتميز خلف نجاح Live English.</p>
         </div>
       </div>
       <div class="team-grid" id="teamGrid">
@@ -795,7 +820,7 @@
       <div class="quick-link-icon"><i class="fa-solid fa-timeline"></i></div>
       <div class="quick-link-title">متابعة الطلب</div>
       <div class="quick-link-text">ابحث بهوية الطالب أو ولي الأمر واطلع على حالة الطلب والخط الزمني والملاحظات.</div>
-      <a href="track.html" class="btn btn-le-dark">
+      <a href="track.html" class="btn btn-le">
         <i class="fa-solid fa-magnifying-glass"></i>
         متابعة الطلب
       </a>
@@ -805,7 +830,7 @@
       <div class="quick-link-icon"><i class="fa-solid fa-user-lock"></i></div>
       <div class="quick-link-title">دخول العاملين</div>
       <div class="quick-link-text">دخول مخصص للعاملين للوصول إلى لوحة الإدارة ومراجعة الطلبات والمتابعة الداخلية.</div>
-      <a href="staff-login.html" class="btn btn-le-outline">
+      <a href="staff-login.html" class="btn btn-grey">
         <i class="fa-solid fa-right-to-bracket"></i>
         دخول العاملين
       </a>
@@ -974,21 +999,25 @@
     });
 
     // ── فريق النجاح ───────────────────────────────────────
+    window.teamImgs = [];
+
     async function initTeam() {
       const grid = document.getElementById('teamGrid');
       try {
         const res  = await fetch(`${DRIVE_SCRIPT_URL}?action=getFolderImages&folderId=${TEAM_FOLDER_ID}`);
         const json = await res.json();
         const imgs = json.images || [];
-        if (!imgs.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#8a8b90;padding:20px;font-weight:800">لا توجد صور</div>'; return; }
+        if (!imgs.length) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#8a8b90;padding:20px;font-weight:800">لا توجد صور</div>';
+          return;
+        }
+        window.teamImgs = imgs;
         grid.innerHTML = imgs.map((img, i) => `
-          <div class="team-card" onclick="openLightbox(teamImgs, ${i})">
+          <div class="team-card" onclick="openLightbox(window.teamImgs, ${i})">
             <img src="${escapeAttr(img.thumb)}" alt="${escapeAttr(img.name)}" loading="lazy">
             <div class="team-card-overlay"></div>
           </div>
         `).join('');
-        // نحفظ المصفوفة للايت بوكس
-        window.teamImgs = imgs;
       } catch (e) {
         console.error('Team error:', e);
         grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#8a8b90;padding:20px;font-weight:800">تعذر تحميل الصور</div>';
