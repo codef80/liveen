@@ -96,7 +96,10 @@
     },
 
     // ── getPackages ───────────────────────────────────────────────────────────
-    async getPackages({ includeHidden } = {}) {
+    async getPackages(params = {}) {
+      const includeHidden = params.includeHidden === true
+        || params.includeHidden === 'true'
+        || params.includeHidden === '1';
       let q = sb.from('packages').select('*').order('display_order');
       if (!includeHidden) q = q.eq('enabled', true);
       const { data, error } = await q;
@@ -134,7 +137,10 @@
     },
 
     // ── getYears ──────────────────────────────────────────────────────────────
-    async getYears({ includeHidden } = {}) {
+    async getYears(params = {}) {
+      const includeHidden = params.includeHidden === true
+        || params.includeHidden === 'true'
+        || params.includeHidden === '1';
       let q = sb.from('years').select('*, year_media(*)').order('display_order');
       if (!includeHidden) q = q.eq('enabled', true);
       const { data, error } = await q;
