@@ -66,12 +66,23 @@
       box-shadow:0 24px 48px rgba(88,89,91,.14);
     }
 
+    .category-show-cover-wrap{
+      width:100%;
+      aspect-ratio:9/16;
+      background:#f8f1db;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px;
+    }
+
     .category-show-cover{
       width:100%;
-      aspect-ratio:16/10;
-      object-fit:cover;
+      height:100%;
+      object-fit:contain;
       display:block;
       background:#f8f1db;
+      border-radius:22px;
     }
 
     .category-show-body{
@@ -325,7 +336,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="assets/js/supabase.js"></script>
+  <script src="assets/js/supabase.js"></script>
   <script src="assets/js/config.js"></script>
 
   <script>
@@ -362,11 +373,13 @@
         container.innerHTML = items.map(item => `
           <div class="col-lg-6">
             <div class="category-show-card">
-              <img
-                class="category-show-cover"
-                src="${escapeAttr(normalizeDriveImageUrl(item.imageUrl || '')) || placeholderImg(item.title || 'Live English')}"
-                alt="${escapeAttr(item.title || '')}"
-              >
+              <div class="category-show-cover-wrap">
+                <img
+                  class="category-show-cover"
+                  src="${escapeAttr(normalizeDriveImageUrl(item.imageUrl || '')) || placeholderImg(item.title || 'Live English')}"
+                  alt="${escapeAttr(item.title || '')}"
+                >
+              </div>
 
               <div class="category-show-body">
                 <div class="category-show-badge">
@@ -447,7 +460,7 @@
 
       const fileId = extractGoogleDriveFileId(url);
       if (fileId) {
-        return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1600`;
+        return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w2000`;
       }
 
       return url;
@@ -459,7 +472,7 @@
 
       const fileId = extractGoogleDriveFileId(url);
       if (fileId) {
-        return `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/view`;
+        return `https://drive.google.com/uc?export=view&id=${encodeURIComponent(fileId)}`;
       }
 
       return url;
@@ -485,7 +498,7 @@
     }
 
     function placeholderImg(text) {
-      return `https://placehold.co/900x620/f8f1db/58595b?text=${encodeURIComponent(text || 'Live English')}`;
+      return `https://placehold.co/900x1600/f8f1db/58595b?text=${encodeURIComponent(text || 'Live English')}`;
     }
 
     function escapeHtml(value) {
