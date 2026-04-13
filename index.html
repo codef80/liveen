@@ -97,21 +97,16 @@
     }
 
     .home-actions .btn,
-.quick-link-card .btn{
-  min-height:52px;
-  padding:12px 20px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  font-weight:800;
-  border-radius:14px;
-  flex:0 0 auto;
-}
-
-.home-actions .btn-lg{
-  min-width:190px;
-}
+    .quick-link-card .btn{
+      min-height:52px;
+      padding:12px 20px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      font-weight:800;
+      border-radius:14px;
+    }
 
     .section-head{
       display:flex;
@@ -589,12 +584,17 @@
       font-size:1rem;
     }
 
-    .btn-grey{
-      background:rgba(88,89,91,.10);
-      color:#58595b;
-      border:1px solid rgba(88,89,91,.18);
-      font-weight:800;
-    }
+.btn-grey {
+  background: rgba(88,89,91,.10);
+  color: #58595b;
+  border: 1px solid rgba(88,89,91,.18);
+  font-weight: 800;
+  /* إضافة نفس خصائص الحجم الموجودة في .btn-le و .btn-le-dark */
+  padding: 12px 20px;
+  min-height: 52px;
+  font-size: 1.25rem; /* مثل btn-lg */
+  line-height: 1.5;
+}
     .btn-grey:hover{
       background:rgba(88,89,91,.18);
       color:#3a3b3d;
@@ -737,10 +737,10 @@
                 <i class="fa-solid fa-layer-group"></i>
                 الفئات
               </a>
-              <a href="years.html" class="btn btn-grey btn-lg">
-                <i class="fa-solid fa-calendar-days"></i>
-                عبر السنوات
-              </a>
+              <a href="years.html" class="btn btn-le btn-lg" style="background:rgba(88,89,91,.10); color:#58595b; border-color:rgba(88,89,91,.18);">
+  <i class="fa-solid fa-calendar-days"></i>
+  عبر السنوات
+</a>
             </div>
           </div>
         </div>
