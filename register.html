@@ -653,9 +653,9 @@
       document.getElementById('introVideo').addEventListener('change', () => updateFileMeta('introVideo', 'videoMeta'));
 
       [
-        'studentName','studentIdentity','city','school','grade','age','hobbies','academicLevel',
-        'englishLevel','healthStatus','studentPhone','guardianPhone','guardianIdentity','category','source'
-      ].forEach(id => {
+  'studentName','studentIdentity','city','school','grade','age','hobbies','academicLevel',
+  'englishLevel','healthStatus','studentPhone','guardianPhone','category','source'
+].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', buildReview);
         if (el) el.addEventListener('change', buildReview);
@@ -790,7 +790,6 @@
           ['englishLevel', 'مستوى اللغة الإنجليزية مطلوب'],
           ['studentPhone', 'جوال الابن مطلوب'],
           ['guardianPhone', 'جوال ولي الأمر مطلوب'],
-          ['guardianIdentity', 'هوية ولي الأمر مطلوبة'],
           ['category', 'الفئة مطلوبة']
         ];
         return validateRequired(required);
@@ -885,7 +884,6 @@
         healthStatus: document.getElementById('healthStatus').value.trim(),
         studentPhone: document.getElementById('studentPhone').value.trim(),
         guardianPhone: document.getElementById('guardianPhone').value.trim(),
-        guardianIdentity: document.getElementById('guardianIdentity').value.trim(),
         category: document.getElementById('category').value.trim(),
         source: document.getElementById('source').value.trim()
       };
