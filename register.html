@@ -516,10 +516,10 @@
               <div class="row g-3">
                 <div class="col-lg-6">
                   <div class="form-box">
-                    <label class="form-label" for="passportImage">صورة الهوية</label>
+                    <label class="form-label" for="passportImage">صورة الجواز</label>
                     <div class="file-box">
                       <i class="fa-solid fa-id-card"></i>
-                      <div class="mb-2">ارفع صورة الهوية</div>
+                      <div class="mb-2">ارفع صورة الجواز</div>
                       <input type="file" class="form-control" id="passportImage" accept="image/*" required>
                       <div class="hint-text" id="passportLimitText">الحد الأقصى سيتم تحميله من الإعدادات.</div>
                       <div class="file-meta" id="passportMeta">لم يتم اختيار ملف بعد</div>
@@ -532,7 +532,7 @@
                     <label class="form-label" for="introVideo">الفيديو التعريفي</label>
                     <div class="file-box">
                       <i class="fa-solid fa-video"></i>
-                      <div class="mb-2">ارفع فيديو تعريفي لمدة دقيقة تقريبًا</div>
+                      <div class="mb-2">الفيديو التعريفي للإبن يذكر فيه اسمه ومدرسته والصف الدراسي والهوايات والهدف من البرنامج</div>
                       <input type="file" class="form-control" id="introVideo" accept="video/*" required>
                       <div class="hint-text" id="videoLimitText">الحد الأقصى سيتم تحميله من الإعدادات.</div>
                       <div class="file-meta" id="videoMeta">لم يتم اختيار ملف بعد</div>
@@ -741,7 +741,7 @@
       const actionInfoMap = {
         1: 'أدخل بيانات الطالب الأساسية',
         2: 'أدخل بيانات التواصل وحدد الفئة',
-        3: 'ارفع صورة الهوية والفيديو',
+        3: 'ارفع صورة الجواز والفيديو',
         4: 'راجع البيانات ثم أرسل الطلب'
       };
       document.getElementById('actionInfo').textContent = actionInfoMap[currentStep] || '';
@@ -793,7 +793,7 @@
         const videoFile = document.getElementById('introVideo').files[0];
 
         if (!passportFile) {
-          showWarn('صورة الهوية مطلوبة');
+          showWarn('صورة الجواز مطلوبة');
           return false;
         }
 
@@ -802,7 +802,7 @@
           return false;
         }
 
-        if (!validateFileSize(passportFile, maxPassportMb, 'صورة الهوية')) return false;
+        if (!validateFileSize(passportFile, maxPassportMb, 'صورة الجواز')) return false;
         if (!validateFileSize(videoFile, maxVideoMb, 'الفيديو')) return false;
       }
 
@@ -914,7 +914,7 @@
     const passportFile   = document.getElementById('passportImage').files[0] || null;
     const introVideoFile = document.getElementById('introVideo').files[0]    || null;
 
-    if (!passportFile)   throw new Error('يرجى رفع صورة الهوية');
+    if (!passportFile)   throw new Error('يرجى رفع صورة الجواز');
     if (!introVideoFile) throw new Error('يرجى رفع الفيديو التعريفي');
 
     // ── أظهر loading فوري ─────────────────────────────────────────────────
@@ -983,7 +983,7 @@
           <div style="color:#6f7075;font-size:.92rem">يمكنك متابعة طلبك بهوية الطالب لاحقًا.</div>
           <div style="color:#6f7075;font-size:.88rem;margin-top:6px">
             <i class="fa-solid fa-circle-info"></i>
-            سيتم رفع المرفقات تلقائيًا في الخلفية.
+            
           </div>
         </div>
       `,
