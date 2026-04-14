@@ -452,19 +452,22 @@
             <div class="media-card mb-4">
               <div class="media-title">فيديوهات يوتيوب</div>
               ${
-                videos.length
-                  ? `<div class="video-list">
-                      ${videos.map((videoId, index) => `
-                        <div class="video-box">
-                          <div class="video-frame">
-                            <iframe src="https://www.youtube.com/embed/${escapeAttr(videoId)}" allowfullscreen loading="lazy"></iframe>
-                          </div>
-                          <div class="video-label">فيديو ${index + 1}</div>
-                        </div>
-                      `).join('')}
-                    </div>`
-                  : `<div class="empty-years">لا توجد فيديوهات لهذه السنة.</div>`
-              }
+  videos.length
+    ? `<div class="video-list">
+        ${videos.map((videoId, index) => `
+          <div class="video-box">
+            <div class="video-frame">
+              <iframe src="https://www.youtube.com/embed/${escapeAttr(videoId)}" allowfullscreen loading="lazy"></iframe>
+            </div>
+            <div class="video-label" id="video-title-${index}">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              جاري تحميل اسم الفيديو...
+            </div>
+          </div>
+        `).join('')}
+      </div>`
+    : `<div class="empty-years">لا توجد فيديوهات لهذه السنة.</div>`
+}
             </div>
 
             <div class="media-card">
@@ -489,7 +492,10 @@
           </div>
         </div>
       `;
-    }
+      if (videos.length) {
+    loadYoutubeTitles(videos);
+  }
+}
 
     function normalizeMediaType(type) {
       const t = String(type || '').trim().toLowerCase();
@@ -497,6 +503,22 @@
       if (t === 'صورة' || t === 'image' || t === 'img') return 'image';
       return 'link';
     }
+
+    async function loadYoutubeTitles(videoIds) {
+  videoIds.forEach(async (videoId, index) => {
+    const titleEl = document.getElementById(`video-title-${index}`);
+    if (!titleEl) return;
+
+    try {
+      const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      const data = await res.json();
+
+      titleEl.innerHTML = `<i class="fa-brands fa-youtube" style="color:#ff0000"></i> ${escapeHtml(data.title || ('فيديو ' + (index + 1)))}`;
+    } catch (error) {
+      titleEl.textContent = `فيديو ${index + 1}`;
+    }
+  });
+}
 
     function normalizeYoutubeLinks(list) {
       return (Array.isArray(list) ? list : [])
