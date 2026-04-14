@@ -642,22 +642,99 @@
       .home-hero{ padding-top:20px; }
       .quick-links-grid{ grid-template-columns:1fr; }
     }
+
+
+    /* شعار السعودية وتاريخ 2016 في الهيدر */
+.saudi-flag-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 20px;
+}
+
+.saudi-flag-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.since-badge {
+  background: rgba(251,199,13,.15);
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #7b5f00;
+  white-space: nowrap;
+  border: 1px solid rgba(251,199,13,.3);
+}
+
+@media (max-width: 991.98px) {
+  .saudi-flag-header {
+    margin-right: 0;
+    margin-top: 10px;
+    justify-content: center;
+  }
+  
+  .saudi-flag-img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .since-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+}
+
+@media (min-width: 992px) {
+  .saudi-flag-img {
+    width: 48px;
+    height: 48px;
+  }
+}
   </style>
 </head>
 <body>
 
-  <a class="navbar-brand" href="index.html">
-  <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
-  <span style="display:inline-flex; flex-direction:column; line-height:1.1; vertical-align:middle;">
-    <span style="display:inline-flex; align-items:center; gap:6px;">
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">
+      <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
       <span>Live English</span>
-      <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg"
-           alt="KSA"
-           style="width:22px; height:22px; object-fit:cover; border-radius:4px; flex-shrink:0;">
-    </span>
-    <span style="font-size:.58rem; font-weight:700; color:#a07800; letter-spacing:.4px; line-height:1.3;">منذ 2016</span>
-  </span>
-</a>
+    </a>
+
+    <!-- شعار السعودية وتاريخ 2016 -->
+    <div class="saudi-flag-header">
+      <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg" alt="علم السعودية" class="saudi-flag-img">
+      <span class="since-badge">
+        <i class="fa-solid fa-calendar-alt"></i>
+        منذ 2016
+      </span>
+    </div>
+
+    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="تبديل القائمة">
+      <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto mb-3 mb-lg-0 align-items-lg-center gap-lg-2">
+        <li class="nav-item"><a class="nav-link" href="categories.html">الفئات</a></li>
+        <li class="nav-item"><a class="nav-link" href="years.html">عبر السنوات</a></li>
+        <li class="nav-item"><a class="nav-link" href="track.html">متابعة الطلب</a></li>
+        <li class="nav-item"><a class="nav-link" href="staff-login.html">دخول العاملين</a></li>
+      </ul>
+
+      <div class="d-flex flex-column flex-lg-row gap-2 ms-lg-3">
+        <a href="register.html" class="btn btn-le">
+          <i class="fa-solid fa-pen-to-square"></i>
+          ابدأ التسجيل
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
 
       <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="تبديل القائمة">
         <i class="fa-solid fa-bars-staggered"></i>
