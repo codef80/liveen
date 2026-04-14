@@ -700,7 +700,7 @@
     height: 44px;
   }
 
-  .navbar-brand{
+.navbar-brand{
   display:flex;
   align-items:center;
   gap:10px;
@@ -716,6 +716,7 @@
 .brand-title{
   display:block;
   line-height:1;
+  font-size:1rem;
 }
 
 .brand-since{
@@ -725,6 +726,21 @@
   color:#fbc70d;
   line-height:1;
   margin-top:3px;
+}
+
+@media (max-width: 575.98px){
+  .navbar-brand{
+    gap:8px;
+  }
+
+  .brand-title{
+    font-size:.9rem;
+  }
+
+  .brand-since{
+    font-size:.52rem;
+    margin-top:2px;
+  }
 }
  
   </style>
