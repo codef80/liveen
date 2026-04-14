@@ -644,12 +644,21 @@
     }
 
 
-    .brand-logo-img{
+  .navbar-brand{
+    display:flex;
+    align-items:center;
+    padding-top:0;
+    padding-bottom:0;
+    min-height:56px;
+  }
+
+  .brand-logo-img{
     width:34px;
     height:34px;
     object-fit:contain;
     display:block;
     border-radius:10px;
+    flex:0 0 auto;
   }
 
   .brand-block{
@@ -662,58 +671,63 @@
     display:flex;
     flex-direction:column;
     justify-content:center;
-    line-height:1.05;
+    line-height:1;
   }
 
   .brand-main-line{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:6px;
     flex-wrap:nowrap;
+    white-space:nowrap;
   }
 
   .brand-title{
     font-weight:800;
     color:inherit;
     font-size:1rem;
-    white-space:nowrap;
+    line-height:1;
+    margin:0;
   }
 
   .brand-since{
-    font-size:.72rem;
+    font-size:.68rem;
     color:rgba(88,89,91,.78);
     font-weight:700;
-    margin-top:4px;
-    white-space:nowrap;
+    line-height:1;
+    margin-top:2px;
   }
 
   .brand-sa-flag{
-    width:22px;
-    height:22px;
+    width:18px;
+    height:18px;
     object-fit:cover;
-    border-radius:4px;
+    border-radius:3px;
     border:1px solid rgba(88,89,91,.12);
     flex:0 0 auto;
   }
 
   @media (max-width: 991.98px){
+    .navbar-brand{
+      min-height:52px;
+    }
+
     .brand-logo-img{
-      width:32px;
-      height:32px;
+      width:31px;
+      height:31px;
     }
 
     .brand-title{
-      font-size:.98rem;
+      font-size:.95rem;
     }
 
     .brand-since{
-      font-size:.68rem;
-      margin-top:3px;
+      font-size:.62rem;
     }
 
     .brand-sa-flag{
-      width:20px;
-      height:20px;
+      width:16px;
+      height:16px;
     }
   }
 
@@ -722,37 +736,38 @@
       gap:8px;
     }
 
+    .brand-logo-img{
+      width:28px;
+      height:28px;
+    }
+
     .brand-title{
-      font-size:.92rem;
+      font-size:.88rem;
     }
 
     .brand-since{
-      font-size:.64rem;
+      font-size:.58rem;
     }
 
     .brand-sa-flag{
-      width:18px;
-      height:18px;
-      border-radius:3px;
+      width:14px;
+      height:14px;
     }
   }
+
     
   </style>
 </head>
 <body>
 
-  <a class="navbar-brand" href="index.html">
+<a class="navbar-brand" href="index.html">
   <div class="brand-block">
     <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
 
     <div class="brand-text-wrap">
       <div class="brand-main-line">
         <span class="brand-title">Live English</span>
-        <img
-          src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg"
-          alt="شعار السعودية"
-          class="brand-sa-flag"
-        >
+        <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg" alt="شعار السعودية" class="brand-sa-flag">
       </div>
       <span class="brand-since">منذ 2016</span>
     </div>
