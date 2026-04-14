@@ -642,66 +642,50 @@
       .home-hero{ padding-top:20px; }
       .quick-links-grid{ grid-template-columns:1fr; }
     }
-
-
-    .brand-inline{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:nowrap;
-}
-
-.brand-name{
-  font-weight:900;
-  color:#58595b;
-  font-size:1rem;
-  line-height:1;
-  white-space:nowrap;
-}
-
-.brand-saudi-img{
-  width:22px;
-  height:22px;
-  object-fit:cover;
-  border-radius:50%;
-  display:block;
-  flex:0 0 auto;
-}
-
-.brand-since{
-  font-size:1rem;
-  font-weight:800;
-  color:#58595b;
-  line-height:1;
-  white-space:nowrap;
-}
-
-@media (max-width:767.98px){
-  .brand-inline{
-    gap:6px;
-  }
-
-  .brand-name,
-  .brand-since{
-    font-size:.92rem;
-  }
-
-  .brand-saudi-img{
-    width:20px;
-    height:20px;
-  }
-}
-    
   </style>
 </head>
 <body>
 
- <a class="navbar-brand brand-inline" href="index.html">
-  <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
-  <span class="brand-name">Live English</span>
-  <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg" alt="شعار السعودية" class="brand-saudi-img">
-  <span class="brand-since">منذ 2016</span>
-</a>
+  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+  <div class="container">
+
+    <!-- ✅ الشعار + منذ 2016 -->
+    <a class="navbar-brand" href="index.html">
+      <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
+      <span style="display:flex; flex-direction:column; line-height:1.15;">
+        <span>Live English</span>
+        <span style="font-size:0.7rem; font-weight:700; color:#9a8040; letter-spacing:0.01em;">منذ 2016</span>
+      </span>
+    </a>
+
+    <!-- ✅ علم السعودية في المنتصف -->
+    <div class="d-none d-lg-flex position-absolute start-50 translate-middle-x">
+      <div style="width:52px; height:36px; border-radius:8px; overflow:hidden; border:1px solid rgba(0,0,0,0.12); flex-shrink:0;">
+        <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg" alt="علم المملكة" style="width:100%; height:100%; object-fit:cover; display:block;">
+      </div>
+    </div>
+
+    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="تبديل القائمة">
+      <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto mb-3 mb-lg-0 align-items-lg-center gap-lg-2">
+        <li class="nav-item"><a class="nav-link" href="categories.html">الفئات</a></li>
+        <li class="nav-item"><a class="nav-link" href="years.html">عبر السنوات</a></li>
+        <li class="nav-item"><a class="nav-link" href="track.html">متابعة الطلب</a></li>
+        <li class="nav-item"><a class="nav-link" href="staff-login.html">دخول العاملين</a></li>
+      </ul>
+      <div class="d-flex flex-column flex-lg-row gap-2 ms-lg-3">
+        <a href="register.html" class="btn btn-le">
+          <i class="fa-solid fa-pen-to-square"></i>
+          ابدأ التسجيل
+        </a>
+      </div>
+    </div>
+
+  </div>
+</nav>
 
       <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="تبديل القائمة">
         <i class="fa-solid fa-bars-staggered"></i>
