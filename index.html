@@ -644,7 +644,6 @@
     }
 
 
-/* شعار السعودية وتاريخ 2016 في الهيدر */
 .saudi-flag-header {
   display: flex;
   align-items: center;
@@ -659,28 +658,38 @@
   border-radius: 4px;
 }
 
-.since-wrapper {
+.navbar-brand {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: 10px;
 }
 
-.since-badge {
-  background: rgba(251,199,13,.15);
-  padding: 4px 10px;
-  border-radius: 30px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #7b5f00;
-  white-space: nowrap;
-  border: 1px solid rgba(251,199,13,.3);
-  margin-top: 4px;
+.brand-text-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.brand-title {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.brand-since {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fbc70d;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
 @media (max-width: 991.98px) {
   .saudi-flag-header {
     margin-right: 0;
-    margin-top: 0;
   }
   
   .saudi-flag-img {
@@ -688,9 +697,12 @@
     height: 32px;
   }
   
-  .since-badge {
-    font-size: 0.6rem;
-    padding: 3px 8px;
+  .brand-title {
+    font-size: 0.95rem;
+  }
+  
+  .brand-since {
+    font-size: 0.55rem;
   }
 }
 
@@ -699,75 +711,33 @@
     width: 44px;
     height: 44px;
   }
-
-.navbar-brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.brand-text-wrap{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  line-height:1;
-}
-
-.brand-title{
-  display:block;
-  line-height:1;
-  font-size:1rem;
-}
-
-.brand-since{
-  display:block;
-  font-size:.62rem;
-  font-weight:700;
-  color:#fbc70d;
-  line-height:1;
-  margin-top:3px;
-}
-
-@media (max-width: 575.98px){
-  .navbar-brand{
-    gap:8px;
+  
+  .brand-title {
+    font-size: 1.2rem;
   }
-
-  .brand-text-wrap{
-    line-height:1;
-  }
-
-  .brand-title{
-    font-size:.9rem;
-  }
-
-  .brand-since{
-    font-size:.52rem;
-    margin-top:2px;
-    color:#fbc70d;
+  
+  .brand-since {
+    font-size: 0.7rem;
   }
 }
-
   
   </style>
 </head>
 <body>
 
-  <nav class="navbar navbar-expand-lg fixed-top glass-nav">
+ <nav class="navbar navbar-expand-lg fixed-top glass-nav">
   <div class="container">
     <a class="navbar-brand" href="index.html">
-  <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
-  <span class="brand-text-wrap">
-    <span class="brand-title">Live English</span>
-    <span class="brand-since">منذ 2016</span>
-  </span>
-</a>
+      <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
+      <span class="brand-text-wrap">
+        <span class="brand-title">Live English</span>
+        <span class="brand-since">منذ 2016</span>
+      </span>
+    </a>
 
     <div class="saudi-flag-header">
-  <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg" alt="علم السعودية" class="saudi-flag-img">
-  <div class="since-wrapper">
+      <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg" alt="علم السعودية" class="saudi-flag-img">
     </div>
-</div>
 
     <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="تبديل القائمة">
       <i class="fa-solid fa-bars-staggered"></i>
