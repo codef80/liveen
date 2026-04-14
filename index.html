@@ -644,98 +644,80 @@
     }
 
 
-.saudi-flag-header{
-  display:flex;
-  align-items:center;
-  margin-right:14px;
+.saudi-flag-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 20px;
 }
 
-.saudi-flag-img{
-  width:40px;
-  height:40px;
-  object-fit:cover;
-  border-radius:4px;
-  display:block;
+.saudi-flag-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
-.navbar-brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin:0;
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.brand-text-wrap{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  line-height:1;
+.brand-text-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
 }
 
-.brand-title{
-  display:block;
-  line-height:1;
-  font-size:1rem;
+.brand-title {
+  display: block;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-.brand-since{
-  display:block;
-  font-size:.62rem;
-  font-weight:700;
-  color:#fbc70d;
-  line-height:1;
-  margin-top:3px;
-  white-space:nowrap;
+.brand-since {
+  display: block;
+  font-size: 0.80rem;
+  font-weight: 700;
+  color: #fbc70d;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
-@media (max-width: 991.98px){
-  .saudi-flag-header{
-    margin-right:10px;
+@media (max-width: 991.98px) {
+  .saudi-flag-header {
+    margin-right: 0;
   }
-
-  .saudi-flag-img{
-    width:30px;
-    height:30px;
+  
+  .saudi-flag-img {
+    width: 32px;
+    height: 32px;
   }
-}
-
-@media (max-width: 575.98px){
-  .navbar-brand{
-    gap:8px;
+  
+  .brand-title {
+    font-size: 0.95rem;
   }
-
-  .brand-text-wrap{
-    display:flex;
-    flex-direction:row;
-    align-items:center;
-    gap:6px;
-    line-height:1;
-  }
-
-  .brand-title{
-    font-size:.9rem;
-  }
-
-  .brand-since{
-    font-size:.52rem;
-    margin-top:0;
-    color:#fbc70d;
-  }
-
-  .saudi-flag-header{
-    margin-right:8px;
-  }
-
-  .saudi-flag-img{
-    width:24px;
-    height:24px;
+  
+  .brand-since {
+    font-size: 0.55rem;
   }
 }
 
-@media (min-width: 992px){
-  .saudi-flag-img{
-    width:44px;
-    height:44px;
+@media (min-width: 992px) {
+  .saudi-flag-img {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .brand-title {
+    font-size: 2.2rem;
+  }
+  
+  .brand-since {
+    font-size: 1.2rem;
   }
 }
   
@@ -756,8 +738,6 @@
     <div class="saudi-flag-header">
       <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg" alt="علم السعودية" class="saudi-flag-img">
     </div>
-  </div>
-</nav>
 
     <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="تبديل القائمة">
       <i class="fa-solid fa-bars-staggered"></i>
