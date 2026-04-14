@@ -642,51 +642,51 @@
       .home-hero{ padding-top:20px; }
       .quick-links-grid{ grid-template-columns:1fr; }
     }
-    .brand-stack{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
 
-.brand-text-wrap{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  line-height:1.1;
-}
 
-.brand-main-line{
+    .brand-inline{
   display:flex;
   align-items:center;
   gap:8px;
+  flex-wrap:nowrap;
 }
 
 .brand-name{
   font-weight:900;
   color:#58595b;
+  font-size:1rem;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.brand-saudi-img{
+  width:22px;
+  height:22px;
+  object-fit:cover;
+  border-radius:50%;
+  display:block;
+  flex:0 0 auto;
 }
 
 .brand-since{
-  font-size:.78rem;
-  font-weight:700;
-  color:#8a8b90;
-  margin-top:3px;
+  font-size:1rem;
+  font-weight:800;
+  color:#58595b;
+  line-height:1;
+  white-space:nowrap;
 }
 
-.saudi-logo-img{
-  width:24px;
-  height:24px;
-  object-fit:contain;
-  display:block;
-  border-radius:50%;
-}
-
-@media (max-width: 767.98px){
-  .brand-since{
-    font-size:.7rem;
+@media (max-width:767.98px){
+  .brand-inline{
+    gap:6px;
   }
 
-  .saudi-logo-img{
+  .brand-name,
+  .brand-since{
+    font-size:.92rem;
+  }
+
+  .brand-saudi-img{
     width:20px;
     height:20px;
   }
@@ -696,15 +696,11 @@
 </head>
 <body>
 
-  <a class="navbar-brand brand-stack" href="index.html">
+ <a class="navbar-brand brand-inline" href="index.html">
   <img src="https://i.ibb.co/2QNwJCd/image.png" alt="Live English" class="brand-logo-img">
-  <div class="brand-text-wrap">
-    <div class="brand-main-line">
-      <span class="brand-name">Live English</span>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/0/0d/Flag_of_Saudi_Arabia.svg" alt="السعودية" class="saudi-logo-img">
-    </div>
-    <span class="brand-since">منذ 2016</span>
-  </div>
+  <span class="brand-name">Live English</span>
+  <img src="https://cms.saudiflag.sa/uploads/flag_cb4beab1dd.jpg" alt="شعار السعودية" class="brand-saudi-img">
+  <span class="brand-since">منذ 2016</span>
 </a>
 
       <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="تبديل القائمة">
