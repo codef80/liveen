@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -890,142 +891,212 @@
     }
 
     async function submitForm(e) {
-  e.preventDefault();
+      e.preventDefault();
 
-  if (!validateCurrentStep()) return;
+      if (!validateCurrentStep()) return;
 
-  const data = collectFormData(true);
+      const data = collectFormData(true);
 
-  const confirm = await Swal.fire({
-    title: 'إرسال الطلب',
-    text: 'هل تريد إرسال الطلب الآن؟',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'إرسال',
-    cancelButtonText: 'إلغاء',
-    confirmButtonColor: '#fbc70d'
-  });
+      const confirm = await Swal.fire({
+        title: 'إرسال الطلب',
+        text: 'هل تريد إرسال الطلب الآن؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'إرسال',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#fbc70d'
+      });
 
-  if (!confirm.isConfirmed) return;
+      if (!confirm.isConfirmed) return;
 
-  const submitBtn = document.getElementById('submitBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      let progressTimer = null;
 
-  try {
-    const passportFile   = document.getElementById('passportImage').files[0] || null;
-    const introVideoFile = document.getElementById('introVideo').files[0]    || null;
+      try {
+        const passportFile = document.getElementById('passportImage').files[0] || null;
+        const introVideoFile = document.getElementById('introVideo').files[0] || null;
 
-    if (!passportFile)   throw new Error('يرجى رفع صورة الجواز');
-    if (!introVideoFile) throw new Error('يرجى رفع الفيديو التعريفي');
+        if (!passportFile) throw new Error('يرجى رفع صورة الجواز');
+        if (!introVideoFile) throw new Error('يرجى رفع الفيديو التعريفي');
 
-    // ── أظهر loading فوري ─────────────────────────────────────────────────
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
 
-    // ── حوّل صورة الجواز فقط (صغيرة وسريعة) ─────────────────────────────
-    const passportBase64 = await fileToBase64(passportFile);
+        showUploadProgressModal();
+        updateUploadProgress(4, 'جاري تجهيز بيانات الطلب...');
 
-    // ── حوّل الفيديو (قد يأخذ وقتاً - في الخلفية بعد الإرسال) ───────────
-    // نرسل البيانات والجواز أولاً، الفيديو يُرفع لاحقاً
-    const passportBase64Video = await fileToBase64(introVideoFile);
+        const passportBase64 = await fileToBase64(passportFile, percent => {
+          const mapped = mapProgress(percent, 5, 35);
+          updateUploadProgress(mapped, `جاري تجهيز صورة الجواز... ${percent}%`);
+        });
 
-    const payload = {
-      action: 'submitRegistration',
-      data: {
-        'اسم_الطالب_الثلاثي':       data.studentName,
-        'هوية_الطالب':              data.studentIdentity,
-        'رقم_الجواز':               data.passportNo || '',
-        'مدينة_السكن':              data.city,
-        'المدرسة':                  data.school,
-        'الصف_الدراسي':             data.grade,
-        'العمر_بالميلادي':          data.age,
-        'الهوايات':                 data.hobbies,
-        'المستوى_الدراسي':          data.academicLevel,
-        'مستوى_اللغة_الإنجليزية':   data.englishLevel,
-        'الحالة_الصحية':            data.healthStatus,
-        'جوال_الابن':               data.studentPhone,
-        'جوال_ولي_الأمر':           data.guardianPhone,
-        'هوية_ولي_الأمر':           data.guardianIdentity,
-        'الفئة':                    data.category,
-        'كيف_عرفت_عن_البرنامج':     data.source,
+        updateUploadProgress(38, 'تم تجهيز صورة الجواز، جاري تجهيز الفيديو...');
 
-        'صورة_الجواز': {
-          base64:    passportBase64,
-          mimeType:  passportFile.type || 'image/jpeg',
-          extension: getFileExtension(passportFile.name, 'jpg'),
-          size:      passportFile.size
-        },
+        const introVideoBase64 = await fileToBase64(introVideoFile, percent => {
+          const mapped = mapProgress(percent, 38, 82);
+          updateUploadProgress(mapped, `جاري تجهيز الفيديو التعريفي... ${percent}%`);
+        });
 
-        'فيديو_تعريفي': {
-          base64:    passportBase64Video,
-          mimeType:  introVideoFile.type || 'video/mp4',
-          extension: getFileExtension(introVideoFile.name, 'mp4'),
-          size:      introVideoFile.size
-        }
+        const payload = {
+          action: 'submitRegistration',
+          data: {
+            'اسم_الطالب_الثلاثي': data.studentName,
+            'هوية_الطالب': data.studentIdentity,
+            'رقم_الجواز': data.passportNo || '',
+            'مدينة_السكن': data.city,
+            'المدرسة': data.school,
+            'الصف_الدراسي': data.grade,
+            'العمر_بالميلادي': data.age,
+            'الهوايات': data.hobbies,
+            'المستوى_الدراسي': data.academicLevel,
+            'مستوى_اللغة_الإنجليزية': data.englishLevel,
+            'الحالة_الصحية': data.healthStatus,
+            'جوال_الابن': data.studentPhone,
+            'جوال_ولي_الأمر': data.guardianPhone,
+            'هوية_ولي_الأمر': data.guardianIdentity,
+            'الفئة': data.category,
+            'كيف_عرفت_عن_البرنامج': data.source,
+            'صورة_الجواز': {
+              base64: passportBase64,
+              mimeType: passportFile.type || 'image/jpeg',
+              extension: getFileExtension(passportFile.name, 'jpg'),
+              size: passportFile.size
+            },
+            'فيديو_تعريفي': {
+              base64: introVideoBase64,
+              mimeType: introVideoFile.type || 'video/mp4',
+              extension: getFileExtension(introVideoFile.name, 'mp4'),
+              size: introVideoFile.size
+            }
+          }
+        };
+
+        updateUploadProgress(86, 'جاري إرسال الطلب إلى النظام...');
+        progressTimer = startPendingProgress(86, 99, 'جاري حفظ البيانات ورفع المرفقات...');
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'تعذر إرسال الطلب');
+
+        stopPendingProgress(progressTimer);
+        updateUploadProgress(100, 'اكتمل الإرسال بنجاح ✅');
+        await delay(450);
+        Swal.close();
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'تم إرسال الطلب بنجاح ✅',
+          html: `
+            <div style="line-height:2.2;text-align:right">
+              <div>رقم الطلب: <strong style="color:#fbc70d;font-size:1.1rem">${escapeHtml(json.applicationNo || json.data?.applicationNo || '—')}</strong></div>
+              <div style="color:#6f7075;font-size:.92rem">يمكنك متابعة طلبك بهوية الطالب لاحقًا.</div>
+            </div>
+          `,
+          confirmButtonColor: '#fbc70d',
+          confirmButtonText: 'حسنًا'
+        });
+
+        document.getElementById('registerForm').reset();
+        currentStep = 1;
+        updateStepper();
+        buildReview();
+        updateFileMeta('passportImage', 'passportMeta');
+        updateFileMeta('introVideo', 'videoMeta');
+        applyCategoryFromQuery();
+
+      } catch (err) {
+        stopPendingProgress(progressTimer);
+        Swal.close();
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'تعذر إرسال الطلب',
+          text: err.message || 'حدث خطأ',
+          confirmButtonColor: '#58595b'
+        });
+      } finally {
+        stopPendingProgress(progressTimer);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال الطلب';
       }
-    };
+    }
 
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.message || 'تعذر إرسال الطلب');
-
-    // ── نجاح فوري ─────────────────────────────────────────────────────────
-    await Swal.fire({
-      icon: 'success',
-      title: 'تم إرسال الطلب بنجاح ✅',
-      html: `
-        <div style="line-height:2.2;text-align:right">
-          <div>رقم الطلب: <strong style="color:#fbc70d;font-size:1.1rem">${escapeHtml(json.applicationNo || json.data?.applicationNo || '—')}</strong></div>
-          <div style="color:#6f7075;font-size:.92rem">يمكنك متابعة طلبك بهوية الطالب لاحقًا.</div>
-          <div style="color:#6f7075;font-size:.88rem;margin-top:6px">
-            <i class="fa-solid fa-circle-info"></i>
-            
+    function showUploadProgressModal() {
+      Swal.fire({
+        title: 'جاري إرسال الطلب',
+        html: `
+          <div style="text-align:right">
+            <div id="uploadProgressText" style="color:#6f7075;line-height:1.9;margin-bottom:10px">جاري تهيئة العملية...</div>
+            <div style="background:#f2eddc;border-radius:999px;overflow:hidden;height:14px;">
+              <div id="uploadProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#fbc70d,#ffe06f);transition:width .25s ease;"></div>
+            </div>
+            <div id="uploadProgressValue" style="margin-top:10px;font-weight:900;color:#58595b;text-align:center">0%</div>
           </div>
-        </div>
-      `,
-      confirmButtonColor: '#fbc70d',
-      confirmButtonText: 'حسنًا'
-    });
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading()
+      });
+    }
 
-    document.getElementById('registerForm').reset();
-    currentStep = 1;
-    updateStepper();
-    buildReview();
-    updateFileMeta('passportImage', 'passportMeta');
-    updateFileMeta('introVideo', 'videoMeta');
-    applyCategoryFromQuery();
+    function updateUploadProgress(percent, text) {
+      const normalized = Math.max(0, Math.min(100, Math.round(percent)));
+      const bar = document.getElementById('uploadProgressBar');
+      const value = document.getElementById('uploadProgressValue');
+      const label = document.getElementById('uploadProgressText');
+      if (bar) bar.style.width = `${normalized}%`;
+      if (value) value.textContent = `${normalized}%`;
+      if (label && text) label.textContent = text;
+    }
 
-  } catch (err) {
-    console.error(err);
-    Swal.fire({
-      icon: 'error',
-      title: 'تعذر إرسال الطلب',
-      text: err.message || 'حدث خطأ',
-      confirmButtonColor: '#58595b'
-    });
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال الطلب';
-  }
-}
+    function startPendingProgress(start, end, text) {
+      let current = start;
+      updateUploadProgress(current, text);
+      return window.setInterval(() => {
+        if (current >= end) return;
+        current += current < 92 ? 2 : 1;
+        if (current > end) current = end;
+        updateUploadProgress(current, text);
+      }, 350);
+    }
 
+    function stopPendingProgress(timer) {
+      if (timer) window.clearInterval(timer);
+    }
 
-    function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result || '');
-      const base64 = result.includes(',') ? result.split(',')[1] : result;
-      resolve(base64);
-    };
-    reader.onerror = () => reject(new Error('تعذر قراءة الملف: ' + (file?.name || '')));
-    reader.readAsDataURL(file);
-  });
-}
+    function mapProgress(percent, start, end) {
+      const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
+      return start + ((end - start) * safePercent / 100);
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function fileToBase64(file, onProgress) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onprogress = event => {
+          if (!event.lengthComputable || typeof onProgress !== 'function') return;
+          const percent = Math.round((event.loaded / event.total) * 100);
+          onProgress(percent);
+        };
+        reader.onload = () => {
+          if (typeof onProgress === 'function') onProgress(100);
+          const result = String(reader.result || '');
+          const base64 = result.includes(',') ? result.split(',')[1] : result;
+          resolve(base64);
+        };
+        reader.onerror = () => reject(new Error('تعذر قراءة الملف: ' + (file?.name || '')));
+        reader.readAsDataURL(file);
+      });
+    }
 
 function getFileExtension(fileName, fallback = '') {
   const name = String(fileName || '').trim();
