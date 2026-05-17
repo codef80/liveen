@@ -465,41 +465,65 @@
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
         .map(mapLog);
 
-      // ── تقارير المعلم ─────────────────────────────────────────────────────
+      // ── تقارير المعلم الأسبوعية ─────────────────────────────────────────────
+      // تم استثمار أعمدة teacher_reports الحالية بدون إنشاء جدول جديد:
+      // grade/edu_status = الأسبوع، lang_level = من تاريخ، behavior = إلى تاريخ،
+      // attendance = نسبة حضور الدورات والأنشطة، skills = اسم المجموعة،
+      // recommendations = نسبة حضور المعهد، notes = الملاحظات.
       const reports = (reportRows || []).map(r => {
+        const week = r.grade || r.edu_status || '';
+        const periodFrom = r.lang_level || '';
+        const periodTo = r.behavior || '';
+        const activityAttendance = r.attendance || '';
+        const groupName = r.skills || '';
+        const instituteAttendance = r.recommendations || '';
+        const notes = r.notes || '';
+        const periodText = (periodFrom || periodTo)
+          ? `من تاريخ ${periodFrom || '—'} إلى تاريخ ${periodTo || '—'}`
+          : '';
         const lines = [
-          r.edu_status      ? `الحالة التعليمية: ${r.edu_status}`   : '',
-          r.lang_level      ? `مستوى اللغة: ${r.lang_level}`         : '',
-          r.attendance      ? `الحضور: ${r.attendance}`               : '',
-          r.behavior        ? `السلوك: ${r.behavior}`                 : '',
-          r.skills          ? `المهارات: ${r.skills}`                 : '',
-          r.recommendations ? `التوصيات: ${r.recommendations}`         : '',
-          r.notes           ? `ملاحظات: ${r.notes}`                   : ''
+          week ? `الأسبوع: ${week}` : '',
+          data.student_name ? `اسم الطالب: ${data.student_name}` : '',
+          periodText ? `فترة رفع التقرير: ${periodText}` : '',
+          activityAttendance ? `نسبة حضور الدورات التدريبية والأنشطة: ${activityAttendance}` : '',
+          groupName ? `اسم المجموعة: ${groupName}` : '',
+          instituteAttendance ? `نسبة حضور المعهد: ${instituteAttendance}` : '',
+          notes ? `الملاحظات: ${notes}` : ''
         ].filter(Boolean);
         const displayText = lines.length > 0 ? lines.join('\n') : (r.report_text || '');
         return {
           id:              r.id,
-          'المعلم':           r.teacher_name        || '',
-          'ملاحظات':          r.notes               || displayText,
-          'التوصيات':         r.recommendations     || '',
-          'التقدير':          r.grade               || r.edu_status || '',
-          'تاريخ_الإنشاء':    formatDate(r.created_at),
-          'الحالة_التعليمية': r.edu_status          || '',
-          'مستوى_اللغة':      r.lang_level          || '',
-          'الحضور':           r.attendance          || '',
-          'السلوك':           r.behavior            || '',
-          'المهارات':         r.skills              || '',
-          // حقول إنجليزية للاستخدام في admin
-          teacher:         r.teacher_name        || '',
+          'المعلم':        r.teacher_name || '',
+          'الأسبوع':       week,
+          'اسم_الطالب':    data.student_name || '',
+          'فترة_من':       periodFrom,
+          'فترة_إلى':      periodTo,
+          'فترة_رفع_التقرير': periodText,
+          'نسبة_حضور_الدورات_والأنشطة': activityAttendance,
+          'اسم_المجموعة':  groupName,
+          'نسبة_حضور_المعهد': instituteAttendance,
+          'ملاحظات':       notes || displayText,
+          'تاريخ_الإنشاء': formatDate(r.created_at),
+
+          // حقول قديمة/إنجليزية للحفاظ على توافق الصفحات الحالية
+          teacher:         r.teacher_name || '',
           reportText:      displayText,
-          eduStatus:       r.edu_status          || '',
-          langLevel:       r.lang_level          || '',
-          attendance:      r.attendance          || '',
-          behavior:        r.behavior            || '',
-          skills:          r.skills              || '',
-          recommendations: r.recommendations     || '',
-          notes:           r.notes               || '',
-          grade:           r.grade               || '',
+          week,
+          studentName:     data.student_name || '',
+          periodFrom,
+          periodTo,
+          reportPeriod:    periodText,
+          activityAttendance,
+          groupName,
+          instituteAttendance,
+          notes,
+          grade:           week,
+          eduStatus:       week,
+          langLevel:       periodFrom,
+          attendance:      activityAttendance,
+          behavior:        periodTo,
+          skills:          groupName,
+          recommendations: instituteAttendance,
           createdAt:       formatDate(r.created_at)
         };
       });
@@ -894,39 +918,85 @@
         .select('id').eq('application_no', d['رقم_الطلب']).single();
       if (!app) throw new Error('الطلب غير موجود');
 
-      const { data: teacher } = await sb.from('staff_users')
-        .select('id').eq('name', actor).maybeSingle();
+      const week = String(d['الأسبوع'] || d['التقرير'] || d['التقدير'] || '').trim();
+      if (!week) throw new Error('اختر الأسبوع أولًا');
 
-      // نص موحد للعرض
+      const teacherIdInput = d['معرف_المعلم'] || '';
+      let teacher = null;
+      if (teacherIdInput) {
+        const res = await sb.from('staff_users').select('id,name').eq('id', teacherIdInput).maybeSingle();
+        teacher = res.data || null;
+      }
+      if (!teacher) {
+        const res = await sb.from('staff_users').select('id,name').eq('name', actor).maybeSingle();
+        teacher = res.data || null;
+      }
+
+      const periodFrom = String(d['فترة_من'] || '').trim();
+      const periodTo = String(d['فترة_إلى'] || '').trim();
+      const activityAttendance = String(d['نسبة_حضور_الدورات_والأنشطة'] || '').trim();
+      const groupName = String(d['اسم_المجموعة'] || '').trim();
+      const instituteAttendance = String(d['نسبة_حضور_المعهد'] || '').trim();
+      const notes = String(d['ملاحظات'] || '').trim();
+      const studentName = String(d['اسم_الطالب'] || '').trim();
+      const periodText = (periodFrom || periodTo)
+        ? `من تاريخ ${periodFrom || '—'} إلى تاريخ ${periodTo || '—'}`
+        : '';
+
       const reportText = [
-        d['الحالة_التعليمية'] ? `الحالة التعليمية: ${d['الحالة_التعليمية']}` : '',
-        d['مستوى_اللغة']      ? `مستوى اللغة: ${d['مستوى_اللغة']}`           : '',
-        d['الحضور']            ? `الحضور: ${d['الحضور']}`                     : '',
-        d['السلوك']            ? `السلوك: ${d['السلوك']}`                     : '',
-        d['المهارات']          ? `المهارات: ${d['المهارات']}`                 : '',
-        d['التوصيات']          ? `التوصيات: ${d['التوصيات']}`                 : '',
-        d['ملاحظات']           ? `ملاحظات: ${d['ملاحظات']}`                   : '',
-        d['نص_التقرير']        ? d['نص_التقرير']                              : ''
+        week ? `الأسبوع: ${week}` : '',
+        studentName ? `اسم الطالب: ${studentName}` : '',
+        periodText ? `فترة رفع التقرير: ${periodText}` : '',
+        activityAttendance ? `نسبة حضور الدورات التدريبية والأنشطة: ${activityAttendance}` : '',
+        groupName ? `اسم المجموعة: ${groupName}` : '',
+        instituteAttendance ? `نسبة حضور المعهد: ${instituteAttendance}` : '',
+        notes ? `الملاحظات: ${notes}` : ''
       ].filter(Boolean).join('\n');
 
-      const { error } = await sb.from('teacher_reports').insert({
+      // نستخدم نفس الأعمدة الحالية لتجنب تغيير قاعدة البيانات:
+      // grade/edu_status للأسبوع، lang_level لبداية الفترة، behavior لنهاية الفترة.
+      const row = {
         application_id:  app.id,
-        teacher_id:      teacher?.id        || null,
-        teacher_name:    d['المعلم']        || actor || '',
+        teacher_id:      teacher?.id || null,
+        teacher_name:    d['المعلم'] || teacher?.name || actor || '',
         report_text:     reportText,
-        grade:           d['التقدير']       || d['الحالة_التعليمية'] || '',
-        // حقول منفصلة
-        edu_status:      d['الحالة_التعليمية'] || '',
-        lang_level:      d['مستوى_اللغة']      || '',
-        attendance:      d['الحضور']            || '',
-        behavior:        d['السلوك']            || '',
-        skills:          d['المهارات']          || '',
-        recommendations: d['التوصيات']          || '',
-        notes:           d['ملاحظات']           || ''
-      });
+        grade:           week,
+        edu_status:      week,
+        lang_level:      periodFrom,
+        attendance:      activityAttendance,
+        behavior:        periodTo,
+        skills:          groupName,
+        recommendations: instituteAttendance,
+        notes:           notes
+      };
+
+      let existingId = d['معرف_التقرير'] || d.reportId || '';
+      if (!existingId) {
+        const { data: existing } = await sb.from('teacher_reports')
+          .select('id')
+          .eq('application_id', app.id)
+          .eq('grade', week)
+          .limit(1)
+          .maybeSingle();
+        existingId = existing?.id || '';
+      }
+
+      if (existingId) {
+        const { error } = await sb.from('teacher_reports')
+          .update(row)
+          .eq('id', existingId)
+          .eq('application_id', app.id);
+        if (error) throw error;
+        return { ok: true, data: { mode: 'updated', reportId: existingId } };
+      }
+
+      const { data: inserted, error } = await sb.from('teacher_reports')
+        .insert(row)
+        .select('id')
+        .single();
       if (error) throw error;
 
-      return { ok: true };
+      return { ok: true, data: { mode: 'inserted', reportId: inserted?.id || '' } };
     },
 
     // ── getUsers ──────────────────────────────────────────────────────────────
