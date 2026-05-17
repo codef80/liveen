@@ -779,48 +779,63 @@
           `).join('')
         : '<div class="text-muted py-3 text-center">لا يوجد خط زمني حاليًا.</div>';
 
-      // ── تبويب التقارير ─────────────────────────────────────────────────────
+      // ── تبويب التقارير الأسبوعية ─────────────────────────────────────────────
       document.getElementById('reportsList').innerHTML = reports.length
-        ? reports.map(r => `
-            <div class="report-card">
-              <div class="report-title">${escapeHtml(r['المعلم'] || r.teacher || 'المعلم')}</div>
-              <div class="report-meta">${escapeHtml(r['تاريخ_الإنشاء'] || r.createdAt || '—')}</div>
-              <div class="report-grid">
-                <div class="report-box">
-                  <div class="report-label">الحالة التعليمية</div>
-                  <div class="report-value">${escapeHtml(r['الحالة_التعليمية'] || r.eduStatus || '—')}</div>
-                </div>
-                <div class="report-box">
-                  <div class="report-label">مستوى اللغة</div>
-                  <div class="report-value">${escapeHtml(r['مستوى_اللغة'] || r.langLevel || '—')}</div>
-                </div>
-                <div class="report-box">
-                  <div class="report-label">الحضور</div>
-                  <div class="report-value">${escapeHtml(r['الحضور'] || r.attendance || '—')}</div>
-                </div>
-                <div class="report-box">
-                  <div class="report-label">السلوك</div>
-                  <div class="report-value">${escapeHtml(r['السلوك'] || r.behavior || '—')}</div>
-                </div>
-                <div class="report-box full">
-                  <div class="report-label">المهارات</div>
-                  <div class="report-value">${escapeHtml(r['المهارات'] || r.skills || '—')}</div>
-                </div>
-                <div class="report-box full">
-                  <div class="report-label">التوصيات</div>
-                  <div class="report-value">${escapeHtml(r['التوصيات'] || r.recommendations || '—')}</div>
-                </div>
-                <div class="report-box full">
-                  <div class="report-label">ملاحظات</div>
-                  <div class="report-value">${escapeHtml(r['ملاحظات'] || r.notes || '—')}</div>
-                </div>
-              </div>
-            </div>
-          `).join('')
+        ? reports.map(renderWeeklyReportCard).join('')
         : '<div class="text-muted py-3 text-center">لا توجد تقارير تعليمية حاليًا.</div>';
 
       document.getElementById('emptyState').classList.add('d-none');
       document.getElementById('resultContent').classList.remove('d-none');
+    }
+
+    function getReportWeek(report) {
+      if (!report) return '';
+      return String(report['الأسبوع'] || report.week || report.grade || report.eduStatus || '').trim();
+    }
+
+    function renderWeeklyReportCard(r) {
+      const week = getReportWeek(r) || 'تقرير أسبوعي';
+      const studentName = r['اسم_الطالب'] || r.studentName || '';
+      const periodFrom = r['فترة_من'] || r.periodFrom || '';
+      const periodTo = r['فترة_إلى'] || r.periodTo || '';
+      const period = r['فترة_رفع_التقرير'] || r.reportPeriod || ((periodFrom || periodTo) ? `من تاريخ ${periodFrom || '—'} إلى تاريخ ${periodTo || '—'}` : '—');
+
+      return `
+        <div class="report-card">
+          <div class="report-title">${escapeHtml(week)}</div>
+          <div class="report-meta">${escapeHtml(r['تاريخ_الإنشاء'] || r.createdAt || '—')}</div>
+          <div class="report-grid">
+            <div class="report-box">
+              <div class="report-label">اسم الطالب</div>
+              <div class="report-value">${escapeHtml(studentName || '—')}</div>
+            </div>
+            <div class="report-box">
+              <div class="report-label">فترة رفع التقرير</div>
+              <div class="report-value">${escapeHtml(period)}</div>
+            </div>
+            <div class="report-box">
+              <div class="report-label">نسبة حضور الدورات والأنشطة</div>
+              <div class="report-value">${escapeHtml(r['نسبة_حضور_الدورات_والأنشطة'] || r.activityAttendance || '—')}</div>
+            </div>
+            <div class="report-box">
+              <div class="report-label">اسم المجموعة</div>
+              <div class="report-value">${escapeHtml(r['اسم_المجموعة'] || r.groupName || '—')}</div>
+            </div>
+            <div class="report-box">
+              <div class="report-label">نسبة حضور المعهد</div>
+              <div class="report-value">${escapeHtml(r['نسبة_حضور_المعهد'] || r.instituteAttendance || '—')}</div>
+            </div>
+            <div class="report-box">
+              <div class="report-label">المعلم</div>
+              <div class="report-value">${escapeHtml(r['المعلم'] || r.teacher || '—')}</div>
+            </div>
+            <div class="report-box full">
+              <div class="report-label">الملاحظات</div>
+              <div class="report-value">${escapeHtml(r['ملاحظات'] || r.notes || '—')}</div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function renderPaymentStatus(status) {

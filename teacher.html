@@ -310,16 +310,15 @@
                 <div><strong>حالة الطلب:</strong> ${escapeHtml(app['حالة_الطلب'] || '')}</div>
                 <div><strong>حالة السداد:</strong> ${escapeHtml(app['حالة_السداد'] || '')}</div>
               </div>
-              <div style="font-weight:900;color:#58595b">التقارير السابقة</div>
+              <div style="font-weight:900;color:#58595b">التقارير الأسبوعية</div>
               ${
                 reports.length
-                  ? reports.map(r => `
-                      <div style="border:1px solid #efe7cf;border-radius:18px;padding:14px 16px;background:#fff">
-                        <div style="font-weight:900;color:#58595b;margin-bottom:6px">${escapeHtml(r['المعلم'] || '')}</div>
-                        <div style="color:#8a8b90;font-size:.92rem;margin-bottom:6px">${escapeHtml(r['تاريخ_الإنشاء'] || '')}</div>
-                        <div style="color:#6f7075;line-height:1.9">${escapeHtml(r['ملاحظات'] || r['التوصيات'] || '—')}</div>
-                      </div>
-                    `).join('')
+                  ? reports.map(r => renderWeeklyReportCard(r, {
+                      editable: true,
+                      applicationNo: app['رقم_الطلب'] || applicationNo,
+                      studentId: app.id || '',
+                      studentName: app['اسم_الطالب_الثلاثي'] || '',
+                    })).join('')
                   : '<div class="empty-box">لا توجد تقارير.</div>'
               }
             </div>
@@ -333,47 +332,105 @@
       }
     }
 
-    async function addTeacherReport(applicationNo, studentId, studentName) {
+    async function addTeacherReport(applicationNo, studentId, studentName, selectedReportId = '') {
+      const weeks = ['الأسبوع الأول', 'الأسبوع الثاني', 'الأسبوع الثالث', 'الأسبوع الرابع'];
+      let reports = [];
+
+      try {
+        const profileRes = await fetch(`${API_URL}?action=getStudentProfile&applicationNo=${encodeURIComponent(applicationNo)}`);
+        const profileJson = await profileRes.json();
+        reports = profileJson?.data?.reports || [];
+      } catch (e) {
+        console.warn('تعذر تحميل التقارير السابقة', e);
+      }
+
+      const selectedReport = reports.find(r => String(r.id || '') === String(selectedReportId || '')) || null;
+      const initialWeek = getReportWeek(selectedReport) || weeks[0];
+
       const { value: formValues } = await Swal.fire({
-        title: 'إضافة تقرير',
+        title: selectedReport ? 'تعديل تقرير أسبوعي' : 'إضافة تقرير أسبوعي',
         width: 760,
         html: `
           <div class="text-end">
-            <label class="form-label">الحالة التعليمية</label>
-            <input id="swalEduStatus" class="form-control mb-3" placeholder="مثال: جيد جدًا">
+            <div class="mb-3" style="background:#fffaf0;border:1px solid #efe7cf;border-radius:16px;padding:12px 14px;color:#58595b;font-weight:800">
+              اسم الطالب: ${escapeHtml(studentName || '—')}
+            </div>
 
-            <label class="form-label">مستوى اللغة</label>
-            <input id="swalLangLevel" class="form-control mb-3" placeholder="مثال: متوسط">
+            <label class="form-label">الأسبوع</label>
+            <select id="swalWeek" class="form-select mb-3">
+              ${weeks.map(w => `<option value="${escapeAttr(w)}" ${w === initialWeek ? 'selected' : ''}>${escapeHtml(w)}</option>`).join('')}
+            </select>
 
-            <label class="form-label">الحضور</label>
-            <input id="swalAttendance" class="form-control mb-3" placeholder="مثال: منتظم">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">فترة رفع التقرير من تاريخ</label>
+                <input id="swalPeriodFrom" type="date" class="form-control mb-3">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">إلى تاريخ</label>
+                <input id="swalPeriodTo" type="date" class="form-control mb-3">
+              </div>
+            </div>
 
-            <label class="form-label">السلوك</label>
-            <input id="swalBehavior" class="form-control mb-3" placeholder="مثال: ممتاز">
+            <label class="form-label">نسبة حضور الدورات التدريبية والأنشطة</label>
+            <input id="swalActivityAttendance" class="form-control mb-3" placeholder="مثال: 90%">
 
-            <label class="form-label">المهارات</label>
-            <textarea id="swalSkills" class="form-control mb-3" rows="3"></textarea>
+            <label class="form-label">اسم المجموعة</label>
+            <input id="swalGroupName" class="form-control mb-3" placeholder="مثال: المجموعة A">
 
-            <label class="form-label">التوصيات</label>
-            <textarea id="swalRecommendations" class="form-control mb-3" rows="3"></textarea>
+            <label class="form-label">نسبة حضور المعهد</label>
+            <input id="swalInstituteAttendance" class="form-control mb-3" placeholder="مثال: 95%">
 
-            <label class="form-label">ملاحظات</label>
-            <textarea id="swalNotes" class="form-control" rows="3"></textarea>
+            <label class="form-label">الملاحظات</label>
+            <textarea id="swalNotes" class="form-control" rows="4" placeholder="اكتب ملاحظات المعلم هنا"></textarea>
           </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'حفظ',
+        confirmButtonText: selectedReport ? 'تحديث التقرير' : 'حفظ التقرير',
         cancelButtonText: 'إلغاء',
         confirmButtonColor: '#fbc70d',
-        preConfirm: () => ({
-          eduStatus: document.getElementById('swalEduStatus').value.trim(),
-          langLevel: document.getElementById('swalLangLevel').value.trim(),
-          attendance: document.getElementById('swalAttendance').value.trim(),
-          behavior: document.getElementById('swalBehavior').value.trim(),
-          skills: document.getElementById('swalSkills').value.trim(),
-          recommendations: document.getElementById('swalRecommendations').value.trim(),
-          notes: document.getElementById('swalNotes').value.trim()
-        })
+        didOpen: () => {
+          const weekEl = document.getElementById('swalWeek');
+          const setValue = (id, value) => { document.getElementById(id).value = value || ''; };
+          const fillByWeek = () => {
+            const currentWeek = weekEl.value;
+            const r = reports.find(item => getReportWeek(item) === currentWeek) || {};
+            setValue('swalPeriodFrom', r['فترة_من'] || r.periodFrom || '');
+            setValue('swalPeriodTo', r['فترة_إلى'] || r.periodTo || '');
+            setValue('swalActivityAttendance', r['نسبة_حضور_الدورات_والأنشطة'] || r.activityAttendance || '');
+            setValue('swalGroupName', r['اسم_المجموعة'] || r.groupName || '');
+            setValue('swalInstituteAttendance', r['نسبة_حضور_المعهد'] || r.instituteAttendance || '');
+            setValue('swalNotes', r['ملاحظات'] || r.notes || '');
+          };
+          weekEl.addEventListener('change', fillByWeek);
+          fillByWeek();
+        },
+        preConfirm: () => {
+          const week = document.getElementById('swalWeek').value.trim();
+          const periodFrom = document.getElementById('swalPeriodFrom').value.trim();
+          const periodTo = document.getElementById('swalPeriodTo').value.trim();
+          const existing = reports.find(item => getReportWeek(item) === week) || null;
+
+          if (!week) {
+            Swal.showValidationMessage('اختر الأسبوع');
+            return false;
+          }
+          if (!periodFrom || !periodTo) {
+            Swal.showValidationMessage('حدد فترة رفع التقرير من تاريخ إلى تاريخ');
+            return false;
+          }
+
+          return {
+            reportId: existing?.id || '',
+            week,
+            periodFrom,
+            periodTo,
+            activityAttendance: document.getElementById('swalActivityAttendance').value.trim(),
+            groupName: document.getElementById('swalGroupName').value.trim(),
+            instituteAttendance: document.getElementById('swalInstituteAttendance').value.trim(),
+            notes: document.getElementById('swalNotes').value.trim()
+          };
+        }
       });
 
       if (!formValues) return;
@@ -386,16 +443,18 @@
             action: 'saveTeacherReport',
             actor: currentUser?.name || '',
             data: {
+              'معرف_التقرير': formValues.reportId,
               'معرف_الطالب': studentId,
               'رقم_الطلب': applicationNo,
               'اسم_الطالب': studentName,
+              'معرف_المعلم': currentUser?.id || '',
               'المعلم': currentUser?.name || '',
-              'الحالة_التعليمية': formValues.eduStatus,
-              'مستوى_اللغة': formValues.langLevel,
-              'الحضور': formValues.attendance,
-              'السلوك': formValues.behavior,
-              'المهارات': formValues.skills,
-              'التوصيات': formValues.recommendations,
+              'الأسبوع': formValues.week,
+              'فترة_من': formValues.periodFrom,
+              'فترة_إلى': formValues.periodTo,
+              'نسبة_حضور_الدورات_والأنشطة': formValues.activityAttendance,
+              'اسم_المجموعة': formValues.groupName,
+              'نسبة_حضور_المعهد': formValues.instituteAttendance,
               'ملاحظات': formValues.notes
             }
           })
@@ -406,13 +465,48 @@
 
         await Swal.fire({
           icon:'success',
-          title:'تم حفظ التقرير',
+          title: json.data?.mode === 'updated' ? 'تم تحديث التقرير' : 'تم حفظ التقرير',
           confirmButtonColor:'#fbc70d'
         });
       } catch (e) {
         console.error(e);
         Swal.fire({ icon:'error', title:'تعذر الحفظ', text:e.message || 'حدث خطأ', confirmButtonColor:'#58595b' });
       }
+    }
+
+    function getReportWeek(report) {
+      if (!report) return '';
+      return String(report['الأسبوع'] || report.week || report.grade || report.eduStatus || '').trim();
+    }
+
+    function renderWeeklyReportCard(r, options = {}) {
+      const week = getReportWeek(r) || 'تقرير أسبوعي';
+      const periodFrom = r['فترة_من'] || r.periodFrom || '';
+      const periodTo = r['فترة_إلى'] || r.periodTo || '';
+      const period = r['فترة_رفع_التقرير'] || r.reportPeriod || ((periodFrom || periodTo) ? `من تاريخ ${periodFrom || '—'} إلى تاريخ ${periodTo || '—'}` : '—');
+      const editBtn = options.editable ? `
+        <button class="mini-btn mini-btn-report" style="padding:7px 10px" onclick="addTeacherReport('${escapeJs(options.applicationNo || '')}','${escapeJs(options.studentId || '')}','${escapeJs(options.studentName || '')}','${escapeJs(r.id || '')}')">
+          <i class="fa-solid fa-pen-to-square"></i> تعديل
+        </button>` : '';
+
+      return `
+        <div style="border:1px solid #efe7cf;border-radius:18px;padding:14px 16px;background:#fff">
+          <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-2">
+            <div>
+              <div style="font-weight:900;color:#58595b;margin-bottom:4px">${escapeHtml(week)}</div>
+              <div style="color:#8a8b90;font-size:.92rem">${escapeHtml(r['تاريخ_الإنشاء'] || r.createdAt || '')}</div>
+            </div>
+            ${editBtn}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;line-height:1.8;color:#67686d">
+            <div><strong>فترة رفع التقرير:</strong> ${escapeHtml(period)}</div>
+            <div><strong>نسبة حضور الدورات والأنشطة:</strong> ${escapeHtml(r['نسبة_حضور_الدورات_والأنشطة'] || r.activityAttendance || '—')}</div>
+            <div><strong>اسم المجموعة:</strong> ${escapeHtml(r['اسم_المجموعة'] || r.groupName || '—')}</div>
+            <div><strong>نسبة حضور المعهد:</strong> ${escapeHtml(r['نسبة_حضور_المعهد'] || r.instituteAttendance || '—')}</div>
+            <div style="grid-column:1 / -1"><strong>الملاحظات:</strong> ${escapeHtml(r['ملاحظات'] || r.notes || '—')}</div>
+          </div>
+        </div>
+      `;
     }
 
     function renderStatus(status) {
