@@ -8,7 +8,7 @@
   const PUSH_CONFIG = {
     supabaseUrl: 'https://yqkkjjfeupfmywadqlwd.supabase.co',
     publishableKey: 'sb_publishable_EtaamtevjICX2rqCN_JoPw__fgGG3w4',
-    vapidPublicKey: 'BD6Y3Ct60okcHxn2NvR2Dqw51UMYB0l2XlFS4v_oj3byC_Xckf5CqYli6k-BU-u7dTvIgsNf6OWnyK-xxp-x425',
+    vapidPublicKey: 'BD6Y3Ct60okcHxn2NvR2Dqw51UMYB0l2XlFS4v_oj3byC_Xckf5CqYli6k-BU-u7dTvIgsNf6OWnyK-xxp-xqnY',
     appKey: 'live-english',
     swPath: '/sw.js'
   };
