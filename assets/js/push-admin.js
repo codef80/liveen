@@ -49,7 +49,7 @@
     }
 
     if (!('PushManager' in window)) {
-      throw new Error('المتصفح لا يدعم Web Push.');
+      throw new Error('المتصفح لا يدعم Web Push. في الآيفون يجب فتح الموقع من أيقونة الشاشة الرئيسية.');
     }
 
     if (!('Notification' in window)) {
@@ -59,6 +59,8 @@
     if (Notification.permission === 'denied') {
       throw new Error('تم منع التنبيهات من إعدادات المتصفح. فعّلها من إعدادات الموقع ثم أعد المحاولة.');
     }
+
+    const applicationServerKey = urlBase64ToUint8Array(PUSH_CONFIG.vapidPublicKey);
 
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
@@ -72,10 +74,21 @@
     await navigator.serviceWorker.ready;
 
     let subscription = await registration.pushManager.getSubscription();
+
+    // لو كان فيه اشتراك قديم بمفتاح سابق، نحذفه ثم ننشئ اشتراكًا جديدًا.
+    if (subscription && subscription.options && subscription.options.applicationServerKey) {
+      const oldKey = new Uint8Array(subscription.options.applicationServerKey);
+      if (!sameBytes(oldKey, applicationServerKey)) {
+        await subscription.unsubscribe();
+        subscription = null;
+      }
+    }
+
     if (!subscription) {
+      // بعض إصدارات Safari/iOS أكثر استقرارًا مع ArrayBuffer بدل Uint8Array.
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(PUSH_CONFIG.vapidPublicKey)
+        applicationServerKey: applicationServerKey.buffer
       });
     }
 
@@ -152,14 +165,37 @@
     return Promise.resolve();
   }
 
+  function sameBytes(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
   function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const clean = String(base64String || '')
+      .trim()
+      .replace(/\s+/g, '');
+
+    if (!clean) {
+      throw new Error('VAPID_PUBLIC_KEY غير موجود داخل ملف push-admin.js.');
+    }
+
+    const padding = '='.repeat((4 - clean.length % 4) % 4);
+    const base64 = (clean + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawData = window.atob(base64);
     const outputArray = new Uint8Array(rawData.length);
+
     for (let i = 0; i < rawData.length; ++i) {
       outputArray[i] = rawData.charCodeAt(i);
     }
+
+    // مفتاح VAPID P-256 الصحيح يكون 65 بايت ويبدأ غالبًا بـ 0x04.
+    if (outputArray.length !== 65 || outputArray[0] !== 4) {
+      throw new Error(`VAPID_PUBLIC_KEY غير صحيح. الطول بعد التحويل: ${outputArray.length} بايت. المطلوب 65 بايت ويبدأ بـ 04.`);
+    }
+
     return outputArray;
   }
 })(window, document);
