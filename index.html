@@ -309,6 +309,47 @@
       flex-grow:1;
     }
 
+    .accreditations-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .accreditations-grid > .accreditation-item:nth-last-child(1):nth-child(odd){
+      grid-column:1 / -1;
+      justify-self:center;
+      width:min(100%, calc((100% - 18px) / 2));
+    }
+
+    .accreditation-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.99), rgba(255,249,229,.94));
+      border:1px solid #efe7cf;
+      border-radius:28px;
+      box-shadow:0 12px 28px rgba(88,89,91,.08);
+      padding:22px;
+      height:100%;
+      min-height:220px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:.28s ease;
+      cursor:pointer;
+    }
+
+    .accreditation-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 22px 42px rgba(88,89,91,.14);
+    }
+
+    .accreditation-card img{
+      display:block;
+      width:100%;
+      max-width:100%;
+      max-height:clamp(150px, 22vw, 260px);
+      object-fit:contain;
+    }
+
     .loading-box{
       background:#fff;
       border:1px solid #efe7cf;
@@ -411,14 +452,18 @@
       padding:0;
       margin-top:72px;
       margin-bottom:0;
-      background:#0a0a0a;
+      background:transparent;
     }
     .banner-wrap{
       position:relative;
       width:100%;
-      aspect-ratio:16/9;
+      aspect-ratio:16/7;
+      min-height:260px;
+      max-height:560px;
       overflow:hidden;
       background:#111;
+      border-radius:32px;
+      box-shadow:0 24px 60px rgba(88,89,91,.16);
     }
     .banner-slide{
       position:absolute;
@@ -634,8 +679,17 @@
     .team-card:hover .team-card-overlay{ opacity:1; }
 
     @media(max-width:767.98px){
+      .banner-wrap{
+        aspect-ratio:16/9;
+        min-height:190px;
+        border-radius:22px;
+      }
       .banner-caption{ bottom:16px; right:16px; left:16px; }
       .team-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+      .accreditations-grid{ grid-template-columns:1fr; }
+      .accreditations-grid > .accreditation-item:nth-last-child(1):nth-child(odd){ width:100%; }
+      .accreditation-card{ min-height:180px; padding:18px; }
+      .accreditation-card img{ max-height:210px; }
     }
 
     @media (max-width:991.98px){
@@ -765,51 +819,32 @@
   </div>
 </nav>
 
-      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="تبديل القائمة">
-        <i class="fa-solid fa-bars-staggered"></i>
-      </button>
-
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav ms-auto mb-3 mb-lg-0 align-items-lg-center gap-lg-2">
-          <li class="nav-item"><a class="nav-link" href="categories.html">الفئات</a></li>
-          <li class="nav-item"><a class="nav-link" href="years.html">عبر السنوات</a></li>
-          <li class="nav-item"><a class="nav-link" href="track.html">متابعة الطلب</a></li>
-          <li class="nav-item"><a class="nav-link" href="staff-login.html">دخول العاملين</a></li>
-        </ul>
-
-        <div class="d-flex flex-column flex-lg-row gap-2 ms-lg-3">
-          <a href="register.html" class="btn btn-le">
-            <i class="fa-solid fa-pen-to-square"></i>
-            ابدأ التسجيل
-          </a>
-        </div>
-      </div>
-    </div>
-  </nav>
 
   <section class="banner-section">
-    <div class="banner-wrap" id="bannerWrap">
-      <div class="banner-loading" id="bannerLoading">
-        <span><i class="fa-solid fa-spinner fa-spin me-2"></i>جاري تحميل الصور...</span>
+    <div class="container">
+      <div class="banner-wrap" id="bannerWrap">
+        <div class="banner-loading" id="bannerLoading">
+          <span><i class="fa-solid fa-spinner fa-spin me-2"></i>جاري تحميل الصور...</span>
+        </div>
+
+        <div class="banner-arrows">
+          <button class="banner-arrow" id="bannerPrev" type="button" aria-label="السابق">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          <button class="banner-arrow" id="bannerNext" type="button" aria-label="التالي">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+        </div>
+
+        <div class="banner-overlay"></div>
+
+        <div class="banner-caption">
+          <div class="banner-caption-title">Live English</div>
+          <div class="banner-caption-sub" id="bannerSubCaption">برنامج صيفي لتعليم اللغة الإنجليزية</div>
+        </div>
+
+        <div class="banner-dots" id="bannerDots"></div>
       </div>
-
-      <div class="banner-arrows">
-        <button class="banner-arrow" id="bannerPrev" type="button" aria-label="السابق">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-        <button class="banner-arrow" id="bannerNext" type="button" aria-label="التالي">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-      </div>
-
-      <div class="banner-overlay"></div>
-
-      <div class="banner-caption">
-        <div class="banner-caption-title">Live English</div>
-        <div class="banner-caption-sub" id="bannerSubCaption">برنامج صيفي لتعليم اللغة الإنجليزية</div>
-      </div>
-
-      <div class="banner-dots" id="bannerDots"></div>
     </div>
   </section>
 
@@ -857,6 +892,19 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title-home">اعتماداتنا</h2>
+          <p class="section-note-home">اعتمادات وشراكات Live English.</p>
+        </div>
+      </div>
+
+      <div class="accreditations-grid" id="accreditationsGrid"></div>
     </div>
   </section>
 
@@ -1056,6 +1104,36 @@
     let lightboxImages = [];
     let lightboxIndex  = 0;
 
+    // لإضافة اعتماد جديد لاحقًا: أضف رابط الصورة داخل هذه القائمة بنفس الصيغة.
+    const accreditationImages = [
+      { name: 'اعتماد Live English', thumb: 'https://i.top4top.io/p_382048e3t1.jpg' },
+      { name: 'اعتماد Live English', thumb: 'https://j.top4top.io/p_38204vy002.jpg' }
+    ];
+
+    function initAccreditations() {
+      const grid = document.getElementById('accreditationsGrid');
+      if (!grid) return;
+
+      grid.innerHTML = '';
+      accreditationImages.forEach((img, i) => {
+        const item = document.createElement('div');
+        item.className = 'accreditation-item';
+        item.innerHTML = `
+          <div class="accreditation-card" role="button" tabindex="0" aria-label="عرض ${escapeAttr(img.name || 'الاعتماد')}">
+            <img src="${escapeAttr(img.thumb)}" alt="${escapeAttr(img.name || 'اعتماد Live English')}" loading="lazy">
+          </div>
+        `;
+        item.querySelector('.accreditation-card')?.addEventListener('click', () => openLightbox(accreditationImages, i));
+        item.querySelector('.accreditation-card')?.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openLightbox(accreditationImages, i);
+          }
+        });
+        grid.appendChild(item);
+      });
+    }
+
     async function initBanner() {
       try {
         const res  = await fetch(`${DRIVE_SCRIPT_URL}?action=getFolderImages&folderId=${BANNER_FOLDER_ID}`);
@@ -1231,6 +1309,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
+      initAccreditations();
       await Promise.all([
         loadCategories(),
         loadYears(),
